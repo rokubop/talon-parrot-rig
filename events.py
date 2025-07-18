@@ -75,17 +75,6 @@ class ParrotEventManager:
     def _update_hud(self):
         """Update the HUD display"""
         try:
-            # print("Updating HUD")
-            # print(f"Current mode: {self._current_mode}")
-            # print(f"Mode color: {MODE_COLORS.get(self._current_mode, '#FFFFFF')}")
-            # print(f"Mode code: {MODE_CODES.get(self._current_mode, '?')}")
-            # print(f"Active modifiers: {list(self._active_modifiers)}")
-
-            # actions.user.ui_elements_set_state("mode", self._current_mode)
-            # actions.user.ui_elements_set_state("color", MODE_COLORS.get(self._current_mode, "#FFFFFF"))
-            # actions.user.ui_elements_set_state("code", MODE_CODES.get(self._current_mode, "?"))
-            # actions.user.ui_elements_set_state("modifiers", list(self._active_modifiers))
-
             actions.user.ui_elements_set_state({
                 "mode": self._current_mode,
                 "color": MODE_COLORS[self._current_mode],
