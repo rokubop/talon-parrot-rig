@@ -1,7 +1,8 @@
 from talon import Module, Context, actions
 from .parrot_actions import parrot_actions
 from .constants import *
-# from . import parrot_mode_ui  # Import UI module to register actions
+from . import parrot_mode_ui  # Import UI module to register actions
+from .events import event_manager
 
 mod = Module()
 mod.mode("parrot_v7", "parrot mode v7")
@@ -175,44 +176,3 @@ class Actions:
     def parrot_mode_v7_toggle():
         """Toggle parrot mode v7"""
         parrot_actions.parrot_mode_toggle()
-
-    def parrot_v7_set_mode(mode: str):
-        """Set parrot mode v7 mode"""
-        from .events import event_manager
-        event_manager.set_mode(mode)
-
-    def parrot_v7_show_utility_selector():
-        """Show utility selector UI"""
-        actions.user.parrot_v7_ui_utility_selector()
-
-    def parrot_v7_show_noise_reference():
-        """Show noise reference UI"""
-        actions.user.parrot_v7_ui_noise_reference()
-
-    def parrot_v7_show_settings():
-        """Show settings UI"""
-        actions.user.parrot_v7_ui_settings()
-
-    # def parrot_config_noise(noise: str):
-    #     """Execute noise command based on current mode"""
-    #     from .events import event_manager
-    #     current_mode = event_manager.get_mode()
-    #     config = parrot_config.get(current_mode, {})
-
-    #     if noise in config:
-    #         description, action = config[noise]
-    #         if callable(action):
-    #             action()
-    #         else:
-    #             print(f"Warning: Action for noise '{noise}' is not callable")
-    #     else:
-    #         print(f"Warning: Noise '{noise}' not found in mode '{current_mode}'")
-
-    # def parrot_config_set_mode(mode: str):
-    #     """Set parrot config mode (compatibility with existing system)"""
-    #     from .events import event_manager
-    #     event_manager.set_mode(mode)
-
-    # def parrot_config():
-    #     """Get parrot config (compatibility with existing system)"""
-    #     return parrot_config

@@ -1,6 +1,6 @@
 from talon import actions
 from typing import Dict, Set, Optional, Callable
-from .config import MODE_COLORS, MODE_CODES, MODIFIER_COLORS
+from .config import MODE_COLORS, MODE_CODES, MODIFIER_COLORS, UTILITY_ACTION
 
 class ParrotEventManager:
     """Manages events for parrot mode v7"""
@@ -10,6 +10,13 @@ class ParrotEventManager:
         self._previous_mode = "default"
         self._active_modifiers: Set[str] = set()
         self._event_listeners: Dict[str, list] = {}
+        # Runtime settings that can be changed
+        self._settings = {
+            "utility_action": UTILITY_ACTION  # Initialize with default
+        }
+        # UI callbacks (registered by UI components)
+        self._hud_show_callback = None
+        self._hud_hide_callback = None
 
     def subscribe(self, event_type: str, callback: Callable):
         """Subscribe to an event"""
@@ -72,6 +79,25 @@ class ParrotEventManager:
         self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
         self._update_hud()
 
+    def set_setting(self, setting_name: str, value):
+        """Set a runtime setting"""
+        self._settings[setting_name] = value
+        self.emit("setting_changed", {"setting": setting_name, "value": value})
+
+    def get_setting(self, setting_name: str, default=None):
+        """Get a runtime setting"""
+        return self._settings.get(setting_name, default)
+
+    def register_hud_callbacks(self, show_callback, hide_callback):
+        """Register HUD show/hide callbacks"""
+        self._hud_show_callback = show_callback
+        self._hud_hide_callback = hide_callback
+
+    def unregister_hud_callbacks(self):
+        """Unregister HUD callbacks"""
+        self._hud_show_callback = None
+        self._hud_hide_callback = None
+
     def _update_hud(self):
         """Update the HUD display"""
         try:
@@ -81,13 +107,16 @@ class ParrotEventManager:
                 "code": MODE_CODES[self._current_mode],
                 "modifiers": list(self._active_modifiers)
             })
+            if self._hud_show_callback:
+                self._hud_show_callback()
         except Exception as e:
             print(f"Error updating HUD: {e}")
 
     def _hide_hud(self):
         """Hide the HUD"""
         try:
-            actions.user.parrot_v7_hide_hud()
+            if self._hud_hide_callback:
+                self._hud_hide_callback()
         except Exception as e:
             print(f"Error hiding HUD: {e}")
 

@@ -1,6 +1,7 @@
 from talon import actions, Module
-from .config import MODE_COLORS, MODE_CODES, MODIFIER_COLORS, UTILITY_ACTIONS
+from .config import MODE_COLORS, MODE_CODES, MODIFIER_COLORS, UTILITY_ACTIONS, SETTINGS_OPTIONS, FULL_MODE_SETTINGS
 from .events import event_manager
+from .src.movement import movement
 
 mod = Module()
 
@@ -75,7 +76,7 @@ def utility_selector():
 
     def create_utility_button(key: str, label: str):
         def on_click():
-            actions.user.parrot_v7_set_utility_action(key)
+            set_utility_action(key)
             actions.user.ui_elements_hide(utility_selector)
 
         return button(
@@ -115,12 +116,10 @@ def settings_ui():
     """Create settings UI"""
     screen, div, button, text = actions.user.ui_elements(["screen", "div", "button", "text"])
 
-    from .config import SETTINGS_OPTIONS
-
     def create_setting_row(setting_name: str, label: str, options: list):
         def create_option_button(index: int, value):
             def on_click():
-                actions.user.parrot_v7_update_setting(setting_name, index)
+                update_setting(setting_name, index)
                 actions.user.ui_elements_hide_all()
 
             return button(
@@ -172,86 +171,81 @@ def settings_ui():
 # Noise reference UI
 def noise_reference():
     """Create noise reference UI"""
-    screen, div, text, table, tr, td = actions.user.ui_elements(["screen", "div", "text", "table", "tr", "td"])
+    screen, div, text, table, tr, td, th = actions.user.ui_elements(["screen", "div", "text", "table", "tr", "td", "th"])
 
-    current_mode = event_manager.get_mode()
-    mode_config = actions.user.parrot_config().get(current_mode, {})
+    all_modes_config = actions.user.parrot_config()
 
-    def create_noise_row(noise: str, description: str):
+    # Get all unique noises across all modes
+    all_noises = set()
+    for mode_config in all_modes_config.values():
+        all_noises.update(mode_config.keys())
+    all_noises = sorted(list(all_noises))
+
+    # Create header row with mode names
+    header_row = tr()[
+        th(padding=8, border_width=1, border_color="#666666", background_color="#4A4A4A")[
+            text("Noise", color="#FFFFFF", font_weight="bold")
+        ],
+        *[th(padding=8, border_width=1, border_color="#666666", background_color="#4A4A4A")[
+            text(mode_name.upper(), color="#FFFFFF", font_weight="bold", font_size=12)
+        ] for mode_name in all_modes_config.keys()]
+    ]
+
+    # Create rows for each noise
+    def create_noise_row(noise: str):
         return tr()[
             td(padding=8, border_width=1, border_color="#666666")[
                 text(noise, color="#FFFFFF", font_family="monospace")
             ],
-            td(padding=8, border_width=1, border_color="#666666")[
-                text(description, color="#FFFFFF")
-            ]
+            *[td(padding=8, border_width=1, border_color="#666666")[
+                text(mode_config.get(noise, [""])[0], color="#FFFFFF")
+            ] for mode_config in all_modes_config.values()]
         ]
+
+    noise_rows = [create_noise_row(noise) for noise in all_noises]
 
     return screen(justify_content="center", align_items="center")[
         div(
-            # position="absolute",
-            # top="50%",
-            # left="50%",
-            # transform="translate(-50%, -50%)",
             background_color="#2D2D2D",
             border_radius=8,
             border_width=2,
             border_color="#666666",
             padding=20,
-            # max_width=600,
-            # max_height=400,
-            # overflow="auto",
         )[
-            text(f"Noise Reference - {current_mode.upper()} Mode",
+            text("Noise Reference - All Modes",
                  font_size=16, font_weight="bold", color="#FFFFFF", margin_bottom=20),
-            table(
-                width="100%",
-                border_collapse="collapse",
-            )[
-                *[create_noise_row(noise, desc[0]) for noise, desc in mode_config.items()]
+            table(width="100%")[
+                header_row,
+                *noise_rows
             ]
         ]
     ]
 
-@mod.action_class
-class Actions:
-    def parrot_v7_show_hud():
-        """Show the parrot HUD with the current mode, color, code, and modifiers"""
-        actions.user.ui_elements_show(parrot_hud)
+# Direct functions instead of actions class
+def show_hud():
+    """Show the parrot HUD with the current mode, color, code, and modifiers"""
+    actions.user.ui_elements_show(
+        parrot_hud,
+        on_mount=lambda: event_manager.register_hud_callbacks(show_hud, hide_hud),
+        on_unmount=lambda: event_manager.unregister_hud_callbacks()
+    )
 
-    def parrot_v7_hide_hud():
-        """Hide the parrot HUD"""
-        actions.user.ui_elements_hide_all()
+def hide_hud():
+    """Hide the parrot HUD"""
+    actions.user.ui_elements_hide_all()
 
-    def parrot_v7_ui_utility_selector():
-        """Show utility selector UI"""
-        actions.user.ui_elements_show(utility_selector)
+def set_utility_action(action: str):
+    """Set the utility action"""
+    event_manager.set_setting("utility_action", action)
 
-    def parrot_v7_ui_settings():
-        """Show settings UI"""
-        actions.user.ui_elements_show(settings_ui)
-
-    def parrot_v7_ui_noise_reference():
-        """Show noise reference UI"""
-        actions.user.ui_elements_show(noise_reference)
-
-    def parrot_v7_set_utility_action(action: str):
-        """Set the utility action"""
-        from . import config
-        config.UTILITY_ACTION = action
-
-    def parrot_v7_update_setting(setting_name: str, value_index: int):
-        """Update a setting value"""
-        from .src.movement import movement
-        from .config import FULL_MODE_SETTINGS
-
-        if setting_name == "speed":
-            movement.update_speed(value_index)
-        elif setting_name == "boost_small":
-            movement.update_boost_small(value_index)
-        elif setting_name == "boost_large":
-            movement.update_boost_large(value_index)
-        elif setting_name == "stop_time":
-            from .config import SETTINGS_OPTIONS
-            if 0 <= value_index < len(SETTINGS_OPTIONS["stop_time"]):
-                FULL_MODE_SETTINGS["stop_time"] = SETTINGS_OPTIONS["stop_time"][value_index]
+def update_setting(setting_name: str, value_index: int):
+    """Update a setting value"""
+    if setting_name == "speed":
+        movement.update_speed(value_index)
+    elif setting_name == "boost_small":
+        movement.update_boost_small(value_index)
+    elif setting_name == "boost_large":
+        movement.update_boost_large(value_index)
+    elif setting_name == "stop_time":
+        if 0 <= value_index < len(SETTINGS_OPTIONS["stop_time"]):
+            FULL_MODE_SETTINGS["stop_time"] = SETTINGS_OPTIONS["stop_time"][value_index]

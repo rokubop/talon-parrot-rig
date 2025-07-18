@@ -8,10 +8,11 @@ from .src.keys import keys
 from .src.phrase import phrase
 from .events import event_manager
 from .config import (
-    CLICK_BEHAVIOR, UTILITY_ACTION, UTILITY_ACTIONS,
+    CLICK_BEHAVIOR, UTILITY_ACTIONS,
     FULL_MODE_SETTINGS, SETTINGS_OPTIONS
 )
 from .constants import *
+from . import parrot_mode_ui
 import time
 
 class ParrotActions:
@@ -132,7 +133,7 @@ class ParrotActions:
     # Utility actions
     def utility(self):
         """Execute utility action based on current setting"""
-        action = UTILITY_ACTION
+        action = event_manager.get_setting("utility_action", "hold_click")
 
         if action == "click":
             self.click()
@@ -158,12 +159,12 @@ class ParrotActions:
         actions.mode.enable("user.parrot_v7")
         # event_manager.set_parrot_enabled(True)
         event_manager.set_mode("default")
-        actions.user.parrot_v7_show_hud()
+        parrot_mode_ui.show_hud()
 
     def parrot_mode_disable(self):
         """Disable parrot mode"""
         self._parrot_mode_enabled = False
-        actions.user.parrot_v7_hide_hud()
+        parrot_mode_ui.hide_hud()
         # event_manager.set_parrot_enabled(False)
         self.stopper()
         actions.mode.disable("user.parrot_v7")
@@ -282,15 +283,15 @@ class ParrotActions:
     # UI actions
     def show_utility_selector(self):
         """Show utility selector UI"""
-        actions.user.parrot_v7_ui_utility_selector()
+        actions.user.ui_elements_show(parrot_mode_ui.utility_selector)
 
     def show_noise_reference(self):
         """Show noise reference UI"""
-        actions.user.parrot_v7_ui_noise_reference()
+        actions.user.ui_elements_show(parrot_mode_ui.noise_reference)
 
     def show_settings(self):
         """Show settings UI"""
-        actions.user.parrot_v7_ui_settings()
+        actions.user.ui_elements_show(parrot_mode_ui.settings_ui)
 
     def scroll_with_stop(self, direction: str):
         """Scroll after stopping (for head mode)"""
