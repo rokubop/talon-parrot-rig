@@ -1,0 +1,126 @@
+{
+  "$schema": "./parrot_config.schema.json",
+  "common": {
+    "ee": "stop",
+    "pop": "click exit",
+    "cluck": "exit",
+    "ah": "move left",
+    "oh": "move right",
+    "t": "move up",
+    "guh": "move down",
+    "eh": "head mode",
+    "er": "full mode",
+    "tut mm": "left click drag",
+    "tut oh": "right click",
+    "tut t": "toggle shift",
+    "tut guh": "toggle control",
+    "tut ah": "toggle alt",
+    "tut cluck": "window mode",
+    "tut pop": "keyboard mode",
+    "tut er": "number mode",
+    "tut palate": "utility selector",
+    "tut tut": "noise reference",
+    "tut hiss": "settings",
+    "tut shush": "settings",
+    "palate": "utility"
+  },
+  "modes": {
+    "default": {
+      "inherits": "common",
+      "noises": {
+        "mm": "click",
+        "hiss": "scroll down",
+        "hiss_stop": "",
+        "shush": "scroll up",
+        "shush_stop": ""
+      }
+    },
+    "move": {
+      "inherits": "common",
+      "noises": {
+        "mm": "click",
+        "shush": "boost large",
+        "shush_stop": "",
+        "hiss": "boost small",
+        "hiss_stop": ""
+      }
+    },
+    "head": {
+      "inherits": "common",
+      "noises": {
+        "mm": "click",
+        "hiss": "scroll down",
+        "hiss_stop": "",
+        "shush": "scroll up",
+        "shush_stop": ""
+      }
+    },
+    "full": {
+      "inherits": "common",
+      "noises": {
+        "mm": "click temp stop",
+        "hiss": "scroll down",
+        "hiss_stop": "",
+        "shush": "scroll up",
+        "shush_stop": ""
+      }
+    },
+    "window": {
+      "noises": {
+        "ah": "snap left",
+        "oh": "snap right",
+        "eh": "snap full",
+        "guh": "window minimize",
+        "hiss": "screen right",
+        "shush": "screen left",
+        "pop": "window cycle next",
+        "palate": "window cycle previous",
+        "er": "window close",
+        "tut": "window swap",
+        "cluck": "return to previous",
+        "tut ee": "app switch 1",
+        "tut er": "app switch 2",
+        "tut ah": "app switch 3",
+        "tut hiss": "app switch 4",
+        "tut shush": "app switch 5",
+        "tut mm": "app switch 6",
+        "tut guh": "app switch 7",
+        "tut t": "app switch 8",
+        "tut eh": "app switch 9",
+        "tut oh": "app switch 0"
+      }
+    },
+    "keyboard": {
+      "noises": {
+        "ah": "left arrow",
+        "oh": "right arrow",
+        "t": "up arrow",
+        "guh": "down arrow",
+        "palate": "tab",
+        "hiss": "backspace",
+        "shush": "delete",
+        "tut": "escape",
+        "pop": "enter",
+        "cluck": "return to previous"
+      }
+    },
+    "number": {
+      "noises": {
+        "oh": "0",
+        "ee": "1",
+        "er": "2",
+        "ah": "3",
+        "hiss": "4",
+        "shush": "5",
+        "mm": "6",
+        "guh": "7",
+        "t": "8",
+        "eh": "9",
+        "palate": "tab",
+        "tut": "escape",
+        "pop": "enter",
+        "cluck": "return to previous"
+      }
+    }
+  }
+}
