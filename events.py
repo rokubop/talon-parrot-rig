@@ -33,17 +33,19 @@ class ParrotEventManager:
                 except Exception as e:
                     print(f"Error in event callback: {e}")
 
-    def set_mode(self, mode: str):
+    def set_mode(self, mode: str, update_ui: bool = True):
         """Set the current mode and emit events"""
         if mode != self._current_mode:
             print("Setting mode to:", mode)
             self._previous_mode = self._current_mode
             self._current_mode = mode
+            actions.user.parrot_config_set_mode(mode)
             self.emit("mode_changed", {
                 "current_mode": self._current_mode,
                 "previous_mode": self._previous_mode
             })
-            self._update_hud()
+            if update_ui:
+                self._update_hud()
 
     def get_mode(self) -> str:
         """Get the current mode"""

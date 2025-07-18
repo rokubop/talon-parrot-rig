@@ -1,4 +1,4 @@
-from talon import actions, Module
+from talon import actions, Module, cron
 from .config import MODE_COLORS, MODE_CODES, MODIFIER_COLORS, UTILITY_ACTIONS, SETTINGS_OPTIONS, FULL_MODE_SETTINGS
 from .events import event_manager
 from .src.movement import movement
@@ -93,10 +93,6 @@ def utility_selector():
 
     return screen(justify_content="center", align_items="center")[
         div(
-            # position="absolute",
-            # top="50%",
-            # left="50%",
-            # transform="translate(-50%, -50%)",
             background_color="#2D2D2D",
             border_radius=8,
             border_width=2,
@@ -149,10 +145,6 @@ def settings_ui():
 
     return screen(justify_content="center", align_items="center")[
         div(
-            # position="absolute",
-            # top="50%",
-            # left="50%",
-            # transform="translate(-50%, -50%)",
             background_color="#2D2D2D",
             border_radius=8,
             border_width=2,
@@ -168,14 +160,45 @@ def settings_ui():
         ]
     ]
 
+def only_current_mode_table():
+    """Create a table showing only the current mode"""
+    table, tr, td, th = actions.user.ui_elements(["table", "tr", "td", "th"])
+    text, state = actions.user.ui_elements(["text", "state"])
+
+    current_mode = state.get("mode", "default")
+    mode_config = actions.user.parrot_config().get(current_mode, {})
+
+    # Create header row
+    header_row = tr()[
+        th(padding=8, border_width=1, border_color="#666666")[
+            text("Noise", color="#FFFFFF", font_weight="bold", font_size=12)
+        ],
+        th(padding=8, border_width=1, border_color="#666666")[
+            text(f"Mode: {current_mode.upper()}", color="#FFFFFF", font_weight="bold", font_size=12)
+        ]
+    ]
+
+    return table()[
+        header_row,
+        *[tr()[
+            td(padding=8, border_width=1, border_color="#666666")[
+                text(noise, color="#FFFFFF", font_family="monospace")
+            ],
+            td(padding=8, border_width=1, border_color="#666666")[
+                text(mode_config.get(noise, [""])[0], color="#FFFFFF")
+            ]
+        ] for noise in mode_config.keys()]
+    ]
+
 # Noise reference UI
 def noise_reference():
     """Create noise reference UI"""
-    screen, div, text, table, tr, td, th = actions.user.ui_elements(["screen", "div", "text", "table", "tr", "td", "th"])
-    state = actions.user.ui_elements(["state"])
+    screen, window, div, text = actions.user.ui_elements(["screen", "window", "div", "text"])
+    table, tr, td, th = actions.user.ui_elements(["table", "tr", "td", "th"])
+    state, button = actions.user.ui_elements(["state", "button"])
 
     all_modes_config = actions.user.parrot_config()
-    current_mode = state.get("mode", "default")
+    current_mode, set_current_mode = state.use("mode", "default")
 
     # Get all unique noises across all modes
     all_noises = set()
@@ -183,15 +206,29 @@ def noise_reference():
         all_noises.update(mode_config.keys())
     all_noises = sorted(list(all_noises))
 
-    # Create header row with mode names
+    # Create header row with mode names (clickable)
+    def create_mode_header(mode_name: str):
+        def on_click():
+            event_manager.set_mode(mode_name, update_ui=False)
+            set_current_mode(mode_name)
+
+        return th(padding=0, border_width=1, border_color="#666666",
+                  background_color="#4A90E2" if mode_name == current_mode else "#4A4A4A")[
+            button(
+                padding=8,
+                width="100%",
+                color="#FFFFFF",
+                on_click=on_click,
+            )[
+                text(mode_name.upper(), color="#FFFFFF", font_weight="bold", font_size=12)
+            ]
+        ]
+
     header_row = tr()[
         th(padding=8, border_width=1, border_color="#666666", background_color="#4A4A4A")[
             text("Noise", color="#FFFFFF", font_weight="bold", font_size=12)
         ],
-        *[th(padding=8, border_width=1, border_color="#666666",
-              background_color="#4A90E2" if mode_name == current_mode else "#4A4A4A")[
-            text(mode_name.upper(), color="#FFFFFF", font_weight="bold", font_size=12)
-        ] for mode_name in all_modes_config.keys()]
+        *[create_mode_header(mode_name) for mode_name in all_modes_config.keys()]
     ]
 
     # Create rows for each noise
@@ -209,15 +246,10 @@ def noise_reference():
     noise_rows = [create_noise_row(noise) for noise in all_noises]
 
     return screen(justify_content="center", align_items="center")[
-        div(
-            background_color="#2D2D2D",
-            border_radius=8,
-            border_width=2,
-            border_color="#666666",
-            padding=20,
+        window(
+            title="Noise Reference",
+            minimized_body=only_current_mode_table,
         )[
-            text(f"Noise Reference - Current Mode: {current_mode.upper()}",
-                 font_size=16, font_weight="bold", color="#FFFFFF", margin_bottom=20),
             table(width="100%")[
                 header_row,
                 *noise_rows

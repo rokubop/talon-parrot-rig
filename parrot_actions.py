@@ -265,7 +265,7 @@ class ParrotActions:
 
     def app_switch(self, number: int):
         """Switch to application number"""
-        actions.key(f"alt-{number}")
+        actions.key(f"win-{number}")
 
     # Mode switching actions
     def set_window_mode(self):
@@ -279,15 +279,6 @@ class ParrotActions:
     def set_number_mode(self):
         """Set number mode"""
         event_manager.set_mode("number")
-
-    def set_settings_mode(self):
-        """Set settings mode"""
-        event_manager.set_mode("settings")
-
-    def show_noise_reference_and_enter_settings(self):
-        """Show noise reference UI and enter settings mode"""
-        event_manager.set_mode("settings")
-        actions.user.ui_elements_show(parrot_mode_ui.noise_reference)
 
     # UI actions
     def show_utility_selector(self):

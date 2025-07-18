@@ -10,7 +10,6 @@ MODE_COLORS = {
     "window": "#50E3C2",     # Teal
     "keyboard": "#B8E986",   # Light Green
     "number": "#F8E71C",     # Yellow
-    "settings": "#FF6B6B",   # Red
 }
 
 # Mode display codes
@@ -22,7 +21,6 @@ MODE_CODES = {
     "window": "WIN",
     "keyboard": "KEYB",
     "number": "NUMB",
-    "settings": "SET",
 }
 
 # Movement settings

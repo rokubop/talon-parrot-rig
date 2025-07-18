@@ -42,7 +42,7 @@ parrot_config_common = {
 
     # UI functions
     "tut palate": ("utility selector", parrot_actions.show_utility_selector),
-    "tut tut": ("settings mode + noise reference", parrot_actions.show_noise_reference_and_enter_settings),
+    "tut tut": ("noise reference", parrot_actions.show_noise_reference),
     "tut hiss": ("settings", parrot_actions.show_settings),
     "tut shush": ("settings", parrot_actions.show_settings),
 
@@ -147,48 +147,6 @@ parrot_config_number = {
     "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
 }
 
-# Settings mode config
-parrot_config_settings = {
-    # Exit settings mode
-    "tut": ("exit settings", parrot_actions.return_to_previous_mode),
-
-    # Basic movement and mode switches (from common config)
-    "ee": ("stop", parrot_actions.stopper),
-    "pop": ("click exit", parrot_actions.click_exit),
-    "cluck": ("exit", parrot_actions.parrot_mode_disable),
-
-    # Movement activation with mode change
-    "ah": ("move left", lambda: parrot_actions.move_and_activate("left")),
-    "oh": ("move right", lambda: parrot_actions.move_and_activate("right")),
-    "t": ("move up", lambda: parrot_actions.move_and_activate("up")),
-    "guh": ("move down", lambda: parrot_actions.move_and_activate("down")),
-
-    # Mode switches
-    "eh": ("head mode", parrot_actions.tracking_activate_head),
-    "er": ("full mode", parrot_actions.tracking_activate_full),
-
-    # Common utility functions (modified to not conflict with "tut" exit)
-    "tut mm": ("left click drag", lambda: parrot_actions.click(hold=True)),
-    "tut oh": ("right click", lambda: parrot_actions.click(button=1)),
-    "tut t": ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
-    "tut guh": ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
-    "tut ah": ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
-
-    # Mode switches with tut
-    "tut cluck": ("window mode", parrot_actions.set_window_mode),
-    "tut pop": ("keyboard mode", parrot_actions.set_keyboard_mode),
-    "tut er": ("number mode", parrot_actions.set_number_mode),
-
-    # Settings-specific UI functions
-    "hiss": ("show settings UI", parrot_actions.show_settings),
-    "shush": ("show settings UI", parrot_actions.show_settings),
-    "palate": ("show noise reference", parrot_actions.show_noise_reference),
-
-    # Basic click and utility
-    "mm": ("click", parrot_actions.click),
-    "tut palate": ("utility selector", parrot_actions.show_utility_selector),
-}
-
 # Complete parrot configuration
 parrot_config = {
     "default": parrot_config_default,
@@ -198,7 +156,6 @@ parrot_config = {
     "window": parrot_config_window,
     "keyboard": parrot_config_keyboard,
     "number": parrot_config_number,
-    "settings": parrot_config_settings,
 }
 
 @ctx_parrot_mode.action_class("user")
