@@ -1,4 +1,4 @@
-from talon import Module, Context, actions
+from talon import Module, Context, actions, app
 from .parrot_actions import parrot_actions
 from .constants import *
 from . import parrot_mode_ui  # Import UI module to register actions
@@ -95,11 +95,13 @@ parrot_config_window = {
     "ah": ("snap left", lambda: actions.user.snap_window_to_position("left")),
     "oh": ("snap right", lambda: actions.user.snap_window_to_position("right")),
     "eh": ("snap full", lambda: actions.user.snap_window_to_position("full")),
-    "t": ("screen right", parrot_actions.screen_right),
-    "guh": ("screen left", parrot_actions.screen_left),
+    "guh": ("window minimize", actions.user.window_minimize),
+    "hiss": ("screen right", parrot_actions.screen_right),
+    "shush": ("screen left", parrot_actions.screen_left),
+    "pop": ("window cycle next", app.window_next),
+    "palate": ("window cycle previous", app.window_previous),
     "er": ("window close", parrot_actions.window_close),
     "tut": ("window swap", parrot_actions.window_swap),
-    "palate": ("alt tab", parrot_actions.window_swap),
     "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
 
     # Application switches
