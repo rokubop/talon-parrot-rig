@@ -280,6 +280,15 @@ class ParrotActions:
         """Set number mode"""
         event_manager.set_mode("number")
 
+    def set_settings_mode(self):
+        """Set settings mode"""
+        event_manager.set_mode("settings")
+
+    def show_noise_reference_and_enter_settings(self):
+        """Show noise reference UI and enter settings mode"""
+        event_manager.set_mode("settings")
+        actions.user.ui_elements_show(parrot_mode_ui.noise_reference)
+
     # UI actions
     def show_utility_selector(self):
         """Show utility selector UI"""

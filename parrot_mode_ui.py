@@ -172,8 +172,10 @@ def settings_ui():
 def noise_reference():
     """Create noise reference UI"""
     screen, div, text, table, tr, td, th = actions.user.ui_elements(["screen", "div", "text", "table", "tr", "td", "th"])
+    state = actions.user.ui_elements(["state"])
 
     all_modes_config = actions.user.parrot_config()
+    current_mode = state.get("mode", "default")
 
     # Get all unique noises across all modes
     all_noises = set()
@@ -184,9 +186,10 @@ def noise_reference():
     # Create header row with mode names
     header_row = tr()[
         th(padding=8, border_width=1, border_color="#666666", background_color="#4A4A4A")[
-            text("Noise", color="#FFFFFF", font_weight="bold")
+            text("Noise", color="#FFFFFF", font_weight="bold", font_size=12)
         ],
-        *[th(padding=8, border_width=1, border_color="#666666", background_color="#4A4A4A")[
+        *[th(padding=8, border_width=1, border_color="#666666",
+              background_color="#4A90E2" if mode_name == current_mode else "#4A4A4A")[
             text(mode_name.upper(), color="#FFFFFF", font_weight="bold", font_size=12)
         ] for mode_name in all_modes_config.keys()]
     ]
@@ -197,9 +200,10 @@ def noise_reference():
             td(padding=8, border_width=1, border_color="#666666")[
                 text(noise, color="#FFFFFF", font_family="monospace")
             ],
-            *[td(padding=8, border_width=1, border_color="#666666")[
+            *[td(padding=8, border_width=1, border_color="#666666",
+                 background_color="#1A3A5C" if mode_name == current_mode else None)[
                 text(mode_config.get(noise, [""])[0], color="#FFFFFF")
-            ] for mode_config in all_modes_config.values()]
+            ] for mode_name, mode_config in all_modes_config.items()]
         ]
 
     noise_rows = [create_noise_row(noise) for noise in all_noises]
@@ -212,7 +216,7 @@ def noise_reference():
             border_color="#666666",
             padding=20,
         )[
-            text("Noise Reference - All Modes",
+            text(f"Noise Reference - Current Mode: {current_mode.upper()}",
                  font_size=16, font_weight="bold", color="#FFFFFF", margin_bottom=20),
             table(width="100%")[
                 header_row,
