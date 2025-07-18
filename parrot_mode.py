@@ -92,11 +92,11 @@ parrot_config_full = {
 
 # Window mode config
 parrot_config_window = {
-    "ah": ("snap left", parrot_actions.window_snap_left),
-    "oh": ("snap right", parrot_actions.window_snap_right),
+    "ah": ("snap left", lambda: actions.user.snap_window_to_position("left")),
+    "oh": ("snap right", lambda: actions.user.snap_window_to_position("right")),
+    "eh": ("snap full", lambda: actions.user.snap_window_to_position("full")),
     "t": ("screen right", parrot_actions.screen_right),
     "guh": ("screen left", parrot_actions.screen_left),
-    "pop": ("snap full", parrot_actions.window_snap_full),
     "er": ("window close", parrot_actions.window_close),
     "tut": ("window swap", parrot_actions.window_swap),
     "palate": ("alt tab", parrot_actions.window_swap),
