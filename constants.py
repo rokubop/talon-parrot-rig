@@ -1,0 +1,27 @@
+from talon import Module
+
+mod = Module()
+
+# Mode constants
+PARROT_MODE_DEFAULT = "default"
+PARROT_MODE_MOVE = "move"
+PARROT_MODE_HEAD = "head"
+PARROT_MODE_FULL = "full"
+PARROT_MODE_WINDOW = "window"
+PARROT_MODE_KEYBOARD = "keyboard"
+PARROT_MODE_NUMBER = "number"
+
+# All available modes
+ALL_MODES = [
+    PARROT_MODE_DEFAULT,
+    PARROT_MODE_MOVE,
+    PARROT_MODE_HEAD,
+    PARROT_MODE_FULL,
+    PARROT_MODE_WINDOW,
+    PARROT_MODE_KEYBOARD,
+    PARROT_MODE_NUMBER,
+]
+
+# Parrot mode states
+PARROT_MODE_DISABLED = "disabled"
+PARROT_MODE_ENABLED = "enabled"
