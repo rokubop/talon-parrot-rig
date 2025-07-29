@@ -1,7 +1,7 @@
 from talon import Module, Context, actions, app
 from .parrot_actions import parrot_actions
 from .constants import *
-from . import parrot_mode_ui  # Import UI module to register actions
+from .visual_interface import visual_interface  # Import visual interface instead of UI module
 from .events import event_manager
 
 mod = Module()

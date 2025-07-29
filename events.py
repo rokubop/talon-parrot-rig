@@ -1,6 +1,6 @@
 from talon import actions
 from typing import Dict, Set, Optional, Callable
-from .config import MODE_COLORS, MODE_CODES, MODIFIER_COLORS, UTILITY_ACTION
+from .config import UTILITY_ACTION
 
 class ParrotEventManager:
     """Manages events for parrot mode v7"""
@@ -14,9 +14,6 @@ class ParrotEventManager:
         self._settings = {
             "utility_action": UTILITY_ACTION  # Initialize with default
         }
-        # UI callbacks (registered by UI components)
-        self._hud_show_callback = None
-        self._hud_hide_callback = None
 
     def subscribe(self, event_type: str, callback: Callable):
         """Subscribe to an event"""
@@ -44,8 +41,6 @@ class ParrotEventManager:
                 "current_mode": self._current_mode,
                 "previous_mode": self._previous_mode
             })
-            if update_ui:
-                self._update_hud()
 
     def get_mode(self) -> str:
         """Get the current mode"""
@@ -63,13 +58,11 @@ class ParrotEventManager:
         """Add an active modifier"""
         self._active_modifiers.add(modifier)
         self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
-        self._update_hud()
 
     def remove_modifier(self, modifier: str):
         """Remove an active modifier"""
         self._active_modifiers.discard(modifier)
         self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
-        self._update_hud()
 
     def get_modifiers(self) -> Set[str]:
         """Get active modifiers"""
@@ -79,7 +72,6 @@ class ParrotEventManager:
         """Clear all active modifiers"""
         self._active_modifiers.clear()
         self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
-        self._update_hud()
 
     def set_setting(self, setting_name: str, value):
         """Set a runtime setting"""
@@ -89,38 +81,6 @@ class ParrotEventManager:
     def get_setting(self, setting_name: str, default=None):
         """Get a runtime setting"""
         return self._settings.get(setting_name, default)
-
-    def register_hud_callbacks(self, show_callback, hide_callback):
-        """Register HUD show/hide callbacks"""
-        self._hud_show_callback = show_callback
-        self._hud_hide_callback = hide_callback
-
-    def unregister_hud_callbacks(self):
-        """Unregister HUD callbacks"""
-        self._hud_show_callback = None
-        self._hud_hide_callback = None
-
-    def _update_hud(self):
-        """Update the HUD display"""
-        try:
-            actions.user.ui_elements_set_state({
-                "mode": self._current_mode,
-                "color": MODE_COLORS[self._current_mode],
-                "code": MODE_CODES[self._current_mode],
-                "modifiers": list(self._active_modifiers)
-            })
-            if self._hud_show_callback:
-                self._hud_show_callback()
-        except Exception as e:
-            print(f"Error updating HUD: {e}")
-
-    def _hide_hud(self):
-        """Hide the HUD"""
-        try:
-            if self._hud_hide_callback:
-                self._hud_hide_callback()
-        except Exception as e:
-            print(f"Error hiding HUD: {e}")
 
 # Global event manager instance
 event_manager = ParrotEventManager()

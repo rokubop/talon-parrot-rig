@@ -2,7 +2,7 @@ from talon import actions, ctrl, cron
 from .src.scrolling import scrolling
 from .src.tracking import tracking
 from .src.movement import movement
-from .src.cursor import cursor
+from .visual_interface import visual_interface
 from .src.position import position
 from .src.keys import keys
 from .src.phrase import phrase
@@ -12,7 +12,6 @@ from .config import (
     FULL_MODE_SETTINGS, SETTINGS_OPTIONS
 )
 from .constants import *
-from . import parrot_mode_ui
 import time
 
 class ParrotActions:
@@ -83,7 +82,7 @@ class ParrotActions:
     def click_release(self, button=0):
         """Release mouse click"""
         ctrl.mouse_click(button=button, up=True)
-        cursor.hide_border()
+        visual_interface.hide_border()
         self._is_left_click_held = False
 
     def click(self, button=0, hold=False):
@@ -100,11 +99,11 @@ class ParrotActions:
             self.click_release(button)
         elif hold:
             ctrl.mouse_click(button=button, down=True)
-            cursor.show_border()
+            visual_interface.show_border()
             self._is_left_click_held = True
         else:
             ctrl.mouse_click(button=button, hold=16000)
-            cursor.hide_border()
+            visual_interface.hide_border()
 
         if should_stop:
             if current_mode == "full":
@@ -159,12 +158,12 @@ class ParrotActions:
         actions.mode.enable("user.parrot_v7")
         # event_manager.set_parrot_enabled(True)
         event_manager.set_mode("default")
-        parrot_mode_ui.show_hud()
+        visual_interface.show()
 
     def parrot_mode_disable(self):
         """Disable parrot mode"""
         self._parrot_mode_enabled = False
-        parrot_mode_ui.hide_hud()
+        visual_interface.hide()
         # event_manager.set_parrot_enabled(False)
         self.stopper()
         actions.mode.disable("user.parrot_v7")
@@ -185,14 +184,14 @@ class ParrotActions:
         """Toggle modifier key"""
         is_active = keys.toggle_modifier(modifier)
         if is_active:
-            cursor.add_modifier(modifier)
+            event_manager.add_modifier(modifier)
         else:
-            cursor.remove_modifier(modifier)
+            event_manager.remove_modifier(modifier)
 
     def disable_modifiers(self):
         """Disable all modifiers"""
         keys.clear_modifiers()
-        cursor.clear_modifiers()
+        event_manager.clear_modifiers()
 
     # Stop actions
     def stopper(self):
@@ -215,7 +214,7 @@ class ParrotActions:
 
         # Schedule reactivation
         stop_time = FULL_MODE_SETTINGS["stop_time"]
-        self._stop_time_job = cron.after(f"{stop_time}s", self._reactivate_full_mode)
+        self._stop_time_job = cron.after(f"{stop_time}ms", self._reactivate_full_mode)
 
     def _reactivate_full_mode(self):
         """Reactivate full mode after temporary stop"""
@@ -280,18 +279,18 @@ class ParrotActions:
         """Set number mode"""
         event_manager.set_mode("number")
 
-    # UI actions
+    # UI actions - TODO: Implement these with simple visual feedback if needed
     def show_utility_selector(self):
-        """Show utility selector UI"""
-        actions.user.ui_elements_show(parrot_mode_ui.utility_selector)
+        """Show utility selector UI - placeholder for now"""
+        print("Utility selector - not implemented yet")
 
     def show_noise_reference(self):
-        """Show noise reference UI"""
-        actions.user.ui_elements_show(parrot_mode_ui.noise_reference)
+        """Show noise reference UI - placeholder for now"""
+        print("Noise reference - not implemented yet")
 
     def show_settings(self):
-        """Show settings UI"""
-        actions.user.ui_elements_show(parrot_mode_ui.settings_ui)
+        """Show settings UI - placeholder for now"""
+        print("Settings UI - not implemented yet")
 
     def scroll_with_stop(self, direction: str):
         """Scroll after stopping (for head mode)"""
