@@ -74,9 +74,9 @@ parrot_config_move = {
 parrot_config_head = {
     **parrot_config_common,
     "mm": ("click", parrot_actions.click_with_mode_behavior),
-    "hiss": ("scroll down", lambda: parrot_actions.scroll("down")),
+    "hiss": ("scroll down", lambda: parrot_actions.scroll_with_mode_reset("down")),
     "hiss_stop": ("", parrot_actions.scroll_stop_soft),
-    "shush": ("scroll up", lambda: parrot_actions.scroll("up")),
+    "shush": ("scroll up", lambda: parrot_actions.scroll_with_mode_reset("up")),
     "shush_stop": ("", parrot_actions.scroll_stop_soft),
 }
 

@@ -52,11 +52,13 @@ class ParrotActions:
     # Tracking actions
     def tracking_activate_head(self):
         """Activate head tracking mode"""
+        movement.stop()
         tracking.activate(full_tracking=False)
         event_manager.set_mode("head")
 
     def tracking_activate_full(self):
         """Activate full tracking mode"""
+        movement.stop()
         tracking.activate(full_tracking=True)
         event_manager.set_mode("full")
 
@@ -67,6 +69,7 @@ class ParrotActions:
     # Click actions
     def click_exit(self):
         """Click and exit parrot mode"""
+
         self.click()
         self.parrot_mode_disable()
 
@@ -303,6 +306,12 @@ class ParrotActions:
     def scroll_with_temp_stop(self, direction: str):
         """Scroll after temporary stop (for full mode)"""
         self.stop_temporarily()
+        self.scroll(direction)
+
+    def scroll_with_mode_reset(self, direction: str):
+        """Scroll and reset to default mode (for head mode)"""
+        tracking.freeze()
+        event_manager.set_mode("default")
         self.scroll(direction)
 
     # Utility functions
