@@ -211,12 +211,13 @@ class ParrotActions:
     def stop_temporarily(self):
         """Stop temporarily (for full mode)"""
         movement.stop()
-        scrolling.scroll_stop_hard()
         tracking.freeze()
 
         # Cancel any existing stop job
         if self._stop_time_job:
             cron.cancel(self._stop_time_job)
+        else:
+            scrolling.scroll_stop_hard()
 
         # Schedule reactivation
         stop_time = FULL_MODE_SETTINGS["stop_time"]
