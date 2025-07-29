@@ -2,29 +2,12 @@ from talon import actions, cron, ctrl
 from talon.canvas import Canvas
 from talon.skia.canvas import Canvas as SkiaCanvas
 from .utils import get_screen
+from ..colors import MODE_COLORS, MODIFIER_COLORS, get_mode_color, get_modifier_color
 
 canvas_cursor = None
 canvas_cursor_job = None
 default_cursor_color = "FF0000"  # STOP color - Red
 default_border_color = "FFFFFF"
-
-# Mode colors - owned by visual UI
-MODE_COLORS = {
-    "default": "FF0000",     # Red (original cursor color)
-    "move": "FFFF00",        # Yellow (MOVEMENT)
-    "head": "83E99B",        # Light Green
-    "full": "BD10E0",        # Purple
-    "window": "E35050",      # Red-ish
-    "keyboard": "A7D3FF",    # Light Blue
-    "number": "F89C1C",      # Orange
-}
-
-# Modifier colors - owned by visual UI
-MODIFIER_COLORS = {
-    "shift": "0490c9",
-    "ctrl": "84E773",
-    "alt": "FF6DD9",
-}
 
 class VisualUI:
     def __init__(self):
@@ -122,11 +105,11 @@ class VisualUI:
 
     def get_mode_color(self, mode: str) -> str:
         """Get the color for a specific mode"""
-        return MODE_COLORS.get(mode, default_cursor_color)
+        return get_mode_color(mode)
 
     def get_modifier_color(self, modifier: str) -> str:
         """Get the color for a specific modifier"""
-        return MODIFIER_COLORS.get(modifier, "FFFFFF")
+        return get_modifier_color(modifier)
 
 # Create a global instance
 visual_ui = VisualUI()

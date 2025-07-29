@@ -3,7 +3,8 @@ Visual interface for parrot mode v7
 Integrates the visual cursor UI with the event system
 """
 
-from .src.visual_ui import visual_ui, MODE_COLORS
+from .src.visual_ui import visual_ui
+from .colors import get_mode_color
 from .events import event_manager
 
 class VisualInterface:
@@ -20,7 +21,7 @@ class VisualInterface:
     def _on_mode_changed(self, data):
         """Handle mode change events"""
         mode = data.get("current_mode", "default")
-        color = MODE_COLORS.get(mode, "FF0000")  # Default to red if mode not found
+        color = get_mode_color(mode)
         visual_ui.set_mode(mode)
         visual_ui.color(color)
 

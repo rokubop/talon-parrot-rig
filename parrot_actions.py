@@ -7,6 +7,7 @@ from .src.position import position
 from .src.keys import keys
 from .src.phrase import phrase
 from .events import event_manager
+from .noise_reference import noise_reference
 from .config import (
     CLICK_BEHAVIOR, UTILITY_ACTIONS,
     FULL_MODE_SETTINGS, SETTINGS_OPTIONS
@@ -163,6 +164,8 @@ class ParrotActions:
     def parrot_mode_disable(self):
         """Disable parrot mode"""
         self._parrot_mode_enabled = False
+        if actions.user.ui_elements_is_active("noise_reference"):
+            actions.user.ui_elements_hide("noise_reference")
         visual_interface.hide()
         # event_manager.set_parrot_enabled(False)
         self.stopper()
@@ -285,8 +288,8 @@ class ParrotActions:
         print("Utility selector - not implemented yet")
 
     def show_noise_reference(self):
-        """Show noise reference UI - placeholder for now"""
-        print("Noise reference - not implemented yet")
+        """Show noise reference UI"""
+        actions.user.ui_elements_toggle(noise_reference)
 
     def show_settings(self):
         """Show settings UI - placeholder for now"""
