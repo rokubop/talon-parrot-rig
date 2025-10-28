@@ -12,41 +12,31 @@ ctx_parrot_mode.matches = """
 mode: user.parrot_v7
 """
 
-# Common noises for all modes
 parrot_config_common = {
     "ee": ("stop", parrot_actions.stopper),
     "pop": ("click exit", parrot_actions.click_exit),
     "cluck": ("exit", parrot_actions.parrot_mode_disable),
-
-    # Movement activation with mode change
     "ah": ("move left", lambda: parrot_actions.move_and_activate("left")),
     "oh": ("move right", lambda: parrot_actions.move_and_activate("right")),
     "t": ("move up", lambda: parrot_actions.move_and_activate("up")),
     "guh": ("move down", lambda: parrot_actions.move_and_activate("down")),
-
-    # Mode switches
     "eh": ("head mode", parrot_actions.tracking_activate_head),
     "er": ("full mode", parrot_actions.tracking_activate_full),
-
-    # Utility functions
+    # "er": ("tele nearest loc", parrot_actions.mouse_pos_tele_nearest),
+    # "er $noise": ("tele loc or mark", lambda noise: parrot_actions.mouse_pos_mark_or_teleport(noise)),
     "tut mm": ("left click drag", lambda: parrot_actions.click(hold=True)),
     "tut oh": ("right click", lambda: parrot_actions.click(button=1)),
     "tut t": ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
     "tut guh": ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
     "tut ah": ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
-
-    # Mode switches with tut
-    "tut cluck": ("window mode", parrot_actions.set_window_mode),
-    "tut pop": ("keyboard mode", parrot_actions.set_keyboard_mode),
-    "tut er": ("number mode", parrot_actions.set_number_mode),
-
-    # UI functions
-    "tut palate": ("utility selector", parrot_actions.show_utility_selector),
-    "tut tut": ("noise reference", parrot_actions.show_noise_reference),
+    # "tut cluck": ("window mode", parrot_actions.set_window_mode),
+    # "tut pop": ("keyboard mode", parrot_actions.set_keyboard_mode),
+    # "tut er": ("number mode", parrot_actions.set_number_mode),
+    # "tut palate": ("utility selector", parrot_actions.show_utility_selector),
+    "tut ee": ("noise reference", parrot_actions.disable_modifiers),
+    "tut tut": ("noise reference", parrot_actions.disable_modifiers),
     "tut hiss": ("settings", parrot_actions.show_settings),
     "tut shush": ("settings", parrot_actions.show_settings),
-
-    # Utility action
     "palate": ("utility", parrot_actions.utility),
 }
 

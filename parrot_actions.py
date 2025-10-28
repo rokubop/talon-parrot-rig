@@ -91,7 +91,7 @@ class ParrotActions:
 
     def click(self, button=0, hold=False):
         """Click or hold mouse button"""
-        position.mouse_pos_save()
+        # position.mouse_pos_save()
         current_mode = event_manager.get_mode()
 
         should_stop = hold != True and (
@@ -133,6 +133,14 @@ class ParrotActions:
         scrolling.scroll_stop_soft()
         self.stop_temporarily()
 
+    def mouse_pos_mark_or_teleport(self, noise: str):
+        """Teleport to saved location or mark current location based on noise"""
+        print("noise", noise)
+        position.mouse_pos_mark_or_teleport(noise)
+
+    def mouse_pos_tele_nearest(self):
+        position.mouse_pos_tele_nearest()
+
     # Utility actions
     def utility(self):
         """Execute utility action based on current setting"""
@@ -172,6 +180,9 @@ class ParrotActions:
         visual_interface.hide()
         # event_manager.set_parrot_enabled(False)
         self.stopper()
+        self.disable_modifiers()
+        if self._is_left_click_held:
+            self.click_release()
         actions.mode.disable("user.parrot_v7")
 
     def parrot_mode_toggle(self):

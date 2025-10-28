@@ -25,6 +25,9 @@ class Tracking():
         storage.set(self.FULL_TRACKING_ID, True)
 
     def teleport_and_track_head(self):
+        # print("is_tracking:", self.is_tracking)
+        # if self.is_tracking:
+        actions.tracking.control_mouse_jump_toggle(False)
         actions.tracking.control_head_toggle(False)
         actions.tracking.control_gaze_toggle(True)
         actions.sleep("50ms")
