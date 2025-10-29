@@ -168,3 +168,11 @@ class Actions:
     def parrot_mode_v7_toggle():
         """Toggle parrot mode v7"""
         parrot_actions.parrot_mode_toggle()
+
+    def parrot_mode_get_state():
+        """Get parrot mode v7 state"""
+        return parrot_actions.parrot_mode_get_state()
+
+    def parrot_mode_v7_tracking_activate_full():
+        """Activate full tracking mode"""
+        parrot_actions.tracking_activate_full()

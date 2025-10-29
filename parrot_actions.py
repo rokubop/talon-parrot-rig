@@ -185,6 +185,18 @@ class ParrotActions:
             self.click_release()
         actions.mode.disable("user.parrot_v7")
 
+    def parrot_mode_get_state(self):
+        """Return all parrot state"""
+        return {
+            "enabled": self._parrot_mode_enabled,
+            "tracking": tracking.is_tracking,
+            "moving": movement.is_moving(),
+            "scrolling": scrolling.is_scrolling(),
+            "mode": event_manager.get_mode(),
+            "modifiers": event_manager.get_modifiers(),
+            "click_held": self._is_left_click_held,
+        }
+
     def parrot_mode_toggle(self):
         """Toggle parrot mode"""
         if self._parrot_mode_enabled:
