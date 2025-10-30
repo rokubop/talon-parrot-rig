@@ -11,12 +11,29 @@ class VisualInterface:
     """Manages the visual interface and integrates with events"""
 
     def __init__(self):
+        self._event_callbacks = []  # Track our event subscriptions
         self._setup_event_listeners()
 
     def _setup_event_listeners(self):
         """Setup event listeners for mode and modifier changes"""
-        event_manager.subscribe("mode_changed", self._on_mode_changed)
-        event_manager.subscribe("modifiers_changed", self._on_modifiers_changed)
+        # Store callbacks so we can unsubscribe later
+        self._mode_callback = self._on_mode_changed
+        self._modifiers_callback = self._on_modifiers_changed
+
+        event_manager.subscribe("mode_changed", self._mode_callback)
+        event_manager.subscribe("modifiers_changed", self._modifiers_callback)
+
+        # Track subscriptions for cleanup
+        self._event_callbacks = [
+            ("mode_changed", self._mode_callback),
+            ("modifiers_changed", self._modifiers_callback)
+        ]
+
+    def cleanup(self):
+        """Cleanup event listeners to prevent memory leaks"""
+        for event_type, callback in self._event_callbacks:
+            event_manager.unsubscribe(event_type, callback)
+        self._event_callbacks.clear()
 
     def _on_mode_changed(self, data):
         """Handle mode change events"""
@@ -49,4 +66,12 @@ class VisualInterface:
         visual_ui.hide_border()
 
 # Create global instance
+# Clean up previous instance if it exists (for module reloads)
+try:
+    # Check if previous instance exists and has cleanup method
+    if 'visual_interface' in globals() and hasattr(globals()['visual_interface'], 'cleanup'):
+        globals()['visual_interface'].cleanup()
+except:
+    pass  # Ignore any errors during cleanup
+
 visual_interface = VisualInterface()

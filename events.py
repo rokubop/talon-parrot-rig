@@ -21,6 +21,18 @@ class ParrotEventManager:
             self._event_listeners[event_type] = []
         self._event_listeners[event_type].append(callback)
 
+    def unsubscribe(self, event_type: str, callback: Callable):
+        """Unsubscribe from an event"""
+        if event_type in self._event_listeners:
+            try:
+                self._event_listeners[event_type].remove(callback)
+                # Clean up empty event type lists
+                if not self._event_listeners[event_type]:
+                    del self._event_listeners[event_type]
+            except ValueError:
+                # Callback not found, ignore
+                pass
+
     def emit(self, event_type: str, data: Optional[dict] = None):
         """Emit an event to all listeners"""
         if event_type in self._event_listeners:
@@ -81,6 +93,13 @@ class ParrotEventManager:
     def get_setting(self, setting_name: str, default=None):
         """Get a runtime setting"""
         return self._settings.get(setting_name, default)
+
+    def debug_listeners(self):
+        """Debug: Print current event listeners count"""
+        print("Current event listeners:")
+        for event_type, callbacks in self._event_listeners.items():
+            print(f"  {event_type}: {len(callbacks)} listeners")
+        return self._event_listeners
 
 # Global event manager instance
 event_manager = ParrotEventManager()

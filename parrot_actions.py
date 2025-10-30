@@ -13,7 +13,6 @@ from .config import (
     FULL_MODE_SETTINGS, SETTINGS_OPTIONS
 )
 from .constants import *
-import time
 
 class ParrotActions:
     def __init__(self):
@@ -171,6 +170,7 @@ class ParrotActions:
         # event_manager.set_parrot_enabled(True)
         event_manager.set_mode("default")
         visual_interface.show()
+        print("Parrot mode enabled")
 
     def parrot_mode_disable(self):
         """Disable parrot mode"""
@@ -184,6 +184,7 @@ class ParrotActions:
         if self._is_left_click_held:
             self.click_release()
         actions.mode.disable("user.parrot_v7")
+        print("Parrot mode disabled")
 
     def parrot_mode_get_state(self):
         """Return all parrot state"""
@@ -211,6 +212,7 @@ class ParrotActions:
     # Modifier actions
     def toggle_modifier(self, modifier: str):
         """Toggle modifier key"""
+        print("toggling modifier:", modifier)
         is_active = keys.toggle_modifier(modifier)
         if is_active:
             event_manager.add_modifier(modifier)
