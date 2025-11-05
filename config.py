@@ -1,18 +1,13 @@
-# Configuration file for parrot_mode_v7
-# This file contains all configurable constants and settings
-
-# Mode colors - easy to configure
 MODE_COLORS = {
-    "default": "#43ABF5",    # Blue
-    "move": "#176918",       # Orange
-    "head": "#83E99B",       # Green
-    "full": "#BD10E0",       # Purple
-    "window": "#E35050",     # Teal
-    "keyboard": "#A7D3FF",   # Light Green
-    "number": "#F89C1C",     # Yellow
+    "default": "#43ABF5",
+    "move": "#176918",
+    "head": "#83E99B",
+    "full": "#BD10E0",
+    "window": "#E35050",
+    "keyboard": "#A7D3FF",
+    "number": "#F89C1C",
 }
 
-# Mode display codes
 MODE_CODES = {
     "default": "DEF",
     "move": "MOV",
@@ -23,33 +18,27 @@ MODE_CODES = {
     "number": "NUMB",
 }
 
-# Movement settings
 MOVEMENT_SETTINGS = {
-    "speed": 60,  # Base movement speed
-    "boost_small": 100,  # Small boost multiplier
-    "boost_large": 200,  # Large boost multiplier
+    "speed": 60,
+    "boost_small": 100,
+    "boost_large": 200,
 }
 
-# Scrolling settings
 SCROLLING_SETTINGS = {
-    "speed": 0.8,  # Base scroll speed
+    "speed": 0.8,
 }
 
-# Full mode settings
 FULL_MODE_SETTINGS = {
-    "stop_time": 1000,  # Time to stop temporarily in full mode (milliseconds)
+    "stop_time": 1000,
 }
 
-# Click behavior settings per mode
 CLICK_BEHAVIOR = {
-    "move": "stop",     # "stop" or "continue"
-    "head": "stop",     # "stop" or "continue"
+    "move": "stop",
+    "head": "stop",
 }
 
-# Utility (palate) action setting
-UTILITY_ACTION = "hold_click"  # Default utility action
+UTILITY_ACTION = "hold_click"
 
-# Available utility actions
 UTILITY_ACTIONS = {
     "click": "Click",
     "hold_click": "Hold Click",
@@ -61,7 +50,6 @@ UTILITY_ACTIONS = {
     "repeat_phrase": "Repeat Phrase",
 }
 
-# Settings UI options (5 discrete values each)
 SETTINGS_OPTIONS = {
     "speed": [30, 60, 90, 120, 150],
     "boost_small": [50, 100, 150, 200, 250],
@@ -69,7 +57,6 @@ SETTINGS_OPTIONS = {
     "stop_time": [500, 1000, 1500, 2000, 2500],
 }
 
-# Modifier colors (matching existing implementation)
 MODIFIER_COLORS = {
     "shift": "#0490c9",
     "ctrl": "#84E773",

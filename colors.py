@@ -1,30 +1,22 @@
-"""
-Color definitions for parrot mode v7
-Centralized color management for consistency across UI components
-"""
-
-# Mode colors - used for visual cursor and UI indicators
 MODE_COLORS = {
-    "default": "FF0000",     # Red
-    "move": "FFFF00",        # Yellow
-    "head": "83E99B",        # Light Green
-    "full": "BD10E0",        # Purple
-    "window": "E35050",      # Red-ish
-    "keyboard": "A7D3FF",    # Light Blue
-    "number": "F89C1C",      # Orange
+    "default": "#FF0000",
+    "move": "#FFFF00",
+    "head": "#83E99B",
+    "full": "#BD10E0",
+    "window": "#E35050",
+    "keyboard": "#A7D3FF",
+    "number": "#F89C1C",
 }
 
-# Modifier colors - used for visual cursor modifier indicators
+
 MODIFIER_COLORS = {
-    "shift": "0490c9",       # Blue
-    "ctrl": "84E773",        # Green
-    "alt": "FF6DD9",         # Pink
+    "shift": "#0490c9",
+    "ctrl": "#84E773",
+    "alt": "#FF6DD9",
 }
 
 def get_mode_color(mode: str) -> str:
-    """Get the color for a specific mode"""
-    return MODE_COLORS.get(mode, "FF0000")  # Default to red
+    return MODE_COLORS.get(mode, "#FF0000")
 
 def get_modifier_color(modifier: str) -> str:
-    """Get the color for a specific modifier"""
-    return MODIFIER_COLORS.get(modifier, "FFFFFF")  # Default to white
+    return MODIFIER_COLORS.get(modifier, "#FFFFFF")

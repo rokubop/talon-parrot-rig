@@ -3,26 +3,21 @@ from typing import Dict, Set, Optional, Callable
 from .config import UTILITY_ACTION
 
 class ParrotEventManager:
-    """Manages events for parrot mode v7"""
-
     def __init__(self):
         self._current_mode = "default"
         self._previous_mode = "default"
         self._active_modifiers: Set[str] = set()
         self._event_listeners: Dict[str, list] = {}
-        # Runtime settings that can be changed
         self._settings = {
-            "utility_action": UTILITY_ACTION  # Initialize with default
+            "utility_action": UTILITY_ACTION
         }
 
     def subscribe(self, event_type: str, callback: Callable):
-        """Subscribe to an event"""
         if event_type not in self._event_listeners:
             self._event_listeners[event_type] = []
         self._event_listeners[event_type].append(callback)
 
     def unsubscribe(self, event_type: str, callback: Callable):
-        """Unsubscribe from an event"""
         if event_type in self._event_listeners:
             try:
                 self._event_listeners[event_type].remove(callback)
@@ -34,7 +29,6 @@ class ParrotEventManager:
                 pass
 
     def emit(self, event_type: str, data: Optional[dict] = None):
-        """Emit an event to all listeners"""
         if event_type in self._event_listeners:
             for callback in self._event_listeners[event_type]:
                 try:
@@ -43,7 +37,6 @@ class ParrotEventManager:
                     print(f"Error in event callback: {e}")
 
     def set_mode(self, mode: str, update_ui: bool = True):
-        """Set the current mode and emit events"""
         if mode != self._current_mode:
             print("Setting mode to:", mode)
             self._previous_mode = self._current_mode
@@ -55,51 +48,40 @@ class ParrotEventManager:
             })
 
     def get_mode(self) -> str:
-        """Get the current mode"""
         return self._current_mode
 
     def get_previous_mode(self) -> str:
-        """Get the previous mode"""
         return self._previous_mode
 
     def return_to_previous_mode(self):
-        """Return to the previous mode"""
         self.set_mode(self._previous_mode)
 
     def add_modifier(self, modifier: str):
-        """Add an active modifier"""
         self._active_modifiers.add(modifier)
         self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
 
     def remove_modifier(self, modifier: str):
-        """Remove an active modifier"""
         self._active_modifiers.discard(modifier)
         self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
 
     def get_modifiers(self) -> Set[str]:
-        """Get active modifiers"""
         return self._active_modifiers.copy()
 
     def clear_modifiers(self):
-        """Clear all active modifiers"""
         self._active_modifiers.clear()
         self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
 
     def set_setting(self, setting_name: str, value):
-        """Set a runtime setting"""
         self._settings[setting_name] = value
         self.emit("setting_changed", {"setting": setting_name, "value": value})
 
     def get_setting(self, setting_name: str, default=None):
-        """Get a runtime setting"""
         return self._settings.get(setting_name, default)
 
     def debug_listeners(self):
-        """Debug: Print current event listeners count"""
         print("Current event listeners:")
         for event_type, callbacks in self._event_listeners.items():
             print(f"  {event_type}: {len(callbacks)} listeners")
         return self._event_listeners
 
-# Global event manager instance
 event_manager = ParrotEventManager()

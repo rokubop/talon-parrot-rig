@@ -20,19 +20,14 @@ parrot_config_common = {
     "oh": ("move right", lambda: parrot_actions.move_and_activate("right")),
     "t": ("move up", lambda: parrot_actions.move_and_activate("up")),
     "guh": ("move down", lambda: parrot_actions.move_and_activate("down")),
-    "eh": ("head mode", parrot_actions.tracking_activate_head),
-    "er": ("full mode", parrot_actions.tracking_activate_full),
-    # "er": ("tele nearest loc", parrot_actions.mouse_pos_tele_nearest),
-    # "er $noise": ("tele loc or mark", lambda noise: parrot_actions.mouse_pos_mark_or_teleport(noise)),
+    "eh": ("track head", parrot_actions.tracking_activate_head),
+    "er": ("track full", parrot_actions.tracking_activate_full),
     "tut mm": ("left click drag", lambda: parrot_actions.click(hold=True)),
     "tut oh": ("right click", lambda: parrot_actions.click(button=1)),
     "tut t": ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
     "tut guh": ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
     "tut ah": ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
-    # "tut cluck": ("window mode", parrot_actions.set_window_mode),
-    # "tut pop": ("keyboard mode", parrot_actions.set_keyboard_mode),
-    # "tut er": ("number mode", parrot_actions.set_number_mode),
-    # "tut palate": ("utility selector", parrot_actions.show_utility_selector),
+    "tut palate": ("utility selector", parrot_actions.show_utility_selector),
     "tut ee": ("noise reference", parrot_actions.disable_modifiers),
     "tut tut": ("noise reference", parrot_actions.disable_modifiers),
     "tut hiss": ("settings", parrot_actions.show_settings),
@@ -50,7 +45,6 @@ parrot_config_default = {
     "shush_stop": ("", parrot_actions.scroll_stop_soft),
 }
 
-# Move mode config
 parrot_config_move = {
     **parrot_config_common,
     "mm": ("click", parrot_actions.click_with_mode_behavior),
@@ -60,7 +54,6 @@ parrot_config_move = {
     "hiss_stop":    ("", lambda: None),
 }
 
-# Head mode config
 parrot_config_head = {
     **parrot_config_common,
     "mm": ("click", parrot_actions.click_with_mode_behavior),
@@ -70,7 +63,6 @@ parrot_config_head = {
     "shush_stop": ("", parrot_actions.scroll_stop_soft),
 }
 
-# Full mode config
 parrot_config_full = {
     **parrot_config_common,
     "mm": ("click temp stop", parrot_actions.click_with_mode_behavior),
@@ -80,7 +72,6 @@ parrot_config_full = {
     "shush_stop": ("", parrot_actions.scroll_stop_soft_temp),
 }
 
-# Window mode config
 parrot_config_window = {
     "ah": ("snap left", lambda: actions.user.snap_window_to_position("left")),
     "oh": ("snap right", lambda: actions.user.snap_window_to_position("right")),
@@ -94,7 +85,6 @@ parrot_config_window = {
     "tut": ("window swap", parrot_actions.window_swap),
     "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
 
-    # Application switches
     "tut ee": ("app switch 1", lambda: parrot_actions.app_switch(1)),
     "tut er": ("app switch 2", lambda: parrot_actions.app_switch(2)),
     "tut ah": ("app switch 3", lambda: parrot_actions.app_switch(3)),
@@ -107,7 +97,6 @@ parrot_config_window = {
     "tut oh": ("app switch 0", lambda: parrot_actions.app_switch(0)),
 }
 
-# Keyboard mode config
 parrot_config_keyboard = {
     "ah": ("left arrow", lambda: actions.key("left")),
     "oh": ("right arrow", lambda: actions.key("right")),
@@ -121,7 +110,6 @@ parrot_config_keyboard = {
     "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
 }
 
-# Number mode config
 parrot_config_number = {
     "oh": ("0", lambda: actions.key("0")),
     "ee": ("1", lambda: actions.key("1")),
@@ -139,7 +127,6 @@ parrot_config_number = {
     "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
 }
 
-# Complete parrot configuration
 parrot_config = {
     "default": parrot_config_default,
     "move": parrot_config_move,

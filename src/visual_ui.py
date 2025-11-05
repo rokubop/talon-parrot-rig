@@ -14,8 +14,6 @@ def cursor_ui():
     show_border = state.get("show_border")
     modifiers = state.get("modifiers")
 
-    print("I see cursor color:", cursor_color)
-
     modifier_elements = []
     if modifiers:
         offset_x = 31
@@ -55,7 +53,6 @@ class VisualUI:
         self._mode = "default"
 
     def _get_state(self):
-        """Get current state as object for ui_elements"""
         return {
             "cursor_color": self._color,
             "border_color": self._border_color,
@@ -65,6 +62,7 @@ class VisualUI:
         }
 
     def show(self):
+        print(f"VisualUI.show() called with state: {self._get_state()}")
         actions.user.ui_elements_show(
             cursor_ui,
             initial_state=self._get_state(),
@@ -73,6 +71,11 @@ class VisualUI:
 
     def hide(self):
         actions.user.ui_elements_hide(cursor_ui)
+        self._color = default_cursor_color
+        self._border_color = default_border_color
+        self._border_show = False
+        self._modifiers = set()
+        self._mode = "default"
 
     def color(self, color):
         self._color = color
@@ -113,5 +116,17 @@ class VisualUI:
 
     def get_modifier_color(self, modifier: str) -> str:
         return get_modifier_color(modifier)
+
+    def cleanup(self):
+        try:
+            self.hide()
+        except:
+            pass
+
+try:
+    if 'visual_ui' in globals() and hasattr(globals()['visual_ui'], 'cleanup'):
+        globals()['visual_ui'].cleanup()
+except:
+    pass
 
 visual_ui = VisualUI()

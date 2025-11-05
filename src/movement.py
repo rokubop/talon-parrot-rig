@@ -8,19 +8,16 @@ class Movement():
         self.boost_large_amount = MOVEMENT_SETTINGS["boost_large"]
 
     def update_speed(self, speed_index: int):
-        """Update movement speed from settings options"""
         if 0 <= speed_index < len(SETTINGS_OPTIONS["speed"]):
             self.speed = SETTINGS_OPTIONS["speed"][speed_index]
             MOVEMENT_SETTINGS["speed"] = self.speed
 
     def update_boost_small(self, boost_index: int):
-        """Update small boost from settings options"""
         if 0 <= boost_index < len(SETTINGS_OPTIONS["boost_small"]):
             self.boost_small_amount = SETTINGS_OPTIONS["boost_small"][boost_index]
             MOVEMENT_SETTINGS["boost_small"] = self.boost_small_amount
 
     def update_boost_large(self, boost_index: int):
-        """Update large boost from settings options"""
         if 0 <= boost_index < len(SETTINGS_OPTIONS["boost_large"]):
             self.boost_large_amount = SETTINGS_OPTIONS["boost_large"][boost_index]
             MOVEMENT_SETTINGS["boost_large"] = self.boost_large_amount
