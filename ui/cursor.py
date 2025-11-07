@@ -1,5 +1,5 @@
 from talon import actions
-from ..colors import MODE_COLORS, MODIFIER_COLORS, get_mode_color, get_modifier_color
+from .colors import MODIFIER_COLORS, get_mode_color, get_modifier_color
 
 default_cursor_color = "FF0000"
 default_border_color = "FFFFFF"
@@ -44,7 +44,7 @@ def cursor_ui():
         ]
     ]
 
-class VisualUI:
+class CursorUI:
     def __init__(self):
         self._color = default_cursor_color
         self._border_color = default_border_color
@@ -62,7 +62,6 @@ class VisualUI:
         }
 
     def show(self):
-        print(f"VisualUI.show() called with state: {self._get_state()}")
         actions.user.ui_elements_show(
             cursor_ui,
             initial_state=self._get_state(),
@@ -79,7 +78,6 @@ class VisualUI:
 
     def color(self, color):
         self._color = color
-        print("Setting cursor color to:", color)
         actions.user.ui_elements_set_state("cursor_color", color)
 
     def show_border(self):
@@ -91,8 +89,6 @@ class VisualUI:
         actions.user.ui_elements_set_state("show_border", False)
 
     def add_modifier(self, modifier):
-        print("Current modifiers:", self._modifiers)
-        print("Adding modifier:", modifier)
         self._modifiers.add(modifier)
         actions.user.ui_elements_set_state("modifiers", self._modifiers.copy())
 
@@ -124,9 +120,9 @@ class VisualUI:
             pass
 
 try:
-    if 'visual_ui' in globals() and hasattr(globals()['visual_ui'], 'cleanup'):
-        globals()['visual_ui'].cleanup()
+    if 'cursor_ui_instance' in globals() and hasattr(globals()['cursor_ui_instance'], 'cleanup'):
+        globals()['cursor_ui_instance'].cleanup()
 except:
     pass
 
-visual_ui = VisualUI()
+cursor_ui_instance = CursorUI()

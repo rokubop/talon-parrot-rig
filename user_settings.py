@@ -1,23 +1,3 @@
-MODE_COLORS = {
-    "default": "#43ABF5",
-    "move": "#176918",
-    "head": "#83E99B",
-    "full": "#BD10E0",
-    "window": "#E35050",
-    "keyboard": "#A7D3FF",
-    "number": "#F89C1C",
-}
-
-MODE_CODES = {
-    "default": "DEF",
-    "move": "MOV",
-    "head": "HEAD",
-    "full": "FULL",
-    "window": "WIN",
-    "keyboard": "KEYB",
-    "number": "NUMB",
-}
-
 MOVEMENT_SETTINGS = {
     "speed": 60,
     "boost_small": 100,
@@ -55,10 +35,4 @@ SETTINGS_OPTIONS = {
     "boost_small": [50, 100, 150, 200, 250],
     "boost_large": [100, 200, 300, 400, 500],
     "stop_time": [500, 1000, 1500, 2000, 2500],
-}
-
-MODIFIER_COLORS = {
-    "shift": "#0490c9",
-    "ctrl": "#84E773",
-    "alt": "#FF6DD9",
 }

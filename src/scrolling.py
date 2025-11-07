@@ -1,6 +1,6 @@
 from talon import cron, settings, actions
 import time
-from ..config import SCROLLING_SETTINGS
+from ..user_settings import SCROLLING_SETTINGS
 
 class Scrolling():
     def __init__(self):
@@ -31,6 +31,8 @@ class Scrolling():
 
     def _scroll_tick(self):
         ts = time.perf_counter()
+        if self.scroll_start_ts is None:
+            return
         if ts - self.scroll_start_ts < self.debounce_start_duration:
             return
 

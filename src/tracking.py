@@ -36,10 +36,12 @@ class Tracking():
         self.is_tracking = True
 
     def freeze(self):
+        was_tracking = self.is_tracking
         if self.is_tracking:
             actions.tracking.control_head_toggle(False)
             actions.tracking.control_gaze_toggle(False)
             self.is_tracking = False
+        return was_tracking
 
     def toggle_full_tracking(self):
         if self.full_tracking:

@@ -1,5 +1,5 @@
 from talon import actions
-from ..events import event_manager
+from .events import event_manager
 
 class Keys:
     def __init__(self):

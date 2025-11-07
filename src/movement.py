@@ -1,5 +1,5 @@
 from talon import actions, ctrl
-from ..config import MOVEMENT_SETTINGS, SETTINGS_OPTIONS
+from ..user_settings import MOVEMENT_SETTINGS, SETTINGS_OPTIONS
 
 class Movement():
     def __init__(self):
@@ -47,6 +47,7 @@ class Movement():
     def boost_large(self):
         amount = self.boost_large_amount
         info = actions.user.mouse_move_info()
+        print("info:", vars(info))
         unit_vector = info["last_unit_vector"]
 
         def continue_slowly():

@@ -1,8 +1,6 @@
 from talon import Module, Context, actions, app
-from .parrot_actions import parrot_actions
-from .constants import *
-from .visual_interface import visual_interface  # Import visual interface instead of UI module
-from .events import event_manager
+from .src.parrot_actions import parrot_actions
+from .src.constants import *
 
 mod = Module()
 mod.mode("parrot_v7", "parrot mode v7")
@@ -13,62 +11,67 @@ mode: user.parrot_v7
 """
 
 parrot_config_common = {
-    "ee": ("stop", parrot_actions.stopper),
-    "pop": ("click exit", parrot_actions.click_exit),
-    "cluck": ("exit", parrot_actions.parrot_mode_disable),
-    "ah": ("move left", lambda: parrot_actions.move_and_activate("left")),
-    "oh": ("move right", lambda: parrot_actions.move_and_activate("right")),
-    "t": ("move up", lambda: parrot_actions.move_and_activate("up")),
-    "guh": ("move down", lambda: parrot_actions.move_and_activate("down")),
-    "eh": ("track head", parrot_actions.tracking_activate_head),
-    "er": ("track full", parrot_actions.tracking_activate_full),
-    "tut mm": ("left click drag", lambda: parrot_actions.click(hold=True)),
-    "tut oh": ("right click", lambda: parrot_actions.click(button=1)),
-    "tut t": ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
-    "tut guh": ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
-    "tut ah": ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
+    "ee":     ("stop", parrot_actions.stopper),
+    "pop":    ("click exit", parrot_actions.click_exit),
+    "cluck":  ("exit", parrot_actions.parrot_mode_disable),
+    "ah":     ("move left", lambda: parrot_actions.mouse_move_dir("left")),
+    "oh":     ("move right", lambda: parrot_actions.mouse_move_dir("right")),
+    "t":      ("move up", lambda: parrot_actions.mouse_move_dir("up")),
+    "guh":    ("move down", lambda: parrot_actions.mouse_move_dir("down")),
+    "eh":     ("track head", parrot_actions.tracking_activate_head),
+    "er":     ("track full", parrot_actions.tracking_activate_full),
+    "palate": ("hold or utility", parrot_actions.utility),
+    "tut mm":     ("left click drag", lambda: parrot_actions.mouse_click(hold=True)),
+    "tut oh":     ("right click", lambda: parrot_actions.mouse_click(button=1)),
+    "tut t":      ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
+    "tut guh":    ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
+    "tut ah":     ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
     "tut palate": ("utility selector", parrot_actions.show_utility_selector),
-    "tut ee": ("noise reference", parrot_actions.disable_modifiers),
-    "tut tut": ("noise reference", parrot_actions.disable_modifiers),
-    "tut hiss": ("settings", parrot_actions.show_settings),
-    "tut shush": ("settings", parrot_actions.show_settings),
-    "palate": ("utility", parrot_actions.utility),
+    "tut eh":     ("go last pos", parrot_actions.mouse_stopped_pos_cycle),
+    "tut pop":    ("go last pos click exit", parrot_actions.mouse_stopped_pos_cycle_click_exit),
+    "tut ee":     ("disable modifiers", parrot_actions.disable_modifiers),
+    "tut tut":    ("show cheatsheet", parrot_actions.show_cheatsheet),
+    "tut hiss":   ("settings", parrot_actions.show_settings),
+    "tut shush":  ("settings", parrot_actions.show_settings),
 }
 
-# Default mode config
 parrot_config_default = {
     **parrot_config_common,
-    "mm": ("click", parrot_actions.click),
-    "hiss": ("scroll down", lambda: parrot_actions.scroll("down")),
-    "hiss_stop": ("", parrot_actions.scroll_stop_soft),
-    "shush": ("scroll up", lambda: parrot_actions.scroll("up")),
+    "mm":         ("click", parrot_actions.mouse_click),
+    "hiss":       ("scroll down", lambda: parrot_actions.scroll("down")),
+    "hiss_stop":  ("", parrot_actions.scroll_stop_soft),
+    "shush":      ("scroll up", lambda: parrot_actions.scroll("up")),
     "shush_stop": ("", parrot_actions.scroll_stop_soft),
 }
 
 parrot_config_move = {
     **parrot_config_common,
-    "mm": ("click", parrot_actions.click_with_mode_behavior),
-    "shush":        ("boost large", parrot_actions.boost_large),
-    "shush_stop":   ("", lambda: None),
-    "hiss":         ("boost small", parrot_actions.boost_small),
-    "hiss_stop":    ("", lambda: None),
+    "ah":         ("move left", lambda: parrot_actions.mouse_move_or_slow_dir("left")),
+    "oh":         ("move right", lambda: parrot_actions.mouse_move_or_slow_dir("right")),
+    "t":          ("move up", lambda: parrot_actions.mouse_move_or_slow_dir("up")),
+    "guh":        ("move down", lambda: parrot_actions.mouse_move_or_slow_dir("down")),
+    "mm":         ("click", parrot_actions.click_with_mode_behavior),
+    "shush":      ("boost large", parrot_actions.boost_large),
+    "shush_stop": ("", lambda: None),
+    "hiss":       ("boost small", parrot_actions.boost_small),
+    "hiss_stop":  ("", lambda: None),
 }
 
 parrot_config_head = {
     **parrot_config_common,
-    "mm": ("click", parrot_actions.click_with_mode_behavior),
-    "hiss": ("scroll down", lambda: parrot_actions.scroll_with_mode_reset("down")),
-    "hiss_stop": ("", parrot_actions.scroll_stop_soft),
-    "shush": ("scroll up", lambda: parrot_actions.scroll_with_mode_reset("up")),
+    "mm":         ("click", parrot_actions.click_with_mode_behavior),
+    "hiss":       ("scroll down", lambda: parrot_actions.scroll_with_mode_reset("down")),
+    "hiss_stop":  ("", parrot_actions.scroll_stop_soft),
+    "shush":      ("scroll up", lambda: parrot_actions.scroll_with_mode_reset("up")),
     "shush_stop": ("", parrot_actions.scroll_stop_soft),
 }
 
 parrot_config_full = {
     **parrot_config_common,
-    "mm": ("click temp stop", parrot_actions.click_with_mode_behavior),
-    "hiss": ("scroll down", lambda: parrot_actions.scroll("down")),
-    "hiss_stop": ("", parrot_actions.scroll_stop_soft_temp),
-    "shush": ("scroll up", lambda: parrot_actions.scroll("up")),
+    "mm":         ("click temp stop", parrot_actions.click_with_mode_behavior),
+    "hiss":       ("scroll down", lambda: parrot_actions.scroll("down")),
+    "hiss_stop":  ("", parrot_actions.scroll_stop_soft_temp),
+    "shush":      ("scroll up", lambda: parrot_actions.scroll("up")),
     "shush_stop": ("", parrot_actions.scroll_stop_soft_temp),
 }
 

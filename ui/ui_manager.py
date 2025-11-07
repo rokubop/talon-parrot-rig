@@ -1,13 +1,8 @@
-"""
-Visual interface for parrot mode v7
-Integrates the visual cursor UI with the event system
-"""
-
-from .src.visual_ui import visual_ui
+from .cursor import cursor_ui_instance
 from .colors import get_mode_color
-from .events import event_manager
+from ..src.events import event_manager
 
-class VisualInterface:
+class UIManager:
     """Manages the visual interface and integrates with events"""
 
     def __init__(self):
@@ -30,48 +25,40 @@ class VisualInterface:
         ]
 
     def cleanup(self):
-        """Cleanup event listeners to prevent memory leaks"""
         for event_type, callback in self._event_callbacks:
             event_manager.unsubscribe(event_type, callback)
         self._event_callbacks.clear()
 
     def _on_mode_changed(self, data):
-        """Handle mode change events"""
         mode = data.get("current_mode", "default")
         color = get_mode_color(mode)
-        visual_ui.set_mode(mode)
-        visual_ui.color(color)
+        cursor_ui_instance.set_mode(mode)
+        cursor_ui_instance.color(color)
 
     def _on_modifiers_changed(self, data):
-        """Handle modifier change events"""
         modifiers = data.get("modifiers", set())
-        visual_ui.clear_modifiers()
+        cursor_ui_instance.clear_modifiers()
         for modifier in modifiers:
-            visual_ui.add_modifier(modifier)
+            cursor_ui_instance.add_modifier(modifier)
 
     def show(self):
-        """Show the visual UI"""
-        visual_ui.show()
+        cursor_ui_instance.show()
 
     def hide(self):
-        """Hide the visual UI"""
-        visual_ui.hide()
+        cursor_ui_instance.hide()
 
     def show_border(self):
-        """Show border around cursor"""
-        visual_ui.show_border()
+        cursor_ui_instance.show_border()
 
     def hide_border(self):
-        """Hide border around cursor"""
-        visual_ui.hide_border()
+        cursor_ui_instance.hide_border()
 
 # Create global instance
 # Clean up previous instance if it exists (for module reloads)
 try:
-    # Check if previous instance exists and has cleanup method
-    if 'visual_interface' in globals() and hasattr(globals()['visual_interface'], 'cleanup'):
-        globals()['visual_interface'].cleanup()
+    if 'ui_manager' in globals() and hasattr(globals()['ui_manager'], 'cleanup'):
+        globals()['ui_manager'].cleanup()
 except:
-    pass  # Ignore any errors during cleanup
+    pass
 
-visual_interface = VisualInterface()
+ui_manager = UIManager()

@@ -1,6 +1,6 @@
 from talon import actions
 from typing import Dict, Set, Optional, Callable
-from .config import UTILITY_ACTION
+from ..user_settings import UTILITY_ACTION
 
 class ParrotEventManager:
     def __init__(self):

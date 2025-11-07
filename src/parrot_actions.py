@@ -1,15 +1,16 @@
 from talon import actions, ctrl, cron
-from .src.scrolling import scrolling
-from .src.tracking import tracking
-from .src.movement import movement
-from .visual_interface import visual_interface
-from .src.position import position
-from .src.keys import keys
-from .src.phrase import phrase
+from .scrolling import scrolling
+from .tracking import tracking
+from .movement import movement
+from ..ui.ui_manager import ui_manager
+from .position import position
+from .keys import keys
+from .phrase import phrase
 from .events import event_manager
-from .noise_reference import noise_reference
-from .config import (
-    CLICK_BEHAVIOR, UTILITY_ACTIONS,
+from ..ui.cheatsheet import show_cheatsheet
+from ..ui.utility_selector import show_utility_selector
+from ..user_settings import (
+    CLICK_BEHAVIOR,
     FULL_MODE_SETTINGS, SETTINGS_OPTIONS
 )
 from .constants import *
@@ -21,7 +22,7 @@ class ParrotActions:
         self._parrot_mode_enabled = False
         self._stop_time_job = None
 
-    def move_or_slow(self, direction: str):
+    def mouse_move_or_slow_dir(self, direction: str):
         if movement.is_moving() and actions.user.mouse_move_info().last_cardinal_dir == direction:
             movement.slower()
         else:
@@ -30,10 +31,12 @@ class ParrotActions:
     def move(self, direction: str):
         tracking.freeze()
         scrolling.scroll_stop_hard()
+        if not movement.is_moving():
+            position.mouse_stopped_pos_save()
         movement.move(direction)
         event_manager.set_mode("move")
 
-    def move_and_activate(self, direction: str):
+    def mouse_move_dir(self, direction: str):
         self.move(direction)
 
     def boost_large(self):
@@ -44,11 +47,15 @@ class ParrotActions:
 
     def tracking_activate_head(self):
         movement.stop()
+        if not tracking.is_tracking:
+            position.mouse_stopped_pos_save()
         tracking.activate(full_tracking=False)
         event_manager.set_mode("head")
 
     def tracking_activate_full(self):
         movement.stop()
+        if not tracking.is_tracking:
+            position.mouse_stopped_pos_save()
         tracking.activate(full_tracking=True)
         event_manager.set_mode("full")
 
@@ -56,12 +63,11 @@ class ParrotActions:
         tracking.toggle_full_tracking()
 
     def click_exit(self):
-
-        self.click()
+        self.mouse_click()
         self.parrot_mode_disable()
 
     def click_await_one_phrase(self):
-        self.click()
+        self.mouse_click()
         self.await_one_phrase()
 
     def await_one_phrase(self):
@@ -70,11 +76,11 @@ class ParrotActions:
 
     def click_release(self, button=0):
         ctrl.mouse_click(button=button, up=True)
-        visual_interface.hide_border()
+        ui_manager.hide_border()
         self._is_left_click_held = False
 
-    def click(self, button=0, hold=False):
-        # position.mouse_pos_save()
+    def mouse_click(self, button=0, hold=False):
+        position.mouse_pos_save()
         current_mode = event_manager.get_mode()
 
         should_stop = hold != True and (
@@ -86,11 +92,11 @@ class ParrotActions:
             self.click_release(button)
         elif hold:
             ctrl.mouse_click(button=button, down=True)
-            visual_interface.show_border()
+            ui_manager.show_border()
             self._is_left_click_held = True
         else:
             ctrl.mouse_click(button=button, hold=16000)
-            visual_interface.hide_border()
+            ui_manager.hide_border()
 
         if should_stop:
             if current_mode == "full":
@@ -99,7 +105,7 @@ class ParrotActions:
                 self.stopper()
 
     def click_with_mode_behavior(self):
-        self.click()
+        self.mouse_click()
 
     def scroll(self, direction: str):
         scrolling.scroll_start(direction)
@@ -118,21 +124,34 @@ class ParrotActions:
     def mouse_pos_tele_nearest(self):
         position.mouse_pos_tele_nearest()
 
+    def mouse_pos_go_last(self):
+        position.mouse_pos_swap_last()
+
+    def mouse_stopped_pos_go_last(self):
+        position.mouse_stopped_pos_go_last()
+
+    def mouse_stopped_pos_cycle(self):
+        position.mouse_stopped_pos_cycle()
+
+    def mouse_stopped_pos_cycle_click_exit(self):
+        position.mouse_stopped_pos_cycle()
+        self.click_exit()
+
     def utility(self):
         action = event_manager.get_setting("utility_action", "hold_click")
 
         if action == "click":
-            self.click()
+            self.mouse_click()
         elif action == "hold_click":
-            self.click(hold=True)
+            self.mouse_click(hold=True)
         elif action == "right_click":
-            self.click(button=1)
+            self.mouse_click(button=1)
         elif action == "hold_right_click":
-            self.click(button=1, hold=True)
+            self.mouse_click(button=1, hold=True)
         elif action == "middle_click":
-            self.click(button=2)
+            self.mouse_click(button=2)
         elif action == "middle_hold":
-            self.click(button=2, hold=True)
+            self.mouse_click(button=2, hold=True)
         elif action == "repeat_last":
             actions.core.repeat_command()
         elif action == "repeat_phrase":
@@ -143,14 +162,15 @@ class ParrotActions:
         actions.mode.enable("user.parrot_v7")
         # event_manager.set_parrot_enabled(True)
         event_manager.set_mode("default")
-        visual_interface.show()
+        ui_manager.show()
+        position.mouse_stopped_pos_save()
         print("Parrot mode enabled")
 
     def parrot_mode_disable(self):
         self._parrot_mode_enabled = False
-        if actions.user.ui_elements_is_active("noise_reference"):
-            actions.user.ui_elements_hide("noise_reference")
-        visual_interface.hide()
+        if actions.user.ui_elements_is_active("cheatsheet"):
+            actions.user.ui_elements_hide("cheatsheet")
+        ui_manager.hide()
         # event_manager.set_parrot_enabled(False)
         self.stopper()
         self.disable_modifiers()
@@ -188,9 +208,20 @@ class ParrotActions:
 
     def stopper(self):
         self.stop_revive_tracking()
+        was_moving = movement.is_moving()
+        was_tracking = tracking.is_tracking
+        print(f"stopper called: was_moving={was_moving}, was_tracking={was_tracking}")
         movement.stop()
         scrolling.scroll_stop_hard()
         tracking.freeze()
+
+        # Save position if we were actually moving or tracking
+        if was_moving or was_tracking:
+            print("  -> Calling mouse_stopped_pos_save")
+            position.mouse_stopped_pos_save()
+        else:
+            print("  -> Not saving position (wasn't active)")
+
         event_manager.set_mode("default")
 
     def stop_temporarily(self):
@@ -254,48 +285,11 @@ class ParrotActions:
     def set_number_mode(self):
         event_manager.set_mode("number")
 
-    def create_action_button(self, action_key: str, action_name: str):
-        state, button, text = actions.user.ui_elements(["state", "button", "text"])
-        current_action, set_current_action = state.use("utility_action", "hold_click")
-        is_selected = current_action == action_key
-        bg_color = "#3E84DA" if is_selected else "#4A4A4A"
-
-        return button(
-            padding=8,
-            border_width=1,
-            border_radius=4,
-            # border_color="#666666",
-            background_color=bg_color,
-            on_click=lambda: [
-                event_manager.set_setting("utility_action", action_key),
-                set_current_action(action_key)
-            ]
-        )[
-            text(action_name, color="#FFFFFF", font_weight="bold" if is_selected else "normal")
-        ]
-
-    def utility_selector(self):
-        screen, window, div, text = actions.user.ui_elements(["screen", "window", "div", "text"])
-
-        return screen(justify_content="center", align_items="center")[
-            window(
-                id="utility_selector",
-                title="Utility Selector",
-                padding=16,
-            )[
-                div(flex_direction="column", gap=10)[
-                    div(flex_direction="column", gap=5)[
-                        *[self.create_action_button(key, name) for key, name in UTILITY_ACTIONS.items()]
-                    ]
-                ]
-            ]
-        ]
-
     def show_utility_selector(self):
-        actions.user.ui_elements_toggle(self.utility_selector)
+        show_utility_selector()
 
-    def show_noise_reference(self):
-        actions.user.ui_elements_toggle(noise_reference)
+    def show_cheatsheet(self):
+        show_cheatsheet()
 
     def show_settings(self):
         print("Settings UI - not implemented yet")

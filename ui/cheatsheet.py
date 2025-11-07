@@ -1,10 +1,9 @@
 """
-Noise reference table for parrot mode v7
+Cheatsheet UI for parrot mode v7
 Shows the noise-to-action mapping in a table format
 """
 
 from talon import actions
-from .events import event_manager
 from .colors import get_mode_color
 
 def only_current_mode_table():
@@ -37,8 +36,8 @@ def only_current_mode_table():
         ] for noise in mode_config.keys()]
     ]
 
-def noise_reference():
-    """Create noise reference UI"""
+def cheatsheet_ui():
+    """Create cheatsheet UI"""
     screen, window, div, text = actions.user.ui_elements(["screen", "window", "div", "text"])
     table, tr, td, th = actions.user.ui_elements(["table", "tr", "td", "th"])
     state, button, svg, circle = actions.user.ui_elements(["state", "button", "svg", "circle"])
@@ -64,7 +63,7 @@ def noise_reference():
                 padding_left=6,
             )[
                 svg()[
-                    circle(cx=12, cy=12, r=7, fill=f"#{mode_color}")
+                    circle(cx=12, cy=12, r=7, fill=f"{mode_color}")
                 ],
                 text(mode_name.upper(), color="#FFFFFF", font_weight="bold", font_size=12)
             ]
@@ -97,8 +96,8 @@ def noise_reference():
 
     return screen(justify_content="center", align_items="center")[
         window(
-            id="noise_reference",
-            title="Noise Reference",
+            id="cheatsheet",
+            title="Cheatsheet",
             minimized_body=only_current_mode_table,
         )[
             table(width="100%")[
@@ -107,3 +106,6 @@ def noise_reference():
             ]
         ]
     ]
+
+def show_cheatsheet():
+    actions.user.ui_elements_toggle(cheatsheet_ui)
