@@ -1,6 +1,8 @@
 from talon import actions
 from .colors import MODIFIER_COLORS, get_mode_color, get_modifier_color
 
+CURSOR_UI_ENABLED = True
+
 default_cursor_color = "FF0000"
 default_border_color = "FFFFFF"
 
@@ -62,6 +64,8 @@ class CursorUI:
         }
 
     def show(self):
+        if not CURSOR_UI_ENABLED:
+            return
         actions.user.ui_elements_show(
             cursor_ui,
             initial_state=self._get_state(),
@@ -69,6 +73,8 @@ class CursorUI:
         )
 
     def hide(self):
+        if not CURSOR_UI_ENABLED:
+            return
         actions.user.ui_elements_hide(cursor_ui)
         self._color = default_cursor_color
         self._border_color = default_border_color
@@ -77,30 +83,44 @@ class CursorUI:
         self._mode = "default"
 
     def color(self, color):
+        if not CURSOR_UI_ENABLED:
+            return
         self._color = color
         actions.user.ui_elements_set_state("cursor_color", color)
 
     def show_border(self):
+        if not CURSOR_UI_ENABLED:
+            return
         self._border_show = True
         actions.user.ui_elements_set_state("show_border", True)
 
     def hide_border(self):
+        if not CURSOR_UI_ENABLED:
+            return
         self._border_show = False
         actions.user.ui_elements_set_state("show_border", False)
 
     def add_modifier(self, modifier):
+        if not CURSOR_UI_ENABLED:
+            return
         self._modifiers.add(modifier)
         actions.user.ui_elements_set_state("modifiers", self._modifiers.copy())
 
     def remove_modifier(self, modifier):
+        if not CURSOR_UI_ENABLED:
+            return
         self._modifiers.discard(modifier)
         actions.user.ui_elements_set_state("modifiers", self._modifiers.copy())
 
     def clear_modifiers(self):
+        if not CURSOR_UI_ENABLED:
+            return
         self._modifiers.clear()
         actions.user.ui_elements_set_state("modifiers", set())
 
     def set_mode(self, mode: str):
+        if not CURSOR_UI_ENABLED:
+            return
         self._mode = mode
         actions.user.ui_elements_set_state("mode", mode)
 
@@ -116,13 +136,17 @@ class CursorUI:
     def cleanup(self):
         try:
             self.hide()
-        except:
-            pass
+        except Exception as e:
+            print(f"Error during cursor UI cleanup: {e}")
+            import traceback
+            traceback.print_exc()
 
 try:
     if 'cursor_ui_instance' in globals() and hasattr(globals()['cursor_ui_instance'], 'cleanup'):
         globals()['cursor_ui_instance'].cleanup()
-except:
-    pass
+except Exception as e:
+    print(f"Error cleaning up previous cursor_ui_instance: {e}")
+    import traceback
+    traceback.print_exc()
 
 cursor_ui_instance = CursorUI()

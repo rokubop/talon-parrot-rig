@@ -51,17 +51,14 @@ class Position:
 
     def mouse_stopped_pos_save(self):
         current_pos = (actions.mouse_x(), actions.mouse_y())
-        print(f"mouse_stopped_pos_save called at {current_pos}")
         # Don't save if it's the same as the last stopped position
         if self.mouse_stopped_pos_history and self.mouse_stopped_pos_history[-1] == current_pos:
-            print("  -> Position same as last, not saving")
             return
         if len(self.mouse_stopped_pos_history) >= self.mouse_stopped_pos_history_size:
             self.mouse_stopped_pos_history.pop(0)
         self.mouse_stopped_pos_history.append(current_pos)
         # Reset pointer to the end when a new position is saved
         self.mouse_stopped_pos_history_pointer = len(self.mouse_stopped_pos_history) - 1
-        print(f"  -> Saved. History now has {len(self.mouse_stopped_pos_history)} positions")
 
     def mouse_stopped_pos_go_last(self):
         if len(self.mouse_stopped_pos_history) == 0:

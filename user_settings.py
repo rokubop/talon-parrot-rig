@@ -1,7 +1,7 @@
 MOVEMENT_SETTINGS = {
-    "speed": 60,
-    "boost_small": 100,
-    "boost_large": 200,
+    "speed": 3,
+    "boost_small": 10,
+    "boost_large": 10,
 }
 
 SCROLLING_SETTINGS = {
@@ -9,7 +9,7 @@ SCROLLING_SETTINGS = {
 }
 
 FULL_MODE_SETTINGS = {
-    "stop_time": 1000,
+    "stop_time": 1000,##
 }
 
 CLICK_BEHAVIOR = {

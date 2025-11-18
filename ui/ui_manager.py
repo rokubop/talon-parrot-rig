@@ -58,7 +58,9 @@ class UIManager:
 try:
     if 'ui_manager' in globals() and hasattr(globals()['ui_manager'], 'cleanup'):
         globals()['ui_manager'].cleanup()
-except:
-    pass
+except Exception as e:
+    print(f"Error cleaning up previous ui_manager: {e}")
+    import traceback
+    traceback.print_exc()
 
 ui_manager = UIManager()

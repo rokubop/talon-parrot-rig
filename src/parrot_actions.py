@@ -23,7 +23,10 @@ class ParrotActions:
         self._stop_time_job = None
 
     def mouse_move_or_slow_dir(self, direction: str):
-        if movement.is_moving() and actions.user.mouse_move_info().last_cardinal_dir == direction:
+        rig = actions.user.mouse_rig()
+        cardinal = rig.state.direction.to_cardinal()
+        if movement.is_moving() and cardinal == direction \
+                and not rig.state.tag("boost"):
             movement.slower()
         else:
             self.move(direction)
@@ -31,13 +34,17 @@ class ParrotActions:
     def move(self, direction: str):
         tracking.freeze()
         scrolling.scroll_stop_hard()
-        if not movement.is_moving():
+        # Only save position if transitioning into move mode (not already moving)
+        if event_manager.get_mode() != "move":
             position.mouse_stopped_pos_save()
         movement.move(direction)
         event_manager.set_mode("move")
 
     def mouse_move_dir(self, direction: str):
         self.move(direction)
+
+    def mouse_move_preserve_dir(self):
+        movement.preserve_direction()
 
     def boost_large(self):
         movement.boost_large()
@@ -47,14 +54,16 @@ class ParrotActions:
 
     def tracking_activate_head(self):
         movement.stop()
-        if not tracking.is_tracking:
+        # Only save position if transitioning into tracking mode (not already tracking)
+        if event_manager.get_mode() not in ["head", "full"]:
             position.mouse_stopped_pos_save()
         tracking.activate(full_tracking=False)
         event_manager.set_mode("head")
 
     def tracking_activate_full(self):
         movement.stop()
-        if not tracking.is_tracking:
+        # Only save position if transitioning into tracking mode (not already tracking)
+        if event_manager.get_mode() not in ["head", "full"]:
             position.mouse_stopped_pos_save()
         tracking.activate(full_tracking=True)
         event_manager.set_mode("full")
@@ -217,10 +226,7 @@ class ParrotActions:
 
         # Save position if we were actually moving or tracking
         if was_moving or was_tracking:
-            print("  -> Calling mouse_stopped_pos_save")
             position.mouse_stopped_pos_save()
-        else:
-            print("  -> Not saving position (wasn't active)")
 
         event_manager.set_mode("default")
 

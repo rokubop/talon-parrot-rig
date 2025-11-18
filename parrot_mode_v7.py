@@ -50,6 +50,7 @@ parrot_config_move = {
     "oh":         ("move right", lambda: parrot_actions.mouse_move_or_slow_dir("right")),
     "t":          ("move up", lambda: parrot_actions.mouse_move_or_slow_dir("up")),
     "guh":        ("move down", lambda: parrot_actions.mouse_move_or_slow_dir("down")),
+    "eh":         ("preserve direction", parrot_actions.mouse_move_preserve_dir),
     "mm":         ("click", parrot_actions.click_with_mode_behavior),
     "shush":      ("boost large", parrot_actions.boost_large),
     "shush_stop": ("", lambda: None),

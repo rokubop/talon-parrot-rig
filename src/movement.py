@@ -23,65 +23,99 @@ class Movement():
             MOVEMENT_SETTINGS["boost_large"] = self.boost_large_amount
 
     def move(self, direction):
-        if direction == "left":
-            self.move_left()
-        elif direction == "right":
-            self.move_right()
-        elif direction == "up":
-            self.move_up()
-        elif direction == "down":
-            self.move_down()
+        direction_map = {
+            "left": (-1, 0),
+            "right": (1, 0),
+            "up": (0, -1),
+            "down": (0, 1)
+        }
+        if direction in direction_map:
+            dx, dy = direction_map[direction]
+            self._move_in_direction(dx, dy)
+
+    def _move_in_direction(self, dx, dy):
+        rig = actions.user.mouse_rig()
+        boost = rig.state.tag("boost")
+
+        if boost:
+            turn_time = min(rig.state.speed * 50, 2000)
+            rig.direction(dx, dy).over(turn_time, interpolation="lerp")
+        else:
+            rig.direction(dx, dy)
+
+        if not rig.state.base.speed:
+            rig.speed(self.speed)
 
     def move_left(self):
-        actions.user.mouse_move_continuous(-1, 0)
+        self._move_in_direction(-1, 0)
 
     def move_right(self):
-        actions.user.mouse_move_continuous(1, 0)
+        self._move_in_direction(1, 0)
 
     def move_up(self):
-        actions.user.mouse_move_continuous(0, -1)
+        self._move_in_direction(0, -1)
 
     def move_down(self):
-        actions.user.mouse_move_continuous(0, 1)
+        self._move_in_direction(0, 1)
+
+    def preserve_direction(self):
+        rig = actions.user.mouse_rig()
+        rig.bake()
 
     def boost_large(self):
         amount = self.boost_large_amount
-        info = actions.user.mouse_move_info()
-        print("info:", vars(info))
-        unit_vector = info["last_unit_vector"]
 
-        def continue_slowly():
-            actions.user.mouse_move_continuous(unit_vector.x, unit_vector.y)
+        # info = actions.user.mouse_move_info()
+        # print("info:", vars(info))
+        # unit_vector = info["last_unit_vector"]
 
-        actions.user.mouse_move_smooth_delta(
-            unit_vector.x * amount,
-            unit_vector.y * amount,
-            callback_stop=continue_slowly
-        )
+        # def continue_slowly():
+        #     actions.user.mouse_move_continuous(unit_vector.x, unit_vector.y)
+
+        rig = actions.user.mouse_rig()
+        rig.tag("boost").speed.add(amount).over(1000).revert(1000)
+        # rig.boost(20).over(1000).ease("ease_out")
+
+        # actions.user.mouse_move_smooth_delta(
+        #     unit_vector.x * amount,
+        #     unit_vector.y * amount,
+        #     callback_stop=continue_slowly
+        # )
 
     def boost_small(self):
         amount = self.boost_small_amount
-        info = actions.user.mouse_move_info()
-        unit_vector = info["last_unit_vector"]
+        rig = actions.user.mouse_rig()
+        rig.tag("boost").speed.add(amount).over(100).revert(500)
 
-        def continue_slowly():
-            actions.user.mouse_move_continuous(unit_vector.x, unit_vector.y)
+        # info = actions.user.mouse_move_info()
+        # unit_vector = info["last_unit_vector"]
 
-        actions.user.mouse_move_smooth_delta(
-            unit_vector.x * amount,
-            unit_vector.y * amount,
-            callback_stop=continue_slowly
-        )
+        # def continue_slowly():
+        #     actions.user.mouse_move_continuous(unit_vector.x, unit_vector.y)
+
+        # actions.user.mouse_move_smooth_delta(
+        #     unit_vector.x * amount,
+        #     unit_vector.y * amount,
+        #     callback_stop=continue_slowly
+        # )
 
     def slower(self):
-        actions.user.mouse_move_continuous_speed_decrease()
+        rig = actions.user.mouse_rig()
+        rig.speed.div(2)
+        # actions.user.mouse_move_continuous_speed_decrease()
 
     def stop(self):
-        actions.user.mouse_move_continuous_stop()
+        rig = actions.user.mouse_rig()
+        rig.stop()
+        # actions.user.mouse_move_continuous_stop()
 
     def is_moving(self):
-        info = actions.user.mouse_move_info()
-        return info["is_moving"]
+        rig = actions.user.mouse_rig()
+
+        return rig.state.speed > 0
+        # return state
+        # info = actions.user.mouse_move_info()
+        # return info["is_moving"]
 
 movement = Movement()
 
