@@ -41,7 +41,7 @@ class ParrotEventManager:
     def set_mode(self, mode: str, update_ui: bool = True):
         if mode != self._current_mode:
             print("Setting mode to:", mode)
-            has_parrot_config = not mode == "boost"
+            has_parrot_config = not mode in ["boost", "glide"]
             self._previous_mode = self._current_mode
             self._current_mode = mode
 

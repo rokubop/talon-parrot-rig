@@ -12,7 +12,7 @@ from ..ui.cheatsheet import show_cheatsheet
 from ..ui.utility_selector import show_utility_selector
 from ..user_settings import (
     CLICK_BEHAVIOR,
-    FULL_MODE_SETTINGS, SETTINGS_OPTIONS
+    FULL_MODE_SETTINGS
 )
 from .constants import *
 
@@ -41,21 +41,27 @@ class ParrotActions:
             position.mouse_stopped_pos_save()
         movement.move(direction)
         rig = actions.user.mouse_rig()
+        if event_manager.get_mode() == "glide":
+            return
         event_manager.set_mode("boost" if "boost_large" in rig.state.layers else "move")
 
     def mouse_move_dir(self, direction: str):
         self.move(direction)
 
-    def mouse_move_preserve_dir(self):
+    def mouse_toggle_glide(self):
         movement.preserve_direction()
+        if event_manager.get_mode() == "glide":
+            event_manager.set_mode("move")
+        else:
+            event_manager.set_mode("glide")
 
-    def boost_large(self):
+    def mouse_boost_large(self):
         event_manager.set_mode("boost")
         movement.boost_large(
             lambda: event_manager.return_to_previous_mode() \
                 if event_manager.get_mode() == "boost" else None)
 
-    def boost_small(self):
+    def mouse_boost_small(self):
         movement.boost_small()
 
     def tracking_activate_head(self):
@@ -221,6 +227,9 @@ class ParrotActions:
             "modifiers": event_manager.get_modifiers(),
             "click_held": self._is_left_click_held,
         }
+
+    def parrot_mode_get_mode(self):
+        return event_manager.get_mode()
 
     def parrot_mode_toggle(self):
         if self._parrot_mode_enabled:

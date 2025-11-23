@@ -50,11 +50,11 @@ parrot_config_move = {
     "oh":         ("move right", lambda: parrot_actions.mouse_move_or_slow_dir("right")),
     "t":          ("move up", lambda: parrot_actions.mouse_move_or_slow_dir("up")),
     "guh":        ("move down", lambda: parrot_actions.mouse_move_or_slow_dir("down")),
-    "eh":         ("preserve direction", parrot_actions.mouse_move_preserve_dir),
+    "eh":         ("toggle glide", parrot_actions.mouse_toggle_glide),
     "mm":         ("click", parrot_actions.click_with_mode_behavior),
-    "shush":      ("boost large", parrot_actions.boost_large),
+    "shush":      ("boost large", parrot_actions.mouse_boost_large),
     "shush_stop": ("", lambda: None),
-    "hiss":       ("boost small", parrot_actions.boost_small),
+    "hiss":       ("boost small", parrot_actions.mouse_boost_small),
     "hiss_stop":  ("", lambda: None),
 }
 
@@ -171,3 +171,7 @@ class Actions:
     def parrot_mode_v7_reload():
         """Reload parrot mode v7"""
         parrot_actions.reload_files()
+
+    def parrot_mode_v7_get_mode():
+        """Get current mode for parrot mode"""
+        return parrot_actions.parrot_mode_get_mode()

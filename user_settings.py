@@ -9,12 +9,14 @@ SCROLLING_SETTINGS = {
 }
 
 FULL_MODE_SETTINGS = {
-    "stop_time": 1000,##
+    "stop_time": 1000,
 }
 
 CLICK_BEHAVIOR = {
     "move": "stop",
     "head": "stop",
+    "boost": "stop",
+    "glide": "stop",
 }
 
 UTILITY_ACTION = "hold_click"
@@ -28,11 +30,4 @@ UTILITY_ACTIONS = {
     "middle_hold": "Middle Hold",
     "repeat_last": "Repeat Last",
     "repeat_phrase": "Repeat Phrase",
-}
-
-SETTINGS_OPTIONS = {
-    "speed": [30, 60, 90, 120, 150],
-    "boost_small": [50, 100, 150, 200, 250],
-    "boost_large": [100, 200, 300, 400, 500],
-    "stop_time": [500, 1000, 1500, 2000, 2500],
 }
