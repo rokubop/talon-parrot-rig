@@ -27,7 +27,7 @@ class ParrotActions:
         rig = actions.user.mouse_rig()
         cardinal = rig.state.direction.to_cardinal()
         if movement.is_moving() and cardinal == direction:
-            if rig.state.layer("boost"):
+            if any("boost" in layer for layer in rig.state.layers):
                 rig.bake()
             movement.slower()
         else:
@@ -41,7 +41,7 @@ class ParrotActions:
             position.mouse_stopped_pos_save()
         movement.move(direction)
         rig = actions.user.mouse_rig()
-        event_manager.set_mode("boost" if rig.state.layer("boost") else "move")
+        event_manager.set_mode("boost" if "boost_large" in rig.state.layers else "move")
 
     def mouse_move_dir(self, direction: str):
         self.move(direction)
@@ -56,10 +56,7 @@ class ParrotActions:
                 if event_manager.get_mode() == "boost" else None)
 
     def boost_small(self):
-        event_manager.set_mode("boost")
-        movement.boost_small(
-            lambda: event_manager.return_to_previous_mode() \
-                if event_manager.get_mode() == "boost" else None)
+        movement.boost_small()
 
     def tracking_activate_head(self):
         movement.stop()
