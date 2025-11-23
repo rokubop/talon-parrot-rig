@@ -22,7 +22,7 @@ def create_action_button(action_key: str, action_name: str):
     ]
 
 def utility_selector():
-    screen, window, div, text = actions.user.ui_elements(["screen", "window", "div", "text"])
+    screen, window, div = actions.user.ui_elements(["screen", "window", "div"])
 
     return screen(justify_content="center", align_items="center")[
         window(
@@ -39,6 +39,4 @@ def utility_selector():
     ]
 
 def show_utility_selector():
-    actions.user.ui_elements_toggle(utility_selector, use_parrot_hints=[
-        "ah", "oh", "pop", "cluck", "ee", "t", "guh", "mm", "hiss", "shush", "palate"
-    ])
+    actions.user.ui_elements_toggle(utility_selector, show_hints="numbers")

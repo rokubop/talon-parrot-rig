@@ -35,11 +35,23 @@ class Movement():
 
     def _move_in_direction(self, dx, dy):
         rig = actions.user.mouse_rig()
-        boost = rig.state.tag("boost")
+        boost = rig.state.layer("boost")
 
         if boost:
-            turn_time = min(rig.state.speed * 50, 2000)
-            rig.direction(dx, dy).over(turn_time, interpolation="lerp")
+            # Early turns (0-0.5s): slower, less responsive (higher turn_time)
+            # Late turns (0.5s+): faster, more responsive (lower turn_time)
+            # Interpolate from 2000ms (early) to 500ms (late) based on time_alive
+            time_alive = boost.time_alive()
+            control_factor = min(time_alive / 2.0, 0.75)  # Clamp to [0, 0.75] over 2 seconds
+            turn_time = int(2000 - (1500 * control_factor))  # 2000ms -> 875ms at max
+            rig.direction.to(dx, dy).over(turn_time, "ease_out_2")
+
+            # print('time alive', boost.time_alive())
+            # turn_time = min(rig.state.s#peed ** 3 + 500, 2000)#b
+            # print(f"Turning with time: {turn_time}ms")
+            # rig.direction(dx, dy).over(turn_time, "ease_out_2")
+            # boost.revert(2000)
+            # boost.speed.mul(0.5).revert(turn_time)-#
         else:
             rig.direction(dx, dy)
 
@@ -60,44 +72,25 @@ class Movement():
 
     def preserve_direction(self):
         rig = actions.user.mouse_rig()
-        rig.bake()
+        rig.direction.bake()
 
-    def boost_large(self):
-        amount = self.boost_large_amount
-
-        # info = actions.user.mouse_move_info()
-        # print("info:", vars(info))
-        # unit_vector = info["last_unit_vector"]
-
-        # def continue_slowly():
-        #     actions.user.mouse_move_continuous(unit_vector.x, unit_vector.y)
-
+    def boost_large(self, on_complete):
         rig = actions.user.mouse_rig()
-        rig.tag("boost").speed.add(amount).over(1000).revert(1000)
+        if rig.state.layer("boost"):
+            amount = self.boost_large_amount + rig.state.layer("boost").speed * 0.8
+        else:
+            amount = self.boost_large_amount
+
+        rig.layer("boost").speed.add(amount).over(1000).revert(1000).then(on_complete)
         # rig.boost(20).over(1000).ease("ease_out")
 
-        # actions.user.mouse_move_smooth_delta(
-        #     unit_vector.x * amount,
-        #     unit_vector.y * amount,
-        #     callback_stop=continue_slowly
-        # )
-
-    def boost_small(self):
-        amount = self.boost_small_amount
+    def boost_small(self, on_complete):
         rig = actions.user.mouse_rig()
-        rig.tag("boost").speed.add(amount).over(100).revert(500)
-
-        # info = actions.user.mouse_move_info()
-        # unit_vector = info["last_unit_vector"]
-
-        # def continue_slowly():
-        #     actions.user.mouse_move_continuous(unit_vector.x, unit_vector.y)
-
-        # actions.user.mouse_move_smooth_delta(
-        #     unit_vector.x * amount,
-        #     unit_vector.y * amount,
-        #     callback_stop=continue_slowly
-        # )
+        # if rig.state.layer("boost"):
+        #     rig.layer("boost").revert(rate=100)
+        # else:
+        amount = min(max(self.boost_small_amount, rig.state.speed * 1.5), 30)
+        rig.layer("boost").speed.add(amount).hold(100).revert(700).then(on_complete)
 
     def slower(self):
         rig = actions.user.mouse_rig()

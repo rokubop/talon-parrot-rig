@@ -13,7 +13,7 @@ mode: user.parrot_v7
 parrot_config_common = {
     "ee":     ("stop", parrot_actions.stopper),
     "pop":    ("click exit", parrot_actions.click_exit),
-    "cluck":  ("exit", parrot_actions.parrot_mode_disable),
+    "cluck":  ("exit", parrot_actions.exit),
     "ah":     ("move left", lambda: parrot_actions.mouse_move_dir("left")),
     "oh":     ("move right", lambda: parrot_actions.mouse_move_dir("right")),
     "t":      ("move up", lambda: parrot_actions.mouse_move_dir("up")),
@@ -167,3 +167,7 @@ class Actions:
     def parrot_mode_v7_tracking_activate_full():
         """Activate full tracking mode"""
         parrot_actions.tracking_activate_full()
+
+    def parrot_mode_v7_reload():
+        """Reload parrot mode v7"""
+        parrot_actions.reload_files()

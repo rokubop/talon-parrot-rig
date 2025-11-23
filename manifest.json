@@ -8,9 +8,7 @@
   "author": "roku",
   "tags": [],
   "contributes": {
-    "modes": [
-      "user.parrot_v7"
-    ],
+    "modes": ["user.parrot_v7"],
     "settings": [
       "user.parrot_mode_v7_boost_large",
       "user.parrot_mode_v7_boost_small",

@@ -7,6 +7,7 @@ from .position import position
 from .keys import keys
 from .phrase import phrase
 from .events import event_manager
+from .utils import reload_files
 from ..ui.cheatsheet import show_cheatsheet
 from ..ui.utility_selector import show_utility_selector
 from ..user_settings import (
@@ -25,8 +26,9 @@ class ParrotActions:
     def mouse_move_or_slow_dir(self, direction: str):
         rig = actions.user.mouse_rig()
         cardinal = rig.state.direction.to_cardinal()
-        if movement.is_moving() and cardinal == direction \
-                and not rig.state.tag("boost"):
+        if movement.is_moving() and cardinal == direction:
+            if rig.state.layer("boost"):
+                rig.bake()
             movement.slower()
         else:
             self.move(direction)
@@ -38,7 +40,8 @@ class ParrotActions:
         if event_manager.get_mode() != "move":
             position.mouse_stopped_pos_save()
         movement.move(direction)
-        event_manager.set_mode("move")
+        rig = actions.user.mouse_rig()
+        event_manager.set_mode("boost" if rig.state.layer("boost") else "move")
 
     def mouse_move_dir(self, direction: str):
         self.move(direction)
@@ -47,10 +50,16 @@ class ParrotActions:
         movement.preserve_direction()
 
     def boost_large(self):
-        movement.boost_large()
+        event_manager.set_mode("boost")
+        movement.boost_large(
+            lambda: event_manager.return_to_previous_mode() \
+                if event_manager.get_mode() == "boost" else None)
 
     def boost_small(self):
-        movement.boost_small()
+        event_manager.set_mode("boost")
+        movement.boost_small(
+            lambda: event_manager.return_to_previous_mode() \
+                if event_manager.get_mode() == "boost" else None)
 
     def tracking_activate_head(self):
         movement.stop()
@@ -74,6 +83,9 @@ class ParrotActions:
     def click_exit(self):
         self.mouse_click()
         self.parrot_mode_disable()
+
+    def exit(self):
+        self.parrot_mode_disable(stop_tracking=not tracking.is_tracking)
 
     def click_await_one_phrase(self):
         self.mouse_click()
@@ -175,16 +187,30 @@ class ParrotActions:
         position.mouse_stopped_pos_save()
         print("Parrot mode enabled")
 
-    def parrot_mode_disable(self):
+    def parrot_mode_disable(
+            self,
+            stop_tracking=True,
+            stop_moving=True,
+            stop_scrolling=True,
+            disable_mods=True
+        ):
         self._parrot_mode_enabled = False
         if actions.user.ui_elements_is_active("cheatsheet"):
             actions.user.ui_elements_hide("cheatsheet")
         ui_manager.hide()
-        # event_manager.set_parrot_enabled(False)
-        self.stopper()
-        self.disable_modifiers()
+
+        self.stopper(
+            stop_tracking=stop_tracking,
+            stop_moving=stop_moving,
+            stop_scrolling=stop_scrolling,
+            reset_mode=True)
+
+        if disable_mods:
+            self.disable_modifiers()
+
         if self._is_left_click_held:
             self.click_release()
+
         actions.mode.disable("user.parrot_v7")
         print("Parrot mode disabled")
 
@@ -205,6 +231,9 @@ class ParrotActions:
         else:
             self.parrot_mode_enable()
 
+    def reload_files(self):
+        reload_files()
+
     def return_to_previous_mode(self):
         event_manager.return_to_previous_mode()
 
@@ -215,20 +244,16 @@ class ParrotActions:
         keys.clear_modifiers()
         event_manager.clear_modifiers()
 
-    def stopper(self):
+    def stopper(self, stop_tracking=True, stop_moving=True, stop_scrolling=True, reset_mode=True):
         self.stop_revive_tracking()
-        was_moving = movement.is_moving()
-        was_tracking = tracking.is_tracking
-        print(f"stopper called: was_moving={was_moving}, was_tracking={was_tracking}")
-        movement.stop()
-        scrolling.scroll_stop_hard()
-        tracking.freeze()
-
-        # Save position if we were actually moving or tracking
-        if was_moving or was_tracking:
-            position.mouse_stopped_pos_save()
-
-        event_manager.set_mode("default")
+        if stop_moving:
+            movement.stop()
+        if stop_scrolling:
+            scrolling.scroll_stop_hard()
+        if stop_tracking:
+            tracking.freeze()
+        if reset_mode:
+            event_manager.set_mode("default")
 
     def stop_temporarily(self):
         movement.stop()

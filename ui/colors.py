@@ -1,11 +1,12 @@
 MODE_COLORS = {
     "default": "#FF0000",
     "move": "#FFFF00",
-    "head": "#83E99B",
-    "full": "#BD10E0",
+    "boost": "#2AE33C",
+    "head": "#E5A64D",
+    "full": "#A7D3FF",
     "window": "#E35050",
-    "keyboard": "#A7D3FF",
-    "number": "#F89C1C",
+    "keyboard": "#BD10E0",
+    "number": "#391CF8",
 }
 
 

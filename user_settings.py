@@ -1,6 +1,6 @@
 MOVEMENT_SETTINGS = {
     "speed": 3,
-    "boost_small": 10,
+    "boost_small": 7,
     "boost_large": 10,
 }
 
