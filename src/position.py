@@ -1,5 +1,6 @@
 from talon import actions, cron
 from .utils import get_screen
+from ..ui.ui_manager import ui_manager
 
 saved_loc_map = {}
 hide_mouse_cron_job = None
@@ -25,18 +26,18 @@ class Position:
     mouse_stopped_pos_history_pointer = 0
 
     def mouse_pos_show_marks(self):
-        actions.user.ui_elements_show(mouse_pos_ui)
+        ui_manager.show_mouse_pos_marks(mouse_pos_ui)
 
     def mouse_pos_show_marks_briefly(self):
         global hide_mouse_cron_job
-        actions.user.ui_elements_show(mouse_pos_ui)
+        ui_manager.show_mouse_pos_marks(mouse_pos_ui)
         if hide_mouse_cron_job:
             cron.cancel(hide_mouse_cron_job)
         hide_mouse_cron_job = cron.after("2s", self.mouse_pos_hide_marks)
 
     def mouse_pos_hide_marks(self):
         global hide_mouse_cron_job
-        actions.user.ui_elements_hide(mouse_pos_ui)
+        ui_manager.hide_mouse_pos_marks(mouse_pos_ui)
         hide_mouse_cron_job = None
 
     def mouse_pos_save(self, name: str = None):
@@ -117,7 +118,7 @@ class Position:
 
     def mouse_pos_clear_all(self):
         saved_loc_map.clear()
-        actions.user.ui_elements_hide(mouse_pos_ui)
+        ui_manager.hide_mouse_pos_marks(mouse_pos_ui)
 
     def mouse_pos_cycle(self):
         if len(self.mouse_pos_history) == 0:

@@ -7,9 +7,7 @@ from .position import position
 from .keys import keys
 from .phrase import phrase
 from .events import event_manager
-from .utils import reload_files
-from ..ui.cheatsheet import show_cheatsheet
-from ..ui.utility_selector import show_utility_selector
+from .utils import utils, get_screen
 from ..user_settings import (
     CLICK_BEHAVIOR,
     FULL_MODE_SETTINGS
@@ -25,7 +23,8 @@ class ParrotActions:
 
     def mouse_move_or_slow_dir(self, direction: str):
         rig = actions.user.mouse_rig()
-        cardinal = rig.state.direction.to_cardinal()
+        print(rig.state.base)
+        cardinal = rig.state.base.direction.to_cardinal()
         if movement.is_moving() and cardinal == direction:
             if any("boost" in layer for layer in rig.state.layers):
                 rig.bake()
@@ -183,6 +182,7 @@ class ParrotActions:
 
     def parrot_mode_enable(self):
         self._parrot_mode_enabled = True
+        actions.mode.disable("command")
         actions.mode.enable("user.parrot_v7")
         # event_manager.set_parrot_enabled(True)
         event_manager.set_mode("default")
@@ -198,8 +198,7 @@ class ParrotActions:
             disable_mods=True
         ):
         self._parrot_mode_enabled = False
-        if actions.user.ui_elements_is_active("cheatsheet"):
-            actions.user.ui_elements_hide("cheatsheet")
+        ui_manager.hide_cheatsheet()
         ui_manager.hide()
 
         self.stopper(
@@ -215,6 +214,7 @@ class ParrotActions:
             self.click_release()
 
         actions.mode.disable("user.parrot_v7")
+        actions.mode.enable("command")
         print("Parrot mode disabled")
 
     def parrot_mode_get_state(self):
@@ -238,7 +238,7 @@ class ParrotActions:
             self.parrot_mode_enable()
 
     def reload_files(self):
-        reload_files()
+        utils.reload_files()
 
     def return_to_previous_mode(self):
         event_manager.return_to_previous_mode()
@@ -323,10 +323,10 @@ class ParrotActions:
         event_manager.set_mode("number")
 
     def show_utility_selector(self):
-        show_utility_selector()
+        ui_manager.show_utility_selector()
 
     def show_cheatsheet(self):
-        show_cheatsheet()
+        ui_manager.show_cheatsheet()
 
     def show_settings(self):
         print("Settings UI - not implemented yet")
@@ -343,6 +343,9 @@ class ParrotActions:
         tracking.freeze()
         event_manager.set_mode("default")
         self.scroll(direction)
+
+    def zoom_in(self):
+        utils.zoom_in()
 
     def is_active(self):
         return tracking.is_tracking or movement.is_moving() or scrolling.is_scrolling()

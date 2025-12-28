@@ -27,12 +27,12 @@ class Movement():
         if boost_large:
             # Early turns slow( reloadb
             # Later turns fast
-            time_alive = boost_large.time_alive()
-            control_factor = min(time_alive / 2.0, 0.75)
+            print(boost_large)
+            control_factor = min(boost_large.time_alive / 2.0, 0.75)
             turn_time = int(2000 - (1500 * control_factor))
-            rig.direction.to(dx, dy).over(turn_time, "ease_out_2")
+            rig.direction.to(dx, dy).over(turn_time, "ease_out2")
         elif mode == "glide":
-            rig.direction.to(dx, dy).over(rig.state.speed * 100, "ease_out_2")
+            rig.direction.to(dx, dy).over(rig.state.speed * 100, "ease_out2")
         else:
             rig.direction(dx, dy)
 
@@ -59,22 +59,26 @@ class Movement():
         rig = actions.user.mouse_rig()
 
         if rig.state.layer("boost_small"):
-            rig.layer("boost_large", order=2).speed.to(self.boost_large_amount * 2) \
+            rig.layer("boost_large", order=2).speed.offset.to(self.boost_large_amount * 2) \
                 .revert(1500, "ease_in_out").then(on_complete)
             return
 
+        # print("state", rig.state)
+        # print("state base", rig.state.base)
+        # print("state layer", rig.state.layer("boost_large"))
+        # print("state layer speed", rig.state.layer("boost_large").speed)
         if rig.state.layer("boost_large"):
-            amount = self.boost_large_amount + rig.state.layer("boost_large").speed * 0.8
+            amount = self.boost_large_amount + rig.state.layer("boost_large").value
         else:
             amount = self.boost_large_amount
 
-        rig.layer("boost_large", order=2).speed.add(amount) \
+        rig.layer("boost_large", order=2).speed.offset.add(amount) \
             .over(1000).revert(1000).then(on_complete)
 
     def boost_small(self):
         rig = actions.user.mouse_rig()
-        rig.layer("boost_small", order=1).speed.add(self.boost_small_amount) \
-            .hold(100).revert(100, "ease_out")
+        rig.layer("boost_small", order=1).speed.offset.add(self.boost_small_amount) \
+            .revert(400, "ease_out2")
 
     def slower(self):
         rig = actions.user.mouse_rig()

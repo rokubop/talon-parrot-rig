@@ -1,3 +1,4 @@
+from talon import actions
 from .cursor import cursor_ui_instance
 from .colors import get_mode_color
 from ..src.events import event_manager
@@ -52,6 +53,33 @@ class UIManager:
 
     def hide_border(self):
         cursor_ui_instance.hide_border()
+
+    def show_cheatsheet(self):
+        """Show the cheatsheet UI"""
+        from .cheatsheet import cheatsheet_ui
+        actions.user.ui_elements_toggle(cheatsheet_ui)
+
+    def hide_cheatsheet(self):
+        """Hide the cheatsheet UI"""
+        if actions.user.ui_elements_is_active("cheatsheet"):
+            actions.user.ui_elements_hide("cheatsheet")
+
+    def is_cheatsheet_active(self):
+        """Check if cheatsheet is currently active"""
+        return actions.user.ui_elements_is_active("cheatsheet")
+
+    def show_utility_selector(self):
+        """Show the utility selector UI"""
+        from .utility_selector import utility_selector
+        actions.user.ui_elements_toggle(utility_selector, show_hints="numbers")
+
+    def show_mouse_pos_marks(self, mouse_pos_ui):
+        """Show mouse position marks UI"""
+        actions.user.ui_elements_show(mouse_pos_ui)
+
+    def hide_mouse_pos_marks(self, mouse_pos_ui):
+        """Hide mouse position marks UI"""
+        actions.user.ui_elements_hide(mouse_pos_ui)
 
 # Create global instance
 # Clean up previous instance if it exists (for module reloads)

@@ -1,4 +1,4 @@
-from talon import Module, actions, storage
+from talon import Module, actions, storage, ctrl
 
 class Tracking():
     FULL_TRACKING_ID = "parrot_v7.full_tracking"
@@ -29,10 +29,12 @@ class Tracking():
         # if self.is_tracking:
         actions.tracking.control_mouse_jump_toggle(False)
         actions.tracking.control_head_toggle(False)
-        actions.tracking.control_gaze_toggle(True)
-        actions.sleep("50ms")
+        # actions.tracking.control_gaze_toggle(True)
+        # actions.sleep("50ms")
         actions.tracking.control_gaze_toggle(False)
+        pos = ctrl.mouse_pos()
         actions.tracking.control_head_toggle(True)
+        actions.mouse_move(pos[0], pos[1])
         self.is_tracking = True
 
     def freeze(self):

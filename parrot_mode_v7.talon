@@ -1,6 +1,7 @@
 mode: user.parrot_v7
 -
-<phrase>: skip()
+# <phrase>: skip()
+^<phrase>$: skip()
 parrot(eh): user.parrot_config_noise("eh")
 parrot(guh): user.parrot_config_noise("guh")
 parrot(ah): user.parrot_config_noise("ah")
