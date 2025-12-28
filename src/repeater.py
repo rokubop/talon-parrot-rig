@@ -54,7 +54,10 @@ def repeat():
     elif last_tut:
         actions.repeat_command(last_tut)
     else:
-        actions.core.repeat_command()
+        try:
+            actions.core.repeat_command()
+        except IndexError:
+            pass  # No command history yet
 
 def reverse():
     """Reverse the last command"""
@@ -66,9 +69,15 @@ def reverse():
         if last_palate in opposites:
             actions.mimic(opposites[last_palate])
         else:
-            actions.core.repeat_command()
+            try:
+                actions.core.repeat_command()
+            except IndexError:
+                pass  # No command history yet
     else:
-        actions.core.repeat_command()
+        try:
+            actions.core.repeat_command()
+        except IndexError:
+            pass  # No command history yet
 
 @mod.action_class
 class Actions:
