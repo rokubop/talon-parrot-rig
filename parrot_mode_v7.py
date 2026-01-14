@@ -2,6 +2,8 @@ from talon import Module, Context, actions, app
 from .src.parrot_actions import parrot_actions
 from .src.constants import *
 
+MARK_NAMES = ["ah", "oh", "t", "sh", "ss", "mm", "guh", "pop", "palate"]
+
 mod = Module()
 mod.mode("parrot_v7", "parrot mode v7")
 
@@ -18,9 +20,18 @@ parrot_config_common = {
     "oh":     ("move right", lambda: parrot_actions.mouse_move_dir("right")),
     "t":      ("move up", lambda: parrot_actions.mouse_move_dir("up")),
     "guh":    ("move down", lambda: parrot_actions.mouse_move_dir("down")),
-    # "eh":     ("track head", parrot_actions.tracking_activate_head),
-    "eh":     ("windows zoom", lambda: (parrot_actions.stopper(), parrot_actions.zoom_in())),
-    "er":     ("track full", parrot_actions.tracking_activate_full),
+    "eh":     ("track full", parrot_actions.tracking_activate_full),
+    "er":     ("mark target next", lambda: parrot_actions.mouse_pos_mark_next(MARK_NAMES)),
+    "er ee":  ("clear all marks", parrot_actions.mouse_pos_clear_all_marks),
+    "er ah":  ("mark or goto ah", lambda: parrot_actions.mouse_pos_mark_or_teleport("ah")),
+    "er oh":  ("mark or goto oh", lambda: parrot_actions.mouse_pos_mark_or_teleport("oh")),
+    "er t":   ("mark or goto t", lambda: parrot_actions.mouse_pos_mark_or_teleport("t")),
+    "er sh":  ("mark or goto sh", lambda: parrot_actions.mouse_pos_mark_or_teleport("sh")),
+    "er ss":  ("mark or goto ss", lambda: parrot_actions.mouse_pos_mark_or_teleport("ss")),
+    "er mm":  ("mark or goto mm", lambda: parrot_actions.mouse_pos_mark_or_teleport("mm")),
+    "er guh": ("mark or goto guh", lambda: parrot_actions.mouse_pos_mark_or_teleport("guh")),
+    "er pop": ("mark or goto pop", lambda: parrot_actions.mouse_pos_mark_or_teleport("pop")),
+    "er palate": ("mark or goto palate", lambda: parrot_actions.mouse_pos_mark_or_teleport("palate")),
     "palate": ("hold or utility", parrot_actions.utility),
     "tut":        ("windows zoom out", lambda: actions.key("win-keypad_minus")),
     "tut mm":     ("left click drag", lambda: parrot_actions.mouse_click(hold=True)),
@@ -32,8 +43,7 @@ parrot_config_common = {
     "tut eh":     ("go last pos", parrot_actions.mouse_stopped_pos_cycle),
     "tut pop":    ("go last pos click exit", parrot_actions.mouse_stopped_pos_cycle_click_exit),
     "tut ee":     ("disable modifiers", parrot_actions.disable_modifiers),
-    # "tut tut":    ("show cheatsheet", parrot_actions.show_cheatsheet),
-    "tut tut":    ("reset zoom", lambda: actions.key("win-escape")),
+    "tut tut":    ("show cheatsheet", parrot_actions.show_cheatsheet),
     "tut hiss":   ("settings", parrot_actions.show_settings),
     "tut shush":  ("settings", parrot_actions.show_settings),
 }
@@ -93,7 +103,6 @@ parrot_config_window = {
     "er": ("window close", parrot_actions.window_close),
     "tut": ("window swap", parrot_actions.window_swap),
     "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
-
     "tut ee": ("app switch 1", lambda: parrot_actions.app_switch(1)),
     "tut er": ("app switch 2", lambda: parrot_actions.app_switch(2)),
     "tut ah": ("app switch 3", lambda: parrot_actions.app_switch(3)),

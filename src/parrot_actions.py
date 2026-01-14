@@ -140,9 +140,17 @@ class ParrotActions:
         scrolling.scroll_stop_soft()
         self.stop_temporarily()
 
+    def mouse_pos_mark_next(self):
+        from .constants import MARK_NAMES
+        tracking.freeze()
+        position.mouse_pos_mark_next(MARK_NAMES)
+
     def mouse_pos_mark_or_teleport(self, noise: str):
-        print("noise", noise)
+        tracking.freeze()
         position.mouse_pos_mark_or_teleport(noise)
+
+    def mouse_pos_clear_all_marks(self):
+        position.mouse_pos_clear_all()
 
     def mouse_pos_tele_nearest(self):
         position.mouse_pos_tele_nearest()

@@ -3,23 +3,26 @@
   "title": "",
   "description": "Advanced parrot mode with 7 distinct modes and event-driven HUD system",
   "version": "7.0.0",
+  "namespace": "user.parrot_mode_v7",
   "github": "",
   "preview": "",
   "author": "roku",
   "tags": [],
+  "dependencies": {
+    "mouse_rig": "0.5.0",
+    "ui_elements": "0.12.2"
+  },
+  "devDependencies": {},
   "contributes": {
-    "modes": ["user.parrot_v7"],
-    "settings": [
-      "user.parrot_mode_v7_boost_large",
-      "user.parrot_mode_v7_boost_small",
-      "user.parrot_mode_v7_full_stop_time",
-      "user.parrot_mode_v7_mouse_scroll_speed",
-      "user.parrot_mode_v7_movement_speed"
+    "modes": [
+      "user.parrot_v7"
     ],
     "actions": [
       "user.parrot_mode_get_state",
       "user.parrot_mode_v7_disable",
       "user.parrot_mode_v7_enable",
+      "user.parrot_mode_v7_get_mode",
+      "user.parrot_mode_v7_reload",
       "user.parrot_mode_v7_toggle",
       "user.parrot_mode_v7_tracking_activate_full",
       "user.parrot_v7_repeater",
@@ -33,12 +36,8 @@
       "app.window_next",
       "app.window_previous",
       "core.repeat_command",
-      "user.mouse_move_continuous",
-      "user.mouse_move_continuous_speed_decrease",
-      "user.mouse_move_continuous_stop",
-      "user.mouse_move_info",
-      "user.mouse_move_smooth_delta",
       "user.mouse_move_smooth_from_to",
+      "user.mouse_rig",
       "user.parrot_config",
       "user.parrot_config_set_mode",
       "user.snap_window_to_position",
@@ -50,5 +49,7 @@
       "user.ui_elements_toggle",
       "user.window_minimize"
     ]
-  }
+  },
+  "_generator": "manifest_builder",
+  "_generatorVersion": "1.0.0"
 }

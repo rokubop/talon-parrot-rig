@@ -6,14 +6,24 @@ saved_loc_map = {}
 hide_mouse_cron_job = None
 
 def mouse_pos_ui():
-    screen, div, svg, circle, text = actions.user.ui_elements(["screen", "div", "svg", "circle", "text"])
+    screen, div, text = actions.user.ui_elements(["screen", "div", "text"])
+
+    padding = 6
+    offset = 10  # offset from the actual position
 
     return screen()[
-      *[div(position="absolute", left=x, top=y)[
-          svg()[
-              circle(cx=6, cy=6, r=5, fill="purple"),
-          ],
-          text(name, font_size=12)
+      *[div(
+          position="absolute",
+          left=x - 10,
+          top=y - 10,
+          background_color="333333",
+          border_width=1,
+          border_color="555555",
+          border_radius=2,
+          padding=padding,
+          opacity=0.8,
+      )[
+          text(name, font_size=12, color="FFFFFF")
       ] for name, (x, y) in saved_loc_map.items()]
     ]
 
@@ -46,9 +56,9 @@ class Position:
             self.mouse_pos_history.pop(0)
         self.mouse_pos_history.append(current_pos)
         self.mouse_pos_history_pointer = len(self.mouse_pos_history) - 1
-        # if name:
-        #     saved_loc_map[name] = current_pos
-        # self.mouse_pos_show_marks_briefly()
+        if name:
+            saved_loc_map[name] = current_pos
+            self.mouse_pos_show_marks()
 
     def mouse_stopped_pos_save(self):
         current_pos = (actions.mouse_x(), actions.mouse_y())
@@ -85,6 +95,15 @@ class Position:
         x, y = self.mouse_stopped_pos_history[self.mouse_stopped_pos_history_pointer]
         actions.mouse_move(x, y)
 
+    def mouse_pos_mark_next(self, mark_names: list):
+        """Mark current position with next available name from mark_names"""
+        for name in mark_names:
+            if name not in saved_loc_map:
+                self.mouse_pos_save(name)
+                return
+        # If all names used, overwrite the first one
+        self.mouse_pos_save(mark_names[0])
+
     def mouse_pos_mark_or_teleport(self, noise: str):
         if noise in saved_loc_map:
             self.mouse_pos_goto(noise)
@@ -110,7 +129,7 @@ class Position:
         if name in saved_loc_map:
             x, y = saved_loc_map[name]
             actions.mouse_move(x, y)
-        self.mouse_pos_show_marks_briefly()
+        self.mouse_pos_show_marks()
 
     def mouse_pos_clear(self, name: str):
         if name in saved_loc_map:
