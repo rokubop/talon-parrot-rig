@@ -81,10 +81,10 @@ def reverse():
 
 @mod.action_class
 class Actions:
-    def parrot_v7_repeater():
+    def parrot_mode_interactive_repeater():
         """Parrot mode v7 repeater"""
         repeat()
 
-    def parrot_v7_reverser():
+    def parrot_mode_interactive_reverser():
         """Parrot mode v7 reverser"""
         reverse()

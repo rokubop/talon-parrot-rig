@@ -1,5 +1,9 @@
 # Parrot Mode v7
 
+![Version](https://img.shields.io/badge/version-7.0.0-blue)
+![Status](https://img.shields.io/badge/status-experimental-orange)
+![Talon Beta](https://img.shields.io/badge/talon%20beta-required-red)
+
 An advanced parrot mode implementation with 7 distinct modes and an event-driven HUD system.
 
 ## Features
@@ -21,6 +25,39 @@ An advanced parrot mode implementation with 7 distinct modes and an event-driven
 - **Configurable Settings**: All constants stored in `config.py`
 - **Dynamic UI Dialogs**: For utility selection, settings, and noise reference
 - **Mode Memory**: Returns to previous mode with `cluck`
+
+## Installation
+
+### Dependencies
+
+This repo requires:
+- [**Talon Beta**](https://talon.wiki/Help/beta_talon/)
+- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.5.0+)
+- [**talon-mouse-rig**](https://github.com/rokubop/mouse_rig) (v0.5.0+)
+- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.12.3+)
+
+### Install
+
+Clone the dependencies and this repo into your [Talon](https://talonvoice.com/) user directory:
+
+```sh
+# mac and linux
+cd ~/.talon/user
+
+# windows
+cd ~/AppData/Roaming/talon/user
+
+# Dependencies
+git clone https://github.com/rokubop/talon-input-map/
+git clone https://github.com/rokubop/mouse_rig
+git clone https://github.com/rokubop/talon-ui-elements
+
+# This repo
+git clone <github_url>  # Add github URL to manifest.json
+```
+
+> **Note**: Review code from unfamiliar sources before installing.
+> Restart Talon after installing dependencies.
 
 ## Modes
 
@@ -89,12 +126,6 @@ All settings are in `config.py`:
 - `pop`: Click and exit (remembers last mode)
 - `cluck`: Exit and return to previous mode
 - `palate`: Dynamic utility action
-
-## Installation
-
-1. Place in your Talon user directory
-2. Requires `actions.user.ui_elements` for UI
-3. Requires mouse movement actions from Talon Community
 
 ## Usage
 

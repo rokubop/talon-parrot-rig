@@ -5,14 +5,14 @@ from .src.constants import *
 MARK_NAMES = ["ah", "oh", "t", "sh", "ss", "mm", "guh", "pop", "palate"]
 
 mod = Module()
-mod.mode("parrot_v7", "parrot mode v7")
+mod.mode("parrot_mode_interactive", "parrot mode v7")
 
-ctx_parrot_mode = Context()
-ctx_parrot_mode.matches = """
-mode: user.parrot_v7
+ctx_parrot_mode_interactive = Context()
+ctx_parrot_mode_interactive.matches = """
+mode: user.parrot_mode_interactive
 """
 
-parrot_config_common = {
+input_map_common = {
     "ee":     ("stop", parrot_actions.stopper),
     "pop":    ("click exit", parrot_actions.click_exit),
     "cluck":  ("exit", parrot_actions.exit),
@@ -33,7 +33,7 @@ parrot_config_common = {
     "er pop": ("mark or goto pop", lambda: parrot_actions.mouse_pos_mark_or_teleport("pop")),
     "er palate": ("mark or goto palate", lambda: parrot_actions.mouse_pos_mark_or_teleport("palate")),
     "palate": ("hold or utility", parrot_actions.utility),
-    "tut":        ("windows zoom out", lambda: actions.key("win-keypad_minus")),
+    # "tut":        (" ", lambda: None),
     "tut mm":     ("left click drag", lambda: parrot_actions.mouse_click(hold=True)),
     "tut oh":     ("right click", lambda: parrot_actions.mouse_click(button=1)),
     "tut t":      ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
@@ -48,8 +48,8 @@ parrot_config_common = {
     "tut shush":  ("settings", parrot_actions.show_settings),
 }
 
-parrot_config_default = {
-    **parrot_config_common,
+input_map_default = {
+    **input_map_common,
     "mm":         ("click", parrot_actions.mouse_click),
     "hiss":       ("scroll down", lambda: parrot_actions.scroll("down")),
     "hiss_stop":  ("", parrot_actions.scroll_stop_soft),
@@ -57,8 +57,8 @@ parrot_config_default = {
     "shush_stop": ("", parrot_actions.scroll_stop_soft),
 }
 
-parrot_config_move = {
-    **parrot_config_common,
+input_map_move = {
+    **input_map_common,
     "ah":         ("move left", lambda: parrot_actions.mouse_move_or_slow_dir("left")),
     "oh":         ("move right", lambda: parrot_actions.mouse_move_or_slow_dir("right")),
     "t":          ("move up", lambda: parrot_actions.mouse_move_or_slow_dir("up")),
@@ -71,8 +71,8 @@ parrot_config_move = {
     "hiss_stop":  ("", lambda: None),
 }
 
-parrot_config_head = {
-    **parrot_config_common,
+input_map_head = {
+    **input_map_common,
     "mm":         ("click", parrot_actions.click_with_mode_behavior),
     "hiss":       ("scroll down", lambda: parrot_actions.scroll_with_mode_reset("down")),
     "hiss_stop":  ("", parrot_actions.scroll_stop_soft),
@@ -80,8 +80,8 @@ parrot_config_head = {
     "shush_stop": ("", parrot_actions.scroll_stop_soft),
 }
 
-parrot_config_full = {
-    **parrot_config_common,
+input_map_full = {
+    **input_map_common,
     "mm":         ("click temp stop", parrot_actions.click_with_mode_behavior),
     "tut":        ("windows zoom out", lambda: actions.key("win-keypad_minus")),
     "tut tut":    ("reset zoom", lambda: actions.key("win-escape")),
@@ -91,7 +91,7 @@ parrot_config_full = {
     "shush_stop": ("", parrot_actions.scroll_stop_soft_temp),
 }
 
-parrot_config_window = {
+input_map_window = {
     "ah": ("snap left", lambda: actions.user.snap_window_to_position("left")),
     "oh": ("snap right", lambda: actions.user.snap_window_to_position("right")),
     "eh": ("snap full", lambda: actions.user.snap_window_to_position("full")),
@@ -115,7 +115,7 @@ parrot_config_window = {
     "tut oh": ("app switch 0", lambda: parrot_actions.app_switch(0)),
 }
 
-parrot_config_keyboard = {
+input_map_keyboard = {
     "ah": ("left arrow", lambda: actions.key("left")),
     "oh": ("right arrow", lambda: actions.key("right")),
     "t": ("up arrow", lambda: actions.key("up")),
@@ -128,7 +128,7 @@ parrot_config_keyboard = {
     "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
 }
 
-parrot_config_number = {
+input_map_number = {
     "oh": ("0", lambda: actions.key("0")),
     "ee": ("1", lambda: actions.key("1")),
     "er": ("2", lambda: actions.key("2")),
@@ -145,47 +145,51 @@ parrot_config_number = {
     "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
 }
 
-parrot_config = {
-    "default": parrot_config_default,
-    "move": parrot_config_move,
-    "head": parrot_config_head,
-    "full": parrot_config_full,
-    "window": parrot_config_window,
-    "keyboard": parrot_config_keyboard,
-    "number": parrot_config_number,
+input_map = {
+    "default": input_map_default,
+    "move": input_map_move,
+    "head": input_map_head,
+    "full": input_map_full,
+    "window": input_map_window,
+    "keyboard": input_map_keyboard,
+    "number": input_map_number,
 }
 
-@ctx_parrot_mode.action_class("user")
+@ctx_parrot_mode_interactive.action_class("user")
 class Actions:
-    def parrot_config():
-        return parrot_config
+    def input_map():
+        return input_map
 
 @mod.action_class
 class Actions:
-    def parrot_mode_v7_enable():
+    def parrot_mode_interactive_enable():
         """Enable parrot mode v7"""
         parrot_actions.parrot_mode_enable()
 
-    def parrot_mode_v7_disable():
+    def parrot_mode_interactive_disable():
         """Disable parrot mode v7"""
         parrot_actions.parrot_mode_disable()
 
-    def parrot_mode_v7_toggle():
+    def parrot_mode_interactive_toggle():
         """Toggle parrot mode v7"""
         parrot_actions.parrot_mode_toggle()
 
-    def parrot_mode_get_state():
+    def parrot_mode_interactive_get_state():
         """Get parrot mode v7 state"""
-        return parrot_actions.parrot_mode_get_state()
+        return parrot_actions.parrot_mode_interactive_get_state()
 
-    def parrot_mode_v7_tracking_activate_full():
+    def parrot_mode_interactive_tracking_activate_full():
         """Activate full tracking mode"""
         parrot_actions.tracking_activate_full()
 
-    def parrot_mode_v7_reload():
+    def parrot_mode_interactive_reload():
         """Reload parrot mode v7"""
         parrot_actions.reload_files()
 
-    def parrot_mode_v7_get_mode():
+    def parrot_mode_interactive_get_mode():
         """Get current mode for parrot mode"""
         return parrot_actions.parrot_mode_get_mode()
+
+    def parrot_mode_interactive_show_help():
+        """Show parrot mode v7 help/cheatsheet"""
+        parrot_actions.show_cheatsheet()

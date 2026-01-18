@@ -21,13 +21,11 @@ class Movement():
     def _move_in_direction(self, dx, dy):
         rig = actions.user.mouse_rig()
         boost_large = rig.state.layer("boost_large")
-        mode = actions.user.parrot_mode_v7_get_mode()
-        print("mode", mode)
+        mode = actions.user.parrot_mode_interactive_get_mode()
 
         if boost_large:
-            # Early turns slow( reloadb
+            # Early turns slow
             # Later turns fast
-            print(boost_large)
             control_factor = min(boost_large.time_alive / 2.0, 0.75)
             turn_time = int(2000 - (1500 * control_factor))
             rig.direction.to(dx, dy).over(turn_time, "ease_out2")
@@ -68,7 +66,7 @@ class Movement():
         # print("state layer", rig.state.layer("boost_large"))
         # print("state layer speed", rig.state.layer("boost_large").speed)
         if rig.state.layer("boost_large"):
-            amount = self.boost_large_amount + rig.state.layer("boost_large").value
+            amount = self.boost_large_amount + rig.state.layer("boost_large").current
         else:
             amount = self.boost_large_amount
 

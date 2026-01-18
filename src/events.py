@@ -40,13 +40,12 @@ class ParrotEventManager:
 
     def set_mode(self, mode: str, update_ui: bool = True):
         if mode != self._current_mode:
-            print("Setting mode to:", mode)
-            has_parrot_config = not mode in ["boost", "glide"]
+            has_input_map = not mode in ["boost", "glide"]
             self._previous_mode = self._current_mode
             self._current_mode = mode
 
-            if has_parrot_config:
-                actions.user.parrot_config_set_mode(mode)
+            if has_input_map:
+                actions.user.input_map_mode_set(mode)
 
             self.emit("mode_changed", {
                 "current_mode": self._current_mode,

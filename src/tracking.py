@@ -1,7 +1,7 @@
 from talon import Module, actions, storage, ctrl
 
 class Tracking():
-    FULL_TRACKING_ID = "parrot_v7.full_tracking"
+    FULL_TRACKING_ID = "parrot_mode_interactive.full_tracking"
 
     def __init__(self):
         self.is_tracking = False

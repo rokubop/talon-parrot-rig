@@ -12,7 +12,7 @@ def only_current_mode_table():
     text, state = actions.user.ui_elements(["text", "state"])
 
     current_mode = state.get("mode", "default")
-    mode_config = actions.user.parrot_config().get(current_mode, {})
+    mode_config = actions.user.input_map().get(current_mode, {})
 
     # Create header row
     header_row = tr()[
@@ -42,7 +42,7 @@ def cheatsheet_ui():
     table, tr, td, th = actions.user.ui_elements(["table", "tr", "td", "th"])
     state, button, svg, circle = actions.user.ui_elements(["state", "button", "svg", "circle"])
 
-    all_modes_config = actions.user.parrot_config()
+    all_modes_config = actions.user.input_map()
     current_mode, set_current_mode = state.use("mode", "default")
 
     # Get all unique noises across all modes

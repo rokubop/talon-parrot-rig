@@ -1,5 +1,8 @@
-parrot(cluck): user.parrot_mode_v7_enable()
-parrot(palate_click): user.parrot_v7_repeater()
-parrot(tut): user.parrot_v7_reverser()
+parrot(cluck): user.parrot_mode_interactive_enable()
+parrot(palate_click): user.parrot_mode_interactive_repeater()
+parrot(tut): user.parrot_mode_interactive_reverser()
 
-parrot [mode] [reload | reset]: user.parrot_mode_v7_reload()
+parrot mode help: user.parrot_mode_interactive_show_help()
+
+# If you are updating inputs/actions, it may be necessary to reload/reset parrot mode
+parrot mode [reload | reset]: user.parrot_mode_interactive_reload()

@@ -32,13 +32,3 @@ class Phrase:
         self.start_listening()
 
 phrase = Phrase()
-
-@mod.action_class
-class Actions:
-    def test_start_listening():
-        """Start listening for a phrase"""
-        phrase.start_listening()
-
-    def test_stop_listening():
-        """Stop listening for a phrase"""
-        phrase.stop_listening()
