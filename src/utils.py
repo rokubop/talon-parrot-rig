@@ -21,7 +21,7 @@ class Utils:
             print(f"Error updating {filename}: {e}")
 
     def reload_files(self):
-        actions.user.parrot_mode_interactive_disable()
+        actions.user.parrot_rig_disable()
 
         src_dir = os.path.dirname(__file__)
         main_dir = os.path.dirname(os.path.join("..", __file__))

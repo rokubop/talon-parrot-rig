@@ -21,7 +21,7 @@ class Movement():
     def _move_in_direction(self, dx, dy):
         rig = actions.user.mouse_rig()
         boost_large = rig.state.layer("boost_large")
-        mode = actions.user.parrot_mode_interactive_get_mode()
+        mode = actions.user.parrot_rig_get_mode()
 
         if boost_large:
             # Early turns slow

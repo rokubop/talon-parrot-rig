@@ -5,11 +5,11 @@ from .src.constants import *
 MARK_NAMES = ["ah", "oh", "t", "sh", "ss", "mm", "guh", "pop", "palate"]
 
 mod = Module()
-mod.mode("parrot_mode_interactive", "parrot mode v7")
+mod.mode("parrot_rig", "parrot rig")
 
-ctx_parrot_mode_interactive = Context()
-ctx_parrot_mode_interactive.matches = """
-mode: user.parrot_mode_interactive
+ctx_parrot_rig = Context()
+ctx_parrot_rig.matches = """
+mode: user.parrot_rig
 """
 
 input_map_common = {
@@ -155,41 +155,41 @@ input_map = {
     "number": input_map_number,
 }
 
-@ctx_parrot_mode_interactive.action_class("user")
+@ctx_parrot_rig.action_class("user")
 class Actions:
     def input_map():
         return input_map
 
 @mod.action_class
 class Actions:
-    def parrot_mode_interactive_enable():
+    def parrot_rig_enable():
         """Enable parrot mode v7"""
         parrot_actions.parrot_mode_enable()
 
-    def parrot_mode_interactive_disable():
+    def parrot_rig_disable():
         """Disable parrot mode v7"""
         parrot_actions.parrot_mode_disable()
 
-    def parrot_mode_interactive_toggle():
+    def parrot_rig_toggle():
         """Toggle parrot mode v7"""
         parrot_actions.parrot_mode_toggle()
 
-    def parrot_mode_interactive_get_state():
+    def parrot_rig_get_state():
         """Get parrot mode v7 state"""
-        return parrot_actions.parrot_mode_interactive_get_state()
+        return parrot_actions.parrot_rig_get_state()
 
-    def parrot_mode_interactive_tracking_activate_full():
+    def parrot_rig_tracking_activate_full():
         """Activate full tracking mode"""
         parrot_actions.tracking_activate_full()
 
-    def parrot_mode_interactive_reload():
+    def parrot_rig_reload():
         """Reload parrot mode v7"""
         parrot_actions.reload_files()
 
-    def parrot_mode_interactive_get_mode():
+    def parrot_rig_get_mode():
         """Get current mode for parrot mode"""
         return parrot_actions.parrot_mode_get_mode()
 
-    def parrot_mode_interactive_show_help():
+    def parrot_rig_show_help():
         """Show parrot mode v7 help/cheatsheet"""
         parrot_actions.show_cheatsheet()

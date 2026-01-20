@@ -1,4 +1,4 @@
-mode: user.parrot_mode_interactive
+mode: user.parrot_rig
 -
 ^<phrase>$: skip()
 parrot(eh): user.input_map_handle("eh")

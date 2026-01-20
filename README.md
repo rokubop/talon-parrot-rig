@@ -1,8 +1,7 @@
 # Parrot Mode v7
 
-![Version](https://img.shields.io/badge/version-7.0.0-blue)
+![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
-![Talon Beta](https://img.shields.io/badge/talon%20beta-required-red)
 
 An advanced parrot mode implementation with 7 distinct modes and an event-driven HUD system.
 

@@ -1,56 +1,53 @@
 {
-  "name": "Parrot Mode v7",
-  "title": "",
-  "description": "Advanced parrot mode with 7 distinct modes and event-driven HUD system",
-  "version": "7.0.0",
+  "name": "talon-parrot-mode-roku",
+  "title": "Parrot Mode Roku",
+  "description": "Add a description of your Talon package here.",
+  "version": "0.1.0",
   "status": "experimental",
-  "namespace": "user.parrot_mode_interactive",
+  "namespace": "user.parrot_rig",
   "github": "",
   "preview": "",
-  "author": "roku",
+  "author": "",
   "tags": [],
+  "requires": ["eyeTracker", "parrot", "talonBeta"],
   "dependencies": {
     "talon-input-map": {
-      "version": "0.5.0",
+      "min_version": "0.6.0",
       "namespace": "user.input_map",
       "github": "https://github.com/rokubop/talon-input-map/"
     },
     "talon-mouse-rig": {
-      "version": "0.5.0",
+      "min_version": "0.5.0",
       "namespace": "user.mouse_rig",
-      "github": "https://github.com/rokubop/mouse_rig"
+      "github": "https://github.com/rokubop/talon-mouse-rig"
     },
     "talon-ui-elements": {
-      "version": "0.12.3",
+      "min_version": "0.13.0",
       "namespace": "user.ui_elements",
       "github": "https://github.com/rokubop/talon-ui-elements"
     }
   },
   "devDependencies": {},
   "contributes": {
-    "modes": [
-      "user.parrot_mode_interactive"
-    ],
+    "modes": ["user.parrot_rig"],
     "actions": [
-      "user.parrot_mode_interactive_disable",
-      "user.parrot_mode_interactive_enable",
-      "user.parrot_mode_interactive_get_mode",
-      "user.parrot_mode_interactive_get_state",
-      "user.parrot_mode_interactive_reload",
-      "user.parrot_mode_interactive_repeater",
-      "user.parrot_mode_interactive_reverser",
-      "user.parrot_mode_interactive_show_help",
-      "user.parrot_mode_interactive_toggle",
-      "user.parrot_mode_interactive_tracking_activate_full",
-      "user.parrot_mode_interactive_version"
+      "user.parrot_rig_disable",
+      "user.parrot_rig_enable",
+      "user.parrot_rig_get_mode",
+      "user.parrot_rig_get_state",
+      "user.parrot_rig_reload",
+      "user.parrot_rig_repeater",
+      "user.parrot_rig_reverser",
+      "user.parrot_rig_show_help",
+      "user.parrot_rig_toggle",
+      "user.parrot_rig_tracking_activate_full",
+      "user.parrot_rig_version"
     ]
   },
   "depends": {
     "actions": [
-      "app.window_next",
-      "app.window_previous",
-      "core.repeat_command",
       "user.input_map",
+      "user.input_map_handle",
       "user.input_map_mode_set",
       "user.mouse_move_smooth_from_to",
       "user.mouse_rig",
@@ -64,10 +61,10 @@
       "user.window_minimize"
     ]
   },
-  "requiresTalonBeta": true,
   "validateDependencies": true,
   "_generator": "talon-manifest-generator",
   "_generatorVersion": "2.0.0",
   "_generatorRequiresVersionAction": true,
-  "_generatorStrictNamespace": true
+  "_generatorStrictNamespace": true,
+  "_generatorFrozenFields": []
 }

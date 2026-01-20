@@ -186,12 +186,12 @@ class ParrotActions:
         elif action == "repeat_last":
             actions.core.repeat_command()
         elif action == "repeat_phrase":
-            actions.user.parrot_mode_interactive_repeater()
+            actions.user.parrot_rig_repeater()
 
     def parrot_mode_enable(self):
         self._parrot_mode_enabled = True
         actions.mode.disable("command")
-        actions.mode.enable("user.parrot_mode_interactive")
+        actions.mode.enable("user.parrot_rig")
         # event_manager.set_parrot_enabled(True)
         event_manager.set_mode("default")
         ui_manager.show()
@@ -221,11 +221,11 @@ class ParrotActions:
         if self._is_left_click_held:
             self.click_release()
 
-        actions.mode.disable("user.parrot_mode_interactive")
+        actions.mode.disable("user.parrot_rig")
         actions.mode.enable("command")
         print("Parrot mode disabled")
 
-    def parrot_mode_interactive_get_state(self):
+    def parrot_rig_get_state(self):
         return {
             "enabled": self._parrot_mode_enabled,
             "tracking": tracking.is_tracking,
