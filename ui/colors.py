@@ -5,9 +5,6 @@ MODE_COLORS = {
     "glide": "#2AE3B8",
     "head": "#E5A64D",
     "full": "#A7D3FF",
-    "window": "#E35050",
-    "keyboard": "#BD10E0",
-    "number": "#391CF8",
 }
 
 

@@ -1,4 +1,4 @@
-from talon import Module, Context, actions, app
+from talon import Module, Context, actions, ctrl
 from .src.parrot_actions import parrot_actions
 from .src.constants import *
 
@@ -91,68 +91,11 @@ input_map_full = {
     "shush_stop": ("", parrot_actions.scroll_stop_soft_temp),
 }
 
-input_map_window = {
-    "ah": ("snap left", lambda: actions.user.snap_window_to_position("left")),
-    "oh": ("snap right", lambda: actions.user.snap_window_to_position("right")),
-    "eh": ("snap full", lambda: actions.user.snap_window_to_position("full")),
-    "guh": ("window minimize", actions.user.window_minimize),
-    "hiss": ("screen right", parrot_actions.screen_right),
-    "shush": ("screen left", parrot_actions.screen_left),
-    "pop": ("window cycle next", actions.app.window_next),
-    "palate": ("window cycle previous", actions.app.window_previous),
-    "er": ("window close", parrot_actions.window_close),
-    "tut": ("window swap", parrot_actions.window_swap),
-    "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
-    "tut ee": ("app switch 1", lambda: parrot_actions.app_switch(1)),
-    "tut er": ("app switch 2", lambda: parrot_actions.app_switch(2)),
-    "tut ah": ("app switch 3", lambda: parrot_actions.app_switch(3)),
-    "tut hiss": ("app switch 4", lambda: parrot_actions.app_switch(4)),
-    "tut shush": ("app switch 5", lambda: parrot_actions.app_switch(5)),
-    "tut mm": ("app switch 6", lambda: parrot_actions.app_switch(6)),
-    "tut guh": ("app switch 7", lambda: parrot_actions.app_switch(7)),
-    "tut t": ("app switch 8", lambda: parrot_actions.app_switch(8)),
-    "tut eh": ("app switch 9", lambda: parrot_actions.app_switch(9)),
-    "tut oh": ("app switch 0", lambda: parrot_actions.app_switch(0)),
-}
-
-input_map_keyboard = {
-    "ah": ("left arrow", lambda: actions.key("left")),
-    "oh": ("right arrow", lambda: actions.key("right")),
-    "t": ("up arrow", lambda: actions.key("up")),
-    "guh": ("down arrow", lambda: actions.key("down")),
-    "palate": ("tab", lambda: actions.key("tab")),
-    "hiss": ("backspace", lambda: actions.key("backspace")),
-    "shush": ("delete", lambda: actions.key("delete")),
-    "tut": ("escape", lambda: actions.key("escape")),
-    "pop": ("enter", lambda: actions.key("enter")),
-    "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
-}
-
-input_map_number = {
-    "oh": ("0", lambda: actions.key("0")),
-    "ee": ("1", lambda: actions.key("1")),
-    "er": ("2", lambda: actions.key("2")),
-    "ah": ("3", lambda: actions.key("3")),
-    "hiss": ("4", lambda: actions.key("4")),
-    "shush": ("5", lambda: actions.key("5")),
-    "mm": ("6", lambda: actions.key("6")),
-    "guh": ("7", lambda: actions.key("7")),
-    "t": ("8", lambda: actions.key("8")),
-    "eh": ("9", lambda: actions.key("9")),
-    "palate": ("tab", lambda: actions.key("tab")),
-    "tut": ("escape", lambda: actions.key("escape")),
-    "pop": ("enter", lambda: actions.key("enter")),
-    "cluck": ("return to previous", parrot_actions.return_to_previous_mode),
-}
-
 input_map = {
     "default": input_map_default,
     "move": input_map_move,
     "head": input_map_head,
     "full": input_map_full,
-    "window": input_map_window,
-    "keyboard": input_map_keyboard,
-    "number": input_map_number,
 }
 
 @ctx_parrot_rig.action_class("user")
@@ -163,19 +106,48 @@ class Actions:
 @mod.action_class
 class Actions:
     def parrot_rig_enable():
-        """Enable parrot mode v7"""
+        """Enable parrot rig"""
         parrot_actions.parrot_mode_enable()
 
     def parrot_rig_disable():
-        """Disable parrot mode v7"""
+        """Disable parrot rig"""
         parrot_actions.parrot_mode_disable()
 
     def parrot_rig_toggle():
-        """Toggle parrot mode v7"""
+        """Toggle parrot rig"""
         parrot_actions.parrot_mode_toggle()
 
+    def parrot_rig_click():
+        """Parrot rig click"""
+        ctrl.mouse_click(button=0, hold=16000)
+        # or parrot_actions.mouse_click() for stopping behaviors
+
+    def parrot_rig_repeater():
+        """Parrot rig repeater"""
+        parrot_actions.repeat()
+
+    def parrot_rig_reverser():
+        """Parrot rig reverser"""
+        parrot_actions.reverse_repeat()
+
+    # def parrot_rig_utility_1():
+    #     """Parrot rig utility 1"""
+    #     parrot_actions.utility_1()
+
+    # def parrot_rig_utility_chooser_1():
+    #     """Parrot rig utility chooser 1"""
+    #     parrot_actions.utility_chooser_1()
+
+    # def parrot_rig_utility_2():
+    #     """Parrot rig utility 2"""
+    #     parrot_actions.utility_2()
+
+    # def parrot_rig_utility_chooser_2():
+    #     """Parrot rig utility chooser 2"""
+    #     parrot_actions.utility_chooser_2()
+
     def parrot_rig_get_state():
-        """Get parrot mode v7 state"""
+        """Get parrot rig state"""
         return parrot_actions.parrot_rig_get_state()
 
     def parrot_rig_tracking_activate_full():
@@ -183,7 +155,7 @@ class Actions:
         parrot_actions.tracking_activate_full()
 
     def parrot_rig_reload():
-        """Reload parrot mode v7"""
+        """Reload parrot rig"""
         parrot_actions.reload_files()
 
     def parrot_rig_get_mode():
@@ -191,5 +163,5 @@ class Actions:
         return parrot_actions.parrot_mode_get_mode()
 
     def parrot_rig_show_help():
-        """Show parrot mode v7 help/cheatsheet"""
+        """Show parrot rig help/cheatsheet"""
         parrot_actions.show_cheatsheet()

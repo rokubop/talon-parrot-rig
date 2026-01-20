@@ -78,13 +78,3 @@ def reverse():
             actions.core.repeat_command()
         except IndexError:
             pass  # No command history yet
-
-@mod.action_class
-class Actions:
-    def parrot_rig_repeater():
-        """Parrot mode v7 repeater"""
-        repeat()
-
-    def parrot_rig_reverser():
-        """Parrot mode v7 reverser"""
-        reverse()

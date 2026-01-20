@@ -1,20 +1,17 @@
-# Parrot Mode v7
+# Parrot Rig
 
 ![Version](https://img.shields.io/badge/version-0.1.0-blue)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 
-An advanced parrot mode implementation with 7 distinct modes and an event-driven HUD system.
+An advanced parrot mode implementation with 4 distinct modes and an event-driven HUD system.
 
 ## Features
 
-- **7 Distinct Modes**: Each with unique colors and behaviors
+- **4 Distinct Modes**: Each with unique colors and behaviors
   - DEF (Default): Basic mode with limited actions
   - MOV (Move): Movement mode with boosting
   - HEAD (Head): Head tracking mode
   - FULL (Full): Full tracking mode with temporary stops
-  - WIN (Window): Window management mode
-  - KEYB (Keyboard): Keyboard navigation mode
-  - NUMB (Number): Number input mode
 
 - **Event-Driven HUD**: Bottom-right corner display showing:
   - Current mode with color-coded circle
@@ -84,21 +81,6 @@ git clone <github_url>  # Add github URL to manifest.json
 - Activated by `er` noise
 - Full tracking with temporary stops
 - Actions pause tracking briefly, then resume
-
-### Window Mode
-- Activated by `tut cluck`
-- Window snapping and management
-- Application switching with `tut + number`
-
-### Keyboard Mode
-- Activated by `tut pop`
-- Arrow key navigation
-- Standard keyboard actions
-
-### Number Mode
-- Activated by `tut t`
-- Number input with specific noise mappings
-- Quick numeric entry
 
 ## Configuration
 

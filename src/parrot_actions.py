@@ -7,7 +7,7 @@ from .position import position
 from .keys import keys
 from .phrase import phrase
 from .events import event_manager
-from .utils import utils, get_screen
+from .repeater import repeat, reverse
 from ..user_settings import (
     CLICK_BEHAVIOR,
     FULL_MODE_SETTINGS
@@ -92,6 +92,12 @@ class ParrotActions:
     def click_await_one_phrase(self):
         self.mouse_click()
         self.await_one_phrase()
+
+    def repeat(self):
+        repeat()
+
+    def reverse_repeat(self):
+        reverse()
 
     def await_one_phrase(self):
         self.parrot_mode_disable()
@@ -297,38 +303,7 @@ class ParrotActions:
         self.stop_revive_tracking()
         self.revive_tracking_job = cron.after("300ms", tracking.activate)
 
-    def window_snap_left(self):
-        actions.key("win-left")
 
-    def window_snap_right(self):
-        actions.key("win-right")
-
-    def window_snap_full(self):
-        actions.key("win-up")
-
-    def window_close(self):
-        actions.key("alt-f4")
-
-    def window_swap(self):
-        actions.key("alt-tab")
-
-    def screen_left(self):
-        actions.key("win-shift-left")
-
-    def screen_right(self):
-        actions.key("win-shift-right")
-
-    def app_switch(self, number: int):
-        actions.key(f"win-{number}")
-
-    def set_window_mode(self):
-        event_manager.set_mode("window")
-
-    def set_keyboard_mode(self):
-        event_manager.set_mode("keyboard")
-
-    def set_number_mode(self):
-        event_manager.set_mode("number")
 
     def show_utility_selector(self):
         ui_manager.show_utility_selector()

@@ -1,6 +1,6 @@
 {
-  "name": "talon-parrot-mode-roku",
-  "title": "Parrot Mode Roku",
+  "name": "talon-parrot-rig",
+  "title": "Parrot Rig",
   "description": "Add a description of your Talon package here.",
   "version": "0.1.0",
   "status": "experimental",
@@ -9,7 +9,11 @@
   "preview": "",
   "author": "",
   "tags": [],
-  "requires": ["eyeTracker", "parrot", "talonBeta"],
+  "requires": [
+    "eyeTracker",
+    "parrot",
+    "talonBeta"
+  ],
   "dependencies": {
     "talon-input-map": {
       "min_version": "0.6.0",
@@ -29,8 +33,11 @@
   },
   "devDependencies": {},
   "contributes": {
-    "modes": ["user.parrot_rig"],
+    "modes": [
+      "user.parrot_rig"
+    ],
     "actions": [
+      "user.parrot_rig_click",
       "user.parrot_rig_disable",
       "user.parrot_rig_enable",
       "user.parrot_rig_get_mode",
@@ -51,14 +58,12 @@
       "user.input_map_mode_set",
       "user.mouse_move_smooth_from_to",
       "user.mouse_rig",
-      "user.snap_window_to_position",
       "user.ui_elements",
       "user.ui_elements_hide",
       "user.ui_elements_is_active",
       "user.ui_elements_set_state",
       "user.ui_elements_show",
-      "user.ui_elements_toggle",
-      "user.window_minimize"
+      "user.ui_elements_toggle"
     ]
   },
   "validateDependencies": true,

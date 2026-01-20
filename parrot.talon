@@ -1,4 +1,4 @@
-parrot(pop): user.on_pop()
+parrot(pop): user.parrot_rig_click()
 parrot(cluck): user.parrot_rig_enable()
 parrot(palate_click): user.parrot_rig_repeater()
 parrot(tut): user.parrot_rig_reverser()
