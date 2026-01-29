@@ -24,8 +24,6 @@ class Movement():
         mode = actions.user.parrot_rig_get_mode()
 
         if boost_large:
-            # Early turns slow
-            # Later turns fast
             control_factor = min(boost_large.time_alive / 2.0, 0.75)
             turn_time = int(2000 - (1500 * control_factor))
             rig.direction.to(dx, dy).over(turn_time, "ease_out2")
@@ -61,10 +59,6 @@ class Movement():
                 .revert(1500, "ease_in_out").then(on_complete)
             return
 
-        # print("state", rig.state)
-        # print("state base", rig.state.base)
-        # print("state layer", rig.state.layer("boost_large"))
-        # print("state layer speed", rig.state.layer("boost_large").speed)
         if rig.state.layer("boost_large"):
             amount = self.boost_large_amount + rig.state.layer("boost_large").current
         else:
@@ -97,20 +91,3 @@ class Movement():
         # return info["is_moving"]
 
 movement = Movement()
-
-def mouse_move_smooth_to_gaze():
-    x = actions.mouse_x()
-    y = actions.mouse_y()
-    actions.tracking.jump()
-    gaze_x = actions.mouse_x()
-    gaze_y = actions.mouse_y()
-    actions.mouse_move(x, y)
-    actions.user.mouse_move_smooth_from_to(x, y, gaze_x, gaze_y)
-
-def mouse_move_smooth_from_gaze():
-    x = actions.mouse_x()
-    y = actions.mouse_y()
-    actions.tracking.jump()
-    gaze_x = actions.mouse_x()
-    gaze_y = actions.mouse_y()
-    actions.user.mouse_move_smooth_from_to(gaze_x, gaze_y, x, y)
