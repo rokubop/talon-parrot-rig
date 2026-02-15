@@ -23,7 +23,7 @@ class Movement():
         """Long speed pulse (shush) — ramp up 1s, revert 1s"""
         self._cancel_boost_revert()
         actions.user.mouse_rig_boost(
-            self.boost_amount, over_ms=1000, release_ms=1000, max_stacks=0)
+            self.boost_amount, over_ms=1000, release_ms=1000)
         if on_complete:
             self._boost_revert_job = cron.after("2000ms", on_complete)
 
