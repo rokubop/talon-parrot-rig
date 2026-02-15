@@ -28,9 +28,9 @@ An advanced parrot mode implementation with 4 distinct modes and an event-driven
 
 This repo requires:
 - [**Talon Beta**](https://talon.wiki/Help/beta_talon/)
-- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.5.0+)
+- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.6.0+)
 - [**talon-mouse-rig**](https://github.com/rokubop/mouse_rig) (v0.5.0+)
-- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.12.3+)
+- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.14.0+)
 
 ### Install
 

@@ -50,12 +50,12 @@ def repeat():
     global last_palate, last_tut
 
     if last_palate:
-        actions.repeat_command(last_palate)
+        actions.repeat_phrase(last_palate)
     elif last_tut:
-        actions.repeat_command(last_tut)
+        actions.repeat_phrase(last_tut)
     else:
         try:
-            actions.core.repeat_command()
+            actions.core.repeat_phrase()
         except IndexError:
             pass  # No command history yet
 
@@ -70,11 +70,11 @@ def reverse():
             actions.mimic(opposites[last_palate])
         else:
             try:
-                actions.core.repeat_command()
+                actions.core.repeat_phrase()
             except IndexError:
                 pass  # No command history yet
     else:
         try:
-            actions.core.repeat_command()
+            actions.core.repeat_phrase()
         except IndexError:
             pass  # No command history yet

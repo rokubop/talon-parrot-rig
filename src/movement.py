@@ -20,7 +20,7 @@ class Movement():
 
     def _move_in_direction(self, dx, dy):
         rig = actions.user.mouse_rig()
-        boost_large = rig.state.layer("boost_large")
+        boost_large = rig.state.layers["boost_large"]
         mode = actions.user.parrot_rig_get_mode()
 
         if boost_large:
@@ -54,13 +54,13 @@ class Movement():
     def boost_large(self, on_complete):
         rig = actions.user.mouse_rig()
 
-        if rig.state.layer("boost_small"):
+        if rig.state.layers["boost_small"]:
             rig.layer("boost_large", order=2).speed.offset.to(self.boost_large_amount * 2) \
                 .revert(1500, "ease_in_out").then(on_complete)
             return
 
-        if rig.state.layer("boost_large"):
-            amount = self.boost_large_amount + rig.state.layer("boost_large").current
+        if rig.state.layers["boost_large"]:
+            amount = self.boost_large_amount + rig.state.layers["boost_large"].current
         else:
             amount = self.boost_large_amount
 

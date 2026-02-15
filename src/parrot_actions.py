@@ -23,7 +23,6 @@ class ParrotActions:
 
     def mouse_move_or_slow_dir(self, direction: str):
         rig = actions.user.mouse_rig()
-        print(rig.state.base)
         cardinal = rig.state.base.direction.to_cardinal()
         if movement.is_moving() and cardinal == direction:
             if any("boost" in layer for layer in rig.state.layers):
