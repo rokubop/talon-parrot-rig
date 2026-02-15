@@ -1,11 +1,11 @@
 MOVEMENT_SETTINGS = {
     "speed": 3,
+    "boost": 10,
     "boost_small": 9,
-    "boost_large": 10,
 }
 
 SCROLLING_SETTINGS = {
-    "speed": 0.8,
+    "speed": 0.4,
 }
 
 FULL_MODE_SETTINGS = {

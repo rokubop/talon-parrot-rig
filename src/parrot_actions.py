@@ -13,6 +13,7 @@ from ..user_settings import (
     FULL_MODE_SETTINGS
 )
 from .constants import *
+from .utils import utils
 
 class ParrotActions:
     def __init__(self):
@@ -22,11 +23,8 @@ class ParrotActions:
         self._stop_time_job = None
 
     def mouse_move_or_slow_dir(self, direction: str):
-        rig = actions.user.mouse_rig()
-        cardinal = rig.state.base.direction.to_cardinal()
+        cardinal = actions.user.mouse_rig_state_direction_cardinal()
         if movement.is_moving() and cardinal == direction:
-            if any("boost" in layer for layer in rig.state.layers):
-                rig.bake()
             movement.slower()
         else:
             self.move(direction)
@@ -38,10 +36,8 @@ class ParrotActions:
         if event_manager.get_mode() != "move":
             position.mouse_stopped_pos_save()
         movement.move(direction)
-        rig = actions.user.mouse_rig()
-        if event_manager.get_mode() == "glide":
-            return
-        event_manager.set_mode("boost" if "boost_large" in rig.state.layers else "move")
+        if event_manager.get_mode() not in ("glide", "boost"):
+            event_manager.set_mode("move")
 
     def mouse_move_dir(self, direction: str):
         self.move(direction)
@@ -53,9 +49,9 @@ class ParrotActions:
         else:
             event_manager.set_mode("glide")
 
-    def mouse_boost_large(self):
+    def mouse_boost(self):
         event_manager.set_mode("boost")
-        movement.boost_large(
+        movement.boost(
             lambda: event_manager.return_to_previous_mode() \
                 if event_manager.get_mode() == "boost" else None)
 

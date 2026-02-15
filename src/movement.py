@@ -1,93 +1,50 @@
-from talon import actions, ctrl
+from talon import actions, cron
 from ..user_settings import MOVEMENT_SETTINGS
 
 class Movement():
     def __init__(self):
         self.speed = MOVEMENT_SETTINGS["speed"]
+        self.boost_amount = MOVEMENT_SETTINGS["boost"]
         self.boost_small_amount = MOVEMENT_SETTINGS["boost_small"]
-        self.boost_large_amount = MOVEMENT_SETTINGS["boost_large"]
+        self._boost_revert_job = None
 
     def move(self, direction):
-        direction_map = {
-            "left": (-1, 0),
-            "right": (1, 0),
-            "up": (0, -1),
-            "down": (0, 1)
-        }
-        if direction in direction_map:
-            dx, dy = direction_map[direction]
-            self._move_in_direction(dx, dy)
-
-    def _move_in_direction(self, dx, dy):
-        rig = actions.user.mouse_rig()
-        boost_large = rig.state.layers["boost_large"]
         mode = actions.user.parrot_rig_get_mode()
-
-        if boost_large:
-            control_factor = min(boost_large.time_alive / 2.0, 0.75)
-            turn_time = int(2000 - (1500 * control_factor))
-            rig.direction.to(dx, dy).over(turn_time, "ease_out2")
-        elif mode == "glide":
-            rig.direction.to(dx, dy).over(rig.state.speed * 100, "ease_out2")
+        if mode in ("glide", "boost"):
+            actions.user.mouse_rig_go_natural(direction, self.speed)
         else:
-            rig.direction(dx, dy)
-
-        if not rig.state.base.speed:
-            rig.speed(self.speed)
-
-    def move_left(self):
-        self._move_in_direction(-1, 0)
-
-    def move_right(self):
-        self._move_in_direction(1, 0)
-
-    def move_up(self):
-        self._move_in_direction(0, -1)
-
-    def move_down(self):
-        self._move_in_direction(0, 1)
+            actions.user.mouse_rig_go(direction, self.speed)
 
     def preserve_direction(self):
         rig = actions.user.mouse_rig()
         rig.bake()
 
-    def boost_large(self, on_complete):
-        rig = actions.user.mouse_rig()
-
-        if rig.state.layers["boost_small"]:
-            rig.layer("boost_large", order=2).speed.offset.to(self.boost_large_amount * 2) \
-                .revert(1500, "ease_in_out").then(on_complete)
-            return
-
-        if rig.state.layers["boost_large"]:
-            amount = self.boost_large_amount + rig.state.layers["boost_large"].current
-        else:
-            amount = self.boost_large_amount
-
-        rig.layer("boost_large", order=2).speed.offset.add(amount) \
-            .over(1000).revert(1000).then(on_complete)
+    def boost(self, on_complete=None):
+        """Long speed pulse (shush) — ramp up 1s, revert 1s"""
+        self._cancel_boost_revert()
+        actions.user.mouse_rig_boost(
+            self.boost_amount, over_ms=1000, release_ms=1000, max_stacks=0)
+        if on_complete:
+            self._boost_revert_job = cron.after("2000ms", on_complete)
 
     def boost_small(self):
+        """Rapid speed pulse (hiss) — instant, fast decay with ease_out2"""
         rig = actions.user.mouse_rig()
-        rig.layer("boost_small", order=1).speed.offset.add(self.boost_small_amount) \
-            .revert(400, "ease_out2")
+        rig.speed.offset.add(self.boost_small_amount).revert(400, "ease_out2")
 
     def slower(self):
-        rig = actions.user.mouse_rig()
-        rig.speed.div(2)
-        # actions.user.mouse_move_continuous_speed_decrease()
+        actions.user.mouse_rig_speed_mul(0.5)
 
     def stop(self):
-        rig = actions.user.mouse_rig()
-        rig.stop()
-        # actions.user.mouse_move_continuous_stop()
+        self._cancel_boost_revert()
+        actions.user.mouse_rig_stop()
 
     def is_moving(self):
-        rig = actions.user.mouse_rig()
+        return actions.user.mouse_rig_state_is_moving()
 
-        return rig.state.speed > 0
-        # return state
-        # info = actions.user.mouse_move_info()
-        # return info["is_moving"]
+    def _cancel_boost_revert(self):
+        if self._boost_revert_job:
+            cron.cancel(self._boost_revert_job)
+            self._boost_revert_job = None
 
 movement = Movement()

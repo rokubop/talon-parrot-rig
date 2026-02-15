@@ -73,10 +73,10 @@ input_map_common = {
 input_map_default = {
     **input_map_common,
     "mm":         ("click", parrot_actions.mouse_click),
-    "hiss":       ("scroll down", lambda: parrot_actions.scroll("down")),
-    "hiss_stop":  ("", parrot_actions.scroll_stop_soft),
-    "shush":      ("scroll up", lambda: parrot_actions.scroll("up")),
-    "shush_stop": ("", parrot_actions.scroll_stop_soft),
+    "hiss":           ("scroll down", lambda: parrot_actions.scroll("down")),
+    "hiss_stop:db_170":  ("", parrot_actions.scroll_stop_soft),
+    "shush":          ("scroll up", lambda: parrot_actions.scroll("up")),
+    "shush_stop:db_170": ("", parrot_actions.scroll_stop_soft),
 }
 
 input_map_move = {
@@ -87,7 +87,7 @@ input_map_move = {
     "guh":        ("move down", lambda: parrot_actions.mouse_move_or_slow_dir("down")),
     "eh":         ("toggle glide", parrot_actions.mouse_toggle_glide),
     "mm":         ("click", parrot_actions.click_with_mode_behavior),
-    "shush":      ("boost large", parrot_actions.mouse_boost_large),
+    "shush":      ("boost", parrot_actions.mouse_boost),
     "shush_stop": ("", lambda: None),
     "hiss":       ("boost small", parrot_actions.mouse_boost_small),
     "hiss_stop":  ("", lambda: None),
@@ -96,10 +96,10 @@ input_map_move = {
 input_map_head = {
     **input_map_common,
     "mm":         ("click", parrot_actions.click_with_mode_behavior),
-    "hiss":       ("scroll down", lambda: parrot_actions.scroll_with_mode_reset("down")),
-    "hiss_stop":  ("", parrot_actions.scroll_stop_soft),
-    "shush":      ("scroll up", lambda: parrot_actions.scroll_with_mode_reset("up")),
-    "shush_stop": ("", parrot_actions.scroll_stop_soft),
+    "hiss":           ("scroll down", lambda: parrot_actions.scroll_with_mode_reset("down")),
+    "hiss_stop:db_170":  ("", parrot_actions.scroll_stop_soft),
+    "shush":          ("scroll up", lambda: parrot_actions.scroll_with_mode_reset("up")),
+    "shush_stop:db_170": ("", parrot_actions.scroll_stop_soft),
 }
 
 input_map_full = {
@@ -107,10 +107,10 @@ input_map_full = {
     "mm":         ("click temp stop", parrot_actions.click_with_mode_behavior),
     "tut":        ("windows zoom out", lambda: actions.key("win-keypad_minus")),
     "tut tut":    ("reset zoom", lambda: actions.key("win-escape")),
-    "hiss":       ("scroll down", lambda: parrot_actions.scroll("down")),
-    "hiss_stop":  ("", parrot_actions.scroll_stop_soft_temp),
-    "shush":      ("scroll up", lambda: parrot_actions.scroll("up")),
-    "shush_stop": ("", parrot_actions.scroll_stop_soft_temp),
+    "hiss":           ("scroll down", lambda: parrot_actions.scroll("down")),
+    "hiss_stop:db_170":  ("", parrot_actions.scroll_stop_soft_temp),
+    "shush":          ("scroll up", lambda: parrot_actions.scroll("up")),
+    "shush_stop:db_170": ("", parrot_actions.scroll_stop_soft_temp),
 }
 
 input_map = {
