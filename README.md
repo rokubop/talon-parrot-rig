@@ -1,35 +1,21 @@
 # Parrot Rig
 
-![Version](https://img.shields.io/badge/version-0.1.0-blue)
+![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 
-An advanced parrot mode implementation with 4 distinct modes and an event-driven HUD system.
+A general-purpose 14-noise parrot mode for hands-free mouse control in [Talon](https://talonvoice.com/).
 
-## Features
-
-- **4 Distinct Modes**: Each with unique colors and behaviors
-  - DEF (Default): Basic mode with limited actions
-  - MOV (Move): Movement mode with boosting
-  - HEAD (Head): Head tracking mode
-  - FULL (Full): Full tracking mode with temporary stops
-
-- **Event-Driven HUD**: Bottom-right corner display showing:
-  - Current mode with color-coded circle
-  - Mode code (DEF, MOV, etc.)
-  - Active modifier keys (Shift, Ctrl, Alt)
-
-- **Configurable Settings**: All constants stored in `config.py`
-- **Dynamic UI Dialogs**: For utility selection, settings, and noise reference
-- **Mode Memory**: Returns to previous mode with `cluck`
+Install it, remap the noises to your own, and you're good to go. This is my daily driver for general computer use. Swap noises, remap actions, tune settings - make it yours.
 
 ## Installation
 
 ### Dependencies
 
-This repo requires:
 - [**Talon Beta**](https://talon.wiki/Help/beta_talon/)
+- **Eye Tracker** - Eye tracking device (e.g., Tobii 4C or Tobii 5)
+- **Parrot** - Trained parrot model with `parrot_integration.py` and `patterns.json` files
 - [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.6.0+)
-- [**talon-mouse-rig**](https://github.com/rokubop/mouse_rig) (v0.5.0+)
+- [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v2.0.0+)
 - [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.14.0+)
 
 ### Install
@@ -45,7 +31,7 @@ cd ~/AppData/Roaming/talon/user
 
 # Dependencies
 git clone https://github.com/rokubop/talon-input-map/
-git clone https://github.com/rokubop/mouse_rig
+git clone https://github.com/rokubop/talon-mouse-rig
 git clone https://github.com/rokubop/talon-ui-elements
 
 # This repo
@@ -53,65 +39,75 @@ git clone <github_url>  # Add github URL to manifest.json
 ```
 
 > **Note**: Review code from unfamiliar sources before installing.
-> Restart Talon after installing dependencies.
 
-## Modes
 
-### Command Mode (Outside Parrot Mode)
-- `cluck`: Start parrot mode
-- `palate`: Repeater
-- `tut`: Reverser
+## How to customize
 
-### Default Mode
-- Basic clicking and scrolling
-- All movement is stopped
-- Entry point for other modes
+### Step 1: Remap noises to your own
 
-### Move Mode
-- Activated by movement noises (ah, oh, t, guh)
-- Includes boost controls (hiss=small, shush=large)
-- Configurable click behavior
+Update these two files to use noises you can produce:
 
-### Head Mode
-- Activated by `eh` noise
-- Teleport and head tracking
-- Scroll actions stop and return to default
+- **`parrot_rig_input.talon`** — noises used inside parrot rig mode
+- **`parrot.talon`** — noises used outside parrot rig mode
 
-### Full Mode
-- Activated by `er` noise
-- Full tracking with temporary stops
-- Actions pause tracking briefly, then resume
+Just change the `parrot(...)` noise on the left side of each line. The right side (the input name in quotes) stays the same.
 
-## Configuration
+### Step 2: Set up your entry point (`parrot.talon`)
 
-All settings are in `config.py`:
+The most important thing is having a way to call `user.parrot_rig_enable()` — that's your entry point into parrot rig mode. This can be a noise or a voice command. Make sure you also have a way to exit (the input map has `parrot_rig_exit` mapped to `cluck` by default, but you can also use `user.parrot_rig_disable()`).
 
-- `MODE_COLORS`: Colors for each mode
-- `MOVEMENT_SETTINGS`: Speed and boost values
-- `CLICK_BEHAVIOR`: Click behavior per mode
-- `UTILITY_ACTION`: Default utility action
-- `SETTINGS_OPTIONS`: UI setting options
+```talon
+parrot(cluck): user.parrot_rig_enable()
 
-## UI Dialogs
+# or use a voice command
+parrot rig start: user.parrot_rig_enable()
+```
 
-- `tut palate`: Utility action selector
-- `tut tut`: Noise reference for current mode
-- `tut hiss/shush`: Settings UI with 5-button selections
+### Step 3: Customize the input map (`parrot_rig_actions.py`)
 
-## Common Noises (All Modes)
+This defines what every noise does in each mode. You can reassign actions, add new entries, or change the mode structure:
 
-- `ah/oh/t/guh`: Activate move mode and move
-- `eh`: Activate head mode
-- `er`: Activate full mode
-- `ee`: Stop all actions
-- `pop`: Click and exit (remembers last mode)
-- `cluck`: Exit and return to previous mode
-- `palate`: Dynamic utility action
+```python
+input_map_common = {
+    "ee":     ("stop", actions.user.parrot_rig_stop),
+    "pop":    ("click exit", actions.user.parrot_rig_click_exit),
+    "ah":     ("move left", lambda: actions.user.parrot_rig_move("left")),
+    "oh":     ("move right", lambda: actions.user.parrot_rig_move("right")),
+    ...
+}
+```
 
-## Usage
+Each entry is `"input_name": ("label", action)`. The label shows up in the cheatsheet UI. There are three mode-specific maps (`input_map_default`, `input_map_move`, `input_map_tracking`) that override entries from `input_map_common`.
 
-1. Say `cluck` to enter parrot mode
-2. Use movement noises to navigate
-3. Switch modes with mode-specific noises
-4. Use `tut` combinations for advanced features
-5. Exit with `cluck` to return to previous mode
+See [talon-input-map](https://github.com/rokubop/talon-input-map/) for combos (`"tut ah"`), throttle (`:th_100`), debounce (`:db_170`), and other options.
+
+### Step 4: Tune settings (`parrot_rig_settings.py`)
+
+Speeds, timings, colors, and click behavior. Say **"parrot rig reload"** after changing these.
+
+```python
+MOVE_SPEED = 3
+SLOW_MODE_MULTIPLIER = 0.5
+BOOST_AMOUNT = 10
+SCROLL_SPEED = 0.4
+TRACKING_STOP_MS = 800
+CLICK_HOLD_MS = 16000
+```
+
+### Step 5: Configure utilities (`parrot_rig_utilities.py`)
+
+Two utility slots you can cycle through at runtime using a noise-triggered selector. The first key in each map is the default. Add, remove, or reorder options:
+
+```python
+utility_map = {
+    "hold_click":  ("Hold Click",  lambda: actions.user.parrot_rig_click(0, True)),
+    "click":       ("Click",       lambda: actions.user.parrot_rig_click(0)),
+    "right_click": ("Right Click", lambda: actions.user.parrot_rig_click(1)),
+    ...
+}
+
+utility2_map = {
+    "middle_click": ("Middle Click", lambda: actions.user.parrot_rig_click(2)),
+    ...
+}
+```

@@ -1,33 +1,25 @@
 from talon import actions
 import os
 
-class Utils:
-    def update_time_of_file(self, filepath, filename):
-        try:
-            os.utime(filepath, None)
-        except Exception as e:
-            print(f"Error updating {filename}: {e}")
+def reload_files():
+    actions.user.parrot_rig_disable()
 
-    def reload_files(self):
-        actions.user.parrot_rig_disable()
+    src_dir = os.path.dirname(__file__)
+    root_dir = os.path.dirname(src_dir)
+    ui_dir = os.path.join(root_dir, "ui")
 
-        src_dir = os.path.dirname(__file__)
-        main_dir = os.path.dirname(os.path.join("..", __file__))
+    touched_count = 0
 
-        touched_count = 0
-
-        for filename in os.listdir(src_dir):
+    for directory in [root_dir, src_dir, ui_dir]:
+        if not os.path.isdir(directory):
+            continue
+        for filename in os.listdir(directory):
             if filename.endswith('.py'):
-                filepath = os.path.join(src_dir, filename)
-                self.update_time_of_file(filepath, filename)
-                touched_count += 1
+                filepath = os.path.join(directory, filename)
+                try:
+                    os.utime(filepath, None)
+                    touched_count += 1
+                except Exception as e:
+                    print(f"Error updating {filename}: {e}")
 
-        for filename in os.listdir(main_dir):
-            if filename.endswith('.py'):
-                filepath = os.path.join(main_dir, filename)
-                self.update_time_of_file(filepath, filename)
-                touched_count += 1
-
-        print(f"Parrot mode reset and {touched_count} files touched for reload")
-
-utils = Utils()
+    print(f"Parrot rig reset and {touched_count} files touched for reload")

@@ -4,18 +4,20 @@ from ..ui.ui_manager import ui_manager
 from .keys import keys
 from .events import event_manager
 from .repeater import repeat, reverse
-from ..user_settings import (
+from ..parrot_rig_settings import (
     MOVE_SPEED,
+    SLOW_MODE_MULTIPLIER,
+    CLICK_HOLD_MS,
     BOOST_AMOUNT,
     BOOST_OVER_MS,
     BOOST_RELEASE_MS,
     BOOST_SMALL_AMOUNT,
     BOOST_SMALL_REVERT_MS,
     SCROLL_SPEED,
-    FULL_MODE_STOP_MS,
+    TRACKING_STOP_MS,
     CLICK_BEHAVIOR,
 )
-from .utils import utils
+from .utils import reload_files
 
 class ParrotActions:
     def __init__(self):
@@ -26,7 +28,7 @@ class ParrotActions:
     def mouse_move_or_slow_dir(self, direction: str):
         cardinal = actions.user.mouse_rig_state_direction_cardinal()
         if actions.user.mouse_rig_state_is_moving() and cardinal == direction:
-            actions.user.mouse_rig_speed_mul(0.5)
+            actions.user.mouse_rig_speed_mul(SLOW_MODE_MULTIPLIER)
         else:
             self.move(direction)
 
@@ -100,7 +102,7 @@ class ParrotActions:
             ui_manager.show_border()
             self._is_left_click_held = True
         else:
-            ctrl.mouse_click(button=button, hold=16000)
+            ctrl.mouse_click(button=button, hold=CLICK_HOLD_MS)
             ui_manager.hide_border()
 
         if should_stop:
@@ -121,26 +123,6 @@ class ParrotActions:
     def scroll_stop_temp(self):
         actions.user.mouse_rig_scroll_stop()
         self.stop_temporarily()
-
-    def utility(self):
-        action = event_manager.get_setting("utility_action", "hold_click")
-
-        if action == "click":
-            self.mouse_click()
-        elif action == "hold_click":
-            self.mouse_click(hold=True)
-        elif action == "right_click":
-            self.mouse_click(button=1)
-        elif action == "hold_right_click":
-            self.mouse_click(button=1, hold=True)
-        elif action == "middle_click":
-            self.mouse_click(button=2)
-        elif action == "middle_hold":
-            self.mouse_click(button=2, hold=True)
-        elif action == "repeat_last":
-            actions.core.repeat_command()
-        elif action == "repeat_phrase":
-            actions.user.parrot_rig_repeater()
 
     def parrot_mode_enable(self):
         self._parrot_mode_enabled = True
@@ -198,7 +180,7 @@ class ParrotActions:
             self.parrot_mode_enable()
 
     def reload_files(self):
-        utils.reload_files()
+        reload_files()
 
     def return_to_previous_mode(self):
         event_manager.return_to_previous_mode()
@@ -231,15 +213,24 @@ class ParrotActions:
             actions.user.mouse_rig_scroll_stop()
 
         # Schedule reactivation
-        self._stop_time_job = cron.after(f"{FULL_MODE_STOP_MS}ms", self._reactivate_full_mode)
+        self._stop_time_job = cron.after(f"{TRACKING_STOP_MS}ms", self._reactivate_full_mode)
 
     def _reactivate_full_mode(self):
         self._stop_time_job = None
         if event_manager.get_mode() == "tracking":
             tracking.activate()
 
-    def show_utility_selector(self):
-        ui_manager.show_utility_selector()
+    def show_utility_selector(self, title: str = "Utility"):
+        ui_manager.show_utility_selector(title)
+
+    def show_utility2_selector(self, title: str = "Utility 2"):
+        ui_manager.show_utility2_selector(title)
+
+    def hide_utility_selector(self):
+        ui_manager.hide_utility_selector()
+
+    def hide_utility2_selector(self):
+        ui_manager.hide_utility2_selector()
 
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()

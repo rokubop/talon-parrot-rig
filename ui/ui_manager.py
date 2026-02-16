@@ -1,6 +1,6 @@
 from talon import actions
 from .cursor import cursor_ui_instance
-from .colors import get_mode_color
+from ..parrot_rig_settings import MODE_COLORS
 from ..src.events import event_manager
 
 class UIManager:
@@ -32,7 +32,7 @@ class UIManager:
 
     def _on_mode_changed(self, data):
         mode = data.get("current_mode", "default")
-        color = get_mode_color(mode)
+        color = MODE_COLORS.get(mode, "#FF0000")
         cursor_ui_instance.set_mode(mode)
         cursor_ui_instance.color(color)
 
@@ -68,10 +68,25 @@ class UIManager:
         """Check if cheatsheet is currently active"""
         return actions.user.ui_elements_is_active("cheatsheet")
 
-    def show_utility_selector(self):
+    def show_utility_selector(self, title: str = "Utility"):
         """Show the utility selector UI"""
-        from .utility_selector import utility_selector
-        actions.user.ui_elements_toggle(utility_selector, show_hints="numbers")
+        from .utility_selector import show_utility_selector
+        show_utility_selector(title)
+
+    def show_utility2_selector(self, title: str = "Utility 2"):
+        """Show the utility2 selector UI"""
+        from .utility_selector import show_utility2_selector
+        show_utility2_selector(title)
+
+    def hide_utility_selector(self):
+        """Hide the utility selector UI"""
+        from .utility_selector import hide_utility_selector
+        hide_utility_selector()
+
+    def hide_utility2_selector(self):
+        """Hide the utility2 selector UI"""
+        from .utility_selector import hide_utility2_selector
+        hide_utility2_selector()
 
 # Create global instance
 # Clean up previous instance if it exists (for module reloads)

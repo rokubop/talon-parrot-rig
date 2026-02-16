@@ -1,6 +1,5 @@
 from talon import actions
 from typing import Dict, Set, Optional, Callable
-from ..user_settings import UTILITY_ACTION
 
 class ParrotEventManager:
     def __init__(self):
@@ -8,9 +7,6 @@ class ParrotEventManager:
         self._previous_mode = "default"
         self._active_modifiers: Set[str] = set()
         self._event_listeners: Dict[str, list] = {}
-        self._settings = {
-            "utility_action": UTILITY_ACTION
-        }
 
     def subscribe(self, event_type: str, callback: Callable):
         if event_type not in self._event_listeners:
@@ -75,13 +71,6 @@ class ParrotEventManager:
     def clear_modifiers(self):
         self._active_modifiers.clear()
         self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
-
-    def set_setting(self, setting_name: str, value):
-        self._settings[setting_name] = value
-        self.emit("setting_changed", {"setting": setting_name, "value": value})
-
-    def get_setting(self, setting_name: str, default=None):
-        return self._settings.get(setting_name, default)
 
     def debug_listeners(self):
         print("Current event listeners:")

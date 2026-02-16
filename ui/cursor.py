@@ -1,7 +1,6 @@
 from talon import actions
-from .colors import MODIFIER_COLORS, get_mode_color, get_modifier_color
-
-CURSOR_UI_ENABLED = True
+from ..parrot_rig_settings import MODE_COLORS, MODIFIER_COLORS
+from ..parrot_rig_settings import CURSOR_UI_ENABLED
 
 default_cursor_color = "FF0000"
 default_border_color = "FFFFFF"
@@ -128,10 +127,10 @@ class CursorUI:
         return self._mode
 
     def get_mode_color(self, mode: str) -> str:
-        return get_mode_color(mode)
+        return MODE_COLORS.get(mode, "#FF0000")
 
     def get_modifier_color(self, modifier: str) -> str:
-        return get_modifier_color(modifier)
+        return MODIFIER_COLORS.get(modifier, "#FFFFFF")
 
     def cleanup(self):
         try:

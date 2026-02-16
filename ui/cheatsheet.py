@@ -4,7 +4,8 @@ Shows the noise-to-action mapping in a table format
 """
 
 from talon import actions
-from .colors import get_mode_color
+from ..parrot_rig_settings import MODE_COLORS
+from ..parrot_rig_settings import UI_BORDER_COLOR, UI_BACKGROUND_COLOR, UI_TEXT_COLOR
 from ..parrot_rig_actions import input_map as parrot_input_map
 
 def only_current_mode_table():
@@ -17,22 +18,22 @@ def only_current_mode_table():
 
     # Create header row
     header_row = tr()[
-        th(padding=8, border_width=1, border_color="#666666")[
-            text("Noise", color="#FFFFFF", font_weight="bold", font_size=12)
+        th(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
+            text("Noise", color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
         ],
-        th(padding=8, border_width=1, border_color="#666666")[
-            text(f"Mode: {current_mode.upper()}", color="#FFFFFF", font_weight="bold", font_size=12)
+        th(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
+            text(f"Mode: {current_mode.upper()}", color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
         ]
     ]
 
     return table()[
         header_row,
         *[tr()[
-            td(padding=8, border_width=1, border_color="#666666")[
-                text(noise, color="#FFFFFF", font_family="monospace")
+            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
+                text(noise, color=UI_TEXT_COLOR, font_family="monospace")
             ],
-            td(padding=8, border_width=1, border_color="#666666")[
-                text(mode_config.get(noise, ("",))[0], color="#FFFFFF")
+            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
+                text(mode_config.get(noise, ("",))[0], color=UI_TEXT_COLOR)
             ]
         ] for noise in mode_config.keys()]
     ]
@@ -54,9 +55,9 @@ def cheatsheet_ui():
 
     # Create header row with mode names (clickable) and colored circles
     def create_mode_header(mode_name: str):
-        mode_color = get_mode_color(mode_name)
+        mode_color = MODE_COLORS.get(mode_name, "#FF0000")
 
-        return th(padding=0, border_width=1, border_color="#666666", background_color="#4A4A4A")[
+        return th(padding=0, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR)[
             div(
                 flex_direction="row",
                 align_items="center",
@@ -66,16 +67,16 @@ def cheatsheet_ui():
                 svg()[
                     circle(cx=12, cy=12, r=7, fill=f"{mode_color}")
                 ],
-                text(mode_name.upper(), color="#FFFFFF", font_weight="bold", font_size=12)
+                text(mode_name.upper(), color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
             ]
         ]
 
     header_row = tr()[
-        th(padding=0, border_width=1, border_color="#666666", background_color="#4A4A4A")[
+        th(padding=0, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR)[
             div(flex_direction="row", align_items="center", gap=6, padding_left=6)[
-                text("NOISE", color="#FFFFFF", font_weight="bold", font_size=12),
+                text("NOISE", color=UI_TEXT_COLOR, font_weight="bold", font_size=12),
                 svg()[
-                    circle(cx=12, cy=12, r=7, fill=f"#4A4A4A")
+                    circle(cx=12, cy=12, r=7, fill=UI_BACKGROUND_COLOR)
                 ],
             ]
         ],
@@ -85,11 +86,11 @@ def cheatsheet_ui():
     # Create rows for each noise
     def create_noise_row(noise: str):
         return tr()[
-            td(padding=8, border_width=1, border_color="#666666")[
-                text(noise, color="#FFFFFF", font_family="monospace")
+            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
+                text(noise, color=UI_TEXT_COLOR, font_family="monospace")
             ],
-            *[td(padding=8, border_width=1, border_color="#666666")[
-                text(mode_config.get(noise, ("",))[0], color="#FFFFFF")
+            *[td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
+                text(mode_config.get(noise, ("",))[0], color=UI_TEXT_COLOR)
             ] for mode_name, mode_config in all_modes_config.items()]
         ]
 

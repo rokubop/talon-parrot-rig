@@ -1,4 +1,5 @@
 from talon import actions, cron
+from ..parrot_rig_settings import REVERSE_TIMEOUT
 
 two_way_opposites = [
     ("north", "south"),
@@ -20,6 +21,9 @@ for key, value in two_way_opposites:
     opposites[key] = value
     opposites[value] = key
 
+last_tut = ""
+last_palate = ""
+
 class StateReverse:
     def __init__(self):
         self.is_reverse_active = False
@@ -29,7 +33,7 @@ class StateReverse:
         self.is_reverse_active = True
         if self.timer_handle:
             cron.cancel(self.timer_handle)
-        self.timer_handle = cron.after("2s", self.deactivate_reverse)
+        self.timer_handle = cron.after(REVERSE_TIMEOUT, self.deactivate_reverse)
 
     def deactivate_reverse(self):
         self.is_reverse_active = False
@@ -42,15 +46,33 @@ stateReverse = StateReverse()
 
 def repeat():
     """Repeat the last command"""
-    try:
-        actions.core.repeat_phrase()
-    except IndexError:
-        pass
+    global last_palate, last_tut
+
+    if last_palate:
+        actions.repeat_command(last_palate)
+    elif last_tut:
+        actions.repeat_command(last_tut)
+    else:
+        try:
+            actions.core.repeat_command()
+        except IndexError:
+            pass
 
 def reverse():
     """Reverse the last command"""
+    global last_palate, last_tut
+
     stateReverse.activate_reverse()
-    try:
-        actions.core.repeat_phrase()
-    except IndexError:
-        pass
+    if last_palate:
+        if last_palate in opposites:
+            actions.mimic(opposites[last_palate])
+        else:
+            try:
+                actions.core.repeat_command()
+            except IndexError:
+                pass
+    else:
+        try:
+            actions.core.repeat_command()
+        except IndexError:
+            pass
