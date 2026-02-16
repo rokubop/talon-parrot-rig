@@ -2,10 +2,13 @@
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
+![License](https://img.shields.io/badge/license-Unlicense-green)
 
-A general-purpose 14-noise parrot mode for hands-free mouse control in [Talon](https://talonvoice.com/).
+A general-purpose 14-noise parrot mode for hands-free mouse control in [Talon](https://talonvoice.com/). This is my daily driver for general mouse use.
 
-Install it, remap the noises to your own, and you're good to go. This is my daily driver for general computer use. Swap noises, remap actions, tune settings - make it yours.
+All you need is a few remappings in order to make this your own.
+
+![preview](./preview.png)
 
 ## Installation
 
@@ -35,11 +38,8 @@ git clone https://github.com/rokubop/talon-mouse-rig
 git clone https://github.com/rokubop/talon-ui-elements
 
 # This repo
-git clone <github_url>  # Add github URL to manifest.json
+git clone https://github.com/rokubop/talon-parrot-rig
 ```
-
-> **Note**: Review code from unfamiliar sources before installing.
-
 
 ## How to customize
 

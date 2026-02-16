@@ -5,10 +5,11 @@
   "version": "1.0.0",
   "status": "experimental",
   "namespace": "user.parrot_rig",
-  "github": "",
-  "preview": "",
+  "github": "https://github.com/rokubop/talon-parrot-rig",
+  "preview": "https://raw.githubusercontent.com/rokubop/talon-parrot-rig/main/preview.png",
   "author": "",
-  "tags": [],
+  "tags": ["parrot", "mouse"],
+  "license": "Unlicense",
   "requires": ["eyeTracker", "parrot", "talonBeta"],
   "dependencies": {
     "talon-input-map": {
