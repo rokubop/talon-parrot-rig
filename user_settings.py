@@ -14,7 +14,6 @@ FULL_MODE_SETTINGS = {
 
 CLICK_BEHAVIOR = {
     "move": "stop",
-    "head": "stop",
     "boost": "stop",
     "glide": "stop",
 }

@@ -73,14 +73,6 @@ class UIManager:
         from .utility_selector import utility_selector
         actions.user.ui_elements_toggle(utility_selector, show_hints="numbers")
 
-    def show_mouse_pos_marks(self, mouse_pos_ui):
-        """Show mouse position marks UI"""
-        actions.user.ui_elements_show(mouse_pos_ui)
-
-    def hide_mouse_pos_marks(self, mouse_pos_ui):
-        """Hide mouse position marks UI"""
-        actions.user.ui_elements_hide(mouse_pos_ui)
-
 # Create global instance
 # Clean up previous instance if it exists (for module reloads)
 try:
