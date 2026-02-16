@@ -14,7 +14,7 @@ Install it, remap the noises to your own, and you're good to go. This is my dail
 - [**Talon Beta**](https://talon.wiki/Help/beta_talon/)
 - **Eye Tracker** - Eye tracking device (e.g., Tobii 4C or Tobii 5)
 - **Parrot** - Trained parrot model with `parrot_integration.py` and `patterns.json` files
-- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.6.0+)
+- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.6.1+)
 - [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v2.0.0+)
 - [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.14.0+)
 
