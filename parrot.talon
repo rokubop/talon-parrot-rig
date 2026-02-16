@@ -1,7 +1,7 @@
 parrot(pop): user.parrot_rig_simple_click()
 parrot(cluck): user.parrot_rig_enable()
 parrot(palate_click): user.parrot_rig_repeat_phrase()
-parrot(tut): user.parrot_rig_reverse_phrase()
+parrot(tut): user.parrot_rig_reverse_command()
 
 parrot rig help: user.parrot_rig_show_help()
 

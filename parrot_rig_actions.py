@@ -198,23 +198,20 @@ class Actions:
         event_manager.return_to_previous_mode()
 
     def parrot_rig_repeat_command():
-        """Repeat last command (with opposites reversal support)"""
-        parrot_actions.repeat()
+        """Repeat last command"""
+        parrot_actions.repeat_command()
 
     def parrot_rig_reverse_command():
-        """Reverse last command (uses opposites mapping)"""
-        parrot_actions.reverse_repeat()
+        """Reverse last command (swaps opposite words and mimics)"""
+        parrot_actions.reverse_command()
 
     def parrot_rig_repeat_phrase():
         """Repeat last phrase"""
-        try:
-            actions.core.repeat_phrase()
-        except IndexError:
-            pass
+        parrot_actions.repeat_phrase()
 
     def parrot_rig_reverse_phrase():
-        """Reverse repeat last phrase"""
-        pass
+        """Reverse last phrase (swaps opposite words and mimics)"""
+        parrot_actions.reverse_phrase()
 
     def parrot_rig_get_state():
         """Get parrot rig state"""

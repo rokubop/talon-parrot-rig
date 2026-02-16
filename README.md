@@ -19,7 +19,7 @@ You'll need at least 9 noises to use this, 12 recommended for the full experienc
 - **Parrot** - Trained parrot model with `parrot_integration.py` and `patterns.json` files
 - [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.6.1+)
 - [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v2.0.0+)
-- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.14.0+)
+- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.14.1+)
 
 ### Install
 

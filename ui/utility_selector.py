@@ -29,10 +29,13 @@ def _make_selector(name: str, util_map: dict):
             ],
         ]
 
+        cancel_noises = [k for k, v in legend.items() if v == "back"]
+        selector_noises = [k for k, v in legend.items() if v != "back"]
+
         rows = []
         for i, key in enumerate(keys):
             label = util_map[key][0]
-            noise = noise_list[i] if i < len(noise_list) else ""
+            noise = selector_noises[i] if i < len(selector_noises) else ""
             is_selected = key == current_mode
             bg = UI_SELECTED_COLOR if is_selected else None
 
@@ -45,6 +48,16 @@ def _make_selector(name: str, util_map: dict):
                 ],
             ])
 
+        cancel_label = ", ".join(cancel_noises) if cancel_noises else ""
+        cancel_row = tr()[
+            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
+                text(cancel_label, color=UI_TEXT_COLOR, font_family="monospace", font_weight="bold")
+            ],
+            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
+                text("Cancel", color=UI_TEXT_COLOR, font_weight="bold")
+            ],
+        ]
+
         return screen(justify_content="center", align_items="center")[
             window(
                 id=f"{name}_selector",
@@ -54,6 +67,7 @@ def _make_selector(name: str, util_map: dict):
                 table(width="100%")[
                     header_row,
                     *rows,
+                    cancel_row,
                 ]
             ]
         ]
@@ -62,11 +76,15 @@ def _make_selector(name: str, util_map: dict):
 utility_selector = _make_selector("utility", utility_map)
 utility2_selector = _make_selector("utility2", utility2_map)
 
+def _on_unmount():
+    from ..src.events import event_manager
+    event_manager.return_to_previous_mode()
+
 def show_utility_selector(title: str = "Utility"):
-    actions.user.ui_elements_show(utility_selector, props={"title": title}, show_hints=False)
+    actions.user.ui_elements_show(utility_selector, props={"title": title}, show_hints=False, on_unmount=_on_unmount)
 
 def show_utility2_selector(title: str = "Utility 2"):
-    actions.user.ui_elements_show(utility2_selector, props={"title": title}, show_hints=False)
+    actions.user.ui_elements_show(utility2_selector, props={"title": title}, show_hints=False, on_unmount=_on_unmount)
 
 def hide_utility_selector():
     actions.user.ui_elements_hide(utility_selector)

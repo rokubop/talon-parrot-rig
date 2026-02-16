@@ -3,7 +3,7 @@ from .tracking import tracking
 from ..ui.ui_manager import ui_manager
 from .keys import keys
 from .events import event_manager
-from .repeater import repeat, reverse
+from .repeater import repeat_command, repeat_phrase, reverse_command, reverse_phrase
 from ..parrot_rig_settings import (
     MOVE_SPEED,
     SLOW_MODE_MULTIPLIER,
@@ -76,11 +76,17 @@ class ParrotActions:
     def exit(self):
         self.parrot_mode_disable(stop_tracking=not tracking.is_tracking)
 
-    def repeat(self):
-        repeat()
+    def repeat_command(self):
+        repeat_command()
 
-    def reverse_repeat(self):
-        reverse()
+    def repeat_phrase(self):
+        repeat_phrase()
+
+    def reverse_command(self):
+        reverse_command()
+
+    def reverse_phrase(self):
+        reverse_phrase()
 
     def click_release(self, button=0):
         ctrl.mouse_click(button=button, up=True)

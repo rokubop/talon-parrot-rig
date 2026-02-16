@@ -8,9 +8,16 @@
   "github": "https://github.com/rokubop/talon-parrot-rig",
   "preview": "https://raw.githubusercontent.com/rokubop/talon-parrot-rig/main/preview.png",
   "author": "",
-  "tags": ["parrot", "mouse"],
+  "tags": [
+    "parrot",
+    "mouse"
+  ],
   "license": "Unlicense",
-  "requires": ["eyeTracker", "parrot", "talonBeta"],
+  "requires": [
+    "eyeTracker",
+    "parrot",
+    "talonBeta"
+  ],
   "dependencies": {
     "talon-input-map": {
       "min_version": "0.6.1",
@@ -23,14 +30,16 @@
       "github": "https://github.com/rokubop/talon-mouse-rig"
     },
     "talon-ui-elements": {
-      "min_version": "0.14.0",
+      "min_version": "0.14.1",
       "namespace": "user.ui_elements",
       "github": "https://github.com/rokubop/talon-ui-elements"
     }
   },
   "devDependencies": {},
   "contributes": {
-    "modes": ["user.parrot_rig"],
+    "modes": [
+      "user.parrot_rig"
+    ],
     "actions": [
       "user.parrot_rig_boost",
       "user.parrot_rig_boost_small",
@@ -71,6 +80,7 @@
   },
   "depends": {
     "actions": [
+      "user.history_get",
       "user.input_map",
       "user.input_map_get_legend",
       "user.input_map_handle",
