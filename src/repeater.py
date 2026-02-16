@@ -1,6 +1,4 @@
-from talon import actions, cron, Module
-
-mod = Module()
+from talon import actions, cron
 
 two_way_opposites = [
     ("north", "south"),
@@ -21,9 +19,6 @@ opposites = {}
 for key, value in two_way_opposites:
     opposites[key] = value
     opposites[value] = key
-
-last_tut = ""
-last_palate = ""
 
 class StateReverse:
     def __init__(self):
@@ -47,34 +42,15 @@ stateReverse = StateReverse()
 
 def repeat():
     """Repeat the last command"""
-    global last_palate, last_tut
-
-    if last_palate:
-        actions.repeat_phrase(last_palate)
-    elif last_tut:
-        actions.repeat_phrase(last_tut)
-    else:
-        try:
-            actions.core.repeat_phrase()
-        except IndexError:
-            pass  # No command history yet
+    try:
+        actions.core.repeat_phrase()
+    except IndexError:
+        pass
 
 def reverse():
     """Reverse the last command"""
-    global last_palate, last_tut
-
     stateReverse.activate_reverse()
-    if last_palate:
-        # Try to reverse the last palate action
-        if last_palate in opposites:
-            actions.mimic(opposites[last_palate])
-        else:
-            try:
-                actions.core.repeat_phrase()
-            except IndexError:
-                pass  # No command history yet
-    else:
-        try:
-            actions.core.repeat_phrase()
-        except IndexError:
-            pass  # No command history yet
+    try:
+        actions.core.repeat_phrase()
+    except IndexError:
+        pass

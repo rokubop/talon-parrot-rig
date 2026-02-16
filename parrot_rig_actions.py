@@ -1,6 +1,5 @@
 from talon import Module, Context, actions, ctrl
 from .src.parrot_actions import parrot_actions
-from .src.constants import *
 
 mod = Module()
 mod.mode("parrot_rig", "parrot rig")
@@ -13,29 +12,30 @@ mode: user.parrot_rig
 input_map_common = {
     "ee":     ("stop", parrot_actions.stopper),
     "pop":    ("click exit", parrot_actions.click_exit),
-    "cluck":  ("exit", parrot_actions.exit),
     "ah":     ("move left", lambda: parrot_actions.mouse_move_dir("left")),
     "oh":     ("move right", lambda: parrot_actions.mouse_move_dir("right")),
     "t":      ("move up", lambda: parrot_actions.mouse_move_dir("up")),
     "guh":    ("move down", lambda: parrot_actions.mouse_move_dir("down")),
     "eh":     ("track", parrot_actions.tracking_activate),
+    "er":     ("", lambda: None),  # available
     "palate": ("hold or utility", parrot_actions.utility),
-    "tut mm":     ("middle click hold", lambda: parrot_actions.mouse_click(button=2)),
-    "tut oh":     ("right click", lambda: parrot_actions.mouse_click(button=1)),
-    "tut ah":     ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
-    "tut t":      ("tab", lambda: actions.key("tab")),
-    "tut palate": ("utility selector", parrot_actions.show_utility_selector),
+    "cluck":  ("exit", parrot_actions.exit),
+    "tut tut":    ("exit", parrot_actions.exit),
     "tut ee":     ("disable modifiers", parrot_actions.disable_modifiers),
+    "tut ah":     ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
     "tut shush":  ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
     "tut guh":    ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
+    "tut mm":     ("middle click hold", lambda: parrot_actions.mouse_click(button=2)),
+    "tut oh":     ("right click", lambda: parrot_actions.mouse_click(button=1)),
+    "tut palate": ("utility selector", parrot_actions.show_utility_selector),
 }
 
 input_map_default = {
     **input_map_common,
-    "mm":         ("click", parrot_actions.mouse_click),
-    "hiss":           ("scroll down", lambda: parrot_actions.scroll("down")),
+    "mm":                ("click", parrot_actions.mouse_click),
+    "hiss":              ("scroll down", lambda: parrot_actions.scroll("down")),
     "hiss_stop:db_170":  ("", parrot_actions.scroll_stop),
-    "shush":          ("scroll up", lambda: parrot_actions.scroll("up")),
+    "shush":             ("scroll up", lambda: parrot_actions.scroll("up")),
     "shush_stop:db_170": ("", parrot_actions.scroll_stop),
 }
 
@@ -53,19 +53,19 @@ input_map_move = {
     "hiss_stop":  ("", lambda: None),
 }
 
-input_map_full = {
+input_map_tracking = {
     **input_map_common,
-    "mm":         ("click temp stop", parrot_actions.click_with_mode_behavior),
-    "hiss":           ("scroll down", lambda: parrot_actions.scroll("down")),
+    "mm":                ("click temp stop", parrot_actions.click_with_mode_behavior),
+    "hiss":              ("scroll down", lambda: parrot_actions.scroll("down")),
     "hiss_stop:db_170":  ("", parrot_actions.scroll_stop_temp),
-    "shush":          ("scroll up", lambda: parrot_actions.scroll("up")),
+    "shush":             ("scroll up", lambda: parrot_actions.scroll("up")),
     "shush_stop:db_170": ("", parrot_actions.scroll_stop_temp),
 }
 
 input_map = {
     "default": input_map_default,
     "move": input_map_move,
-    "full": input_map_full,
+    "tracking": input_map_tracking,
 }
 
 @ctx_parrot_rig.action_class("user")

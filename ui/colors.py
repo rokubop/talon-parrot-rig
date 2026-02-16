@@ -3,7 +3,7 @@ MODE_COLORS = {
     "move": "#FFFF00",
     "boost": "#2AE33C",
     "glide": "#2AE3B8",
-    "full": "#A7D3FF",
+    "tracking": "#A7D3FF",
 }
 
 

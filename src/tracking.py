@@ -1,4 +1,4 @@
-from talon import Module, actions, ctrl
+from talon import actions
 
 class Tracking():
     def __init__(self):

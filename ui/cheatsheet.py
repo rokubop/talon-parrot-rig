@@ -5,6 +5,7 @@ Shows the noise-to-action mapping in a table format
 
 from talon import actions
 from .colors import get_mode_color
+from ..parrot_rig_actions import input_map as parrot_input_map
 
 def only_current_mode_table():
     """Create a table showing only the current mode"""
@@ -12,7 +13,7 @@ def only_current_mode_table():
     text, state = actions.user.ui_elements(["text", "state"])
 
     current_mode = state.get("mode", "default")
-    mode_config = actions.user.input_map().get(current_mode, {})
+    mode_config = parrot_input_map.get(current_mode, {})
 
     # Create header row
     header_row = tr()[
@@ -31,7 +32,7 @@ def only_current_mode_table():
                 text(noise, color="#FFFFFF", font_family="monospace")
             ],
             td(padding=8, border_width=1, border_color="#666666")[
-                text(mode_config.get(noise, [""])[0], color="#FFFFFF")
+                text(mode_config.get(noise, ("",))[0], color="#FFFFFF")
             ]
         ] for noise in mode_config.keys()]
     ]
@@ -42,7 +43,7 @@ def cheatsheet_ui():
     table, tr, td, th = actions.user.ui_elements(["table", "tr", "td", "th"])
     state, button, svg, circle = actions.user.ui_elements(["state", "button", "svg", "circle"])
 
-    all_modes_config = actions.user.input_map()
+    all_modes_config = parrot_input_map
     current_mode, set_current_mode = state.use("mode", "default")
 
     # Get all unique noises across all modes
@@ -88,7 +89,7 @@ def cheatsheet_ui():
                 text(noise, color="#FFFFFF", font_family="monospace")
             ],
             *[td(padding=8, border_width=1, border_color="#666666")[
-                text(mode_config.get(noise, [""])[0], color="#FFFFFF")
+                text(mode_config.get(noise, ("",))[0], color="#FFFFFF")
             ] for mode_name, mode_config in all_modes_config.items()]
         ]
 

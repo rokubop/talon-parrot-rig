@@ -1,44 +1,52 @@
 from talon import actions, ctrl, cron
 from .tracking import tracking
-from .movement import movement
 from ..ui.ui_manager import ui_manager
 from .keys import keys
 from .events import event_manager
 from .repeater import repeat, reverse
 from ..user_settings import (
+    MOVE_SPEED,
+    BOOST_AMOUNT,
+    BOOST_OVER_MS,
+    BOOST_RELEASE_MS,
+    BOOST_SMALL_AMOUNT,
+    BOOST_SMALL_REVERT_MS,
+    SCROLL_SPEED,
+    FULL_MODE_STOP_MS,
     CLICK_BEHAVIOR,
-    FULL_MODE_SETTINGS,
-    SCROLLING_SETTINGS,
 )
-from .constants import *
 from .utils import utils
 
 class ParrotActions:
     def __init__(self):
-        self.revive_tracking_job = None
         self._is_left_click_held = False
         self._parrot_mode_enabled = False
         self._stop_time_job = None
 
     def mouse_move_or_slow_dir(self, direction: str):
         cardinal = actions.user.mouse_rig_state_direction_cardinal()
-        if movement.is_moving() and cardinal == direction:
-            movement.slower()
+        if actions.user.mouse_rig_state_is_moving() and cardinal == direction:
+            actions.user.mouse_rig_speed_mul(0.5)
         else:
             self.move(direction)
 
     def move(self, direction: str):
         tracking.freeze()
         actions.user.mouse_rig_scroll_stop()
-        movement.move(direction)
-        if event_manager.get_mode() not in ("glide", "boost"):
+        mode = event_manager.get_mode()
+        if mode in ("glide", "boost"):
+            actions.user.mouse_rig_go_natural(direction, MOVE_SPEED)
+        else:
+            actions.user.mouse_rig_go(direction, MOVE_SPEED)
+        if mode not in ("glide", "boost"):
             event_manager.set_mode("move")
 
     def mouse_move_dir(self, direction: str):
         self.move(direction)
 
     def mouse_toggle_glide(self):
-        movement.preserve_direction()
+        rig = actions.user.mouse_rig()
+        rig.bake()
         if event_manager.get_mode() == "glide":
             event_manager.set_mode("move")
         else:
@@ -46,17 +54,18 @@ class ParrotActions:
 
     def mouse_boost(self):
         event_manager.set_mode("boost")
-        movement.boost(
-            lambda: event_manager.return_to_previous_mode() \
+        actions.user.mouse_rig_boost(BOOST_AMOUNT, over_ms=BOOST_OVER_MS, release_ms=BOOST_RELEASE_MS).then(
+            lambda: event_manager.return_to_previous_mode()
                 if event_manager.get_mode() == "boost" else None)
 
     def mouse_boost_small(self):
-        movement.boost_small()
+        rig = actions.user.mouse_rig()
+        rig.speed.offset.add(BOOST_SMALL_AMOUNT).revert(BOOST_SMALL_REVERT_MS, "ease_out2")
 
     def tracking_activate(self):
-        movement.stop()
+        actions.user.mouse_rig_stop()
         tracking.activate()
-        event_manager.set_mode("full")
+        event_manager.set_mode("tracking")
 
     def click_exit(self):
         self.mouse_click()
@@ -81,7 +90,7 @@ class ParrotActions:
 
         should_stop = hold != True and (
             (current_mode in CLICK_BEHAVIOR and CLICK_BEHAVIOR[current_mode] == "stop") or
-            (current_mode == "full")
+            (current_mode == "tracking")
         )
 
         if self._is_left_click_held:
@@ -95,7 +104,7 @@ class ParrotActions:
             ui_manager.hide_border()
 
         if should_stop:
-            if current_mode == "full":
+            if current_mode == "tracking":
                 self.stop_temporarily()
             else:
                 self.stopper()
@@ -104,7 +113,7 @@ class ParrotActions:
         self.mouse_click()
 
     def scroll(self, direction: str):
-        actions.user.mouse_rig_scroll_go(direction, SCROLLING_SETTINGS["speed"])
+        actions.user.mouse_rig_scroll_go(direction, SCROLL_SPEED)
 
     def scroll_stop(self):
         actions.user.mouse_rig_scroll_stop()
@@ -172,7 +181,7 @@ class ParrotActions:
         return {
             "enabled": self._parrot_mode_enabled,
             "tracking": tracking.is_tracking,
-            "moving": movement.is_moving(),
+            "moving": actions.user.mouse_rig_state_is_moving(),
             "scrolling": actions.user.mouse_rig_state_is_scrolling(),
             "mode": event_manager.get_mode(),
             "modifiers": event_manager.get_modifiers(),
@@ -202,9 +211,8 @@ class ParrotActions:
         event_manager.clear_modifiers()
 
     def stopper(self, stop_tracking=True, stop_moving=True, stop_scrolling=True, reset_mode=True):
-        self.stop_revive_tracking()
         if stop_moving:
-            movement.stop()
+            actions.user.mouse_rig_stop()
         if stop_scrolling:
             actions.user.mouse_rig_scroll_stop()
         if stop_tracking:
@@ -213,7 +221,7 @@ class ParrotActions:
             event_manager.set_mode("default")
 
     def stop_temporarily(self):
-        movement.stop()
+        actions.user.mouse_rig_stop()
         tracking.freeze()
 
         # Cancel any existing stop job
@@ -223,46 +231,17 @@ class ParrotActions:
             actions.user.mouse_rig_scroll_stop()
 
         # Schedule reactivation
-        stop_time = FULL_MODE_SETTINGS["stop_time"]
-        self._stop_time_job = cron.after(f"{stop_time}ms", self._reactivate_full_mode)
+        self._stop_time_job = cron.after(f"{FULL_MODE_STOP_MS}ms", self._reactivate_full_mode)
 
     def _reactivate_full_mode(self):
         self._stop_time_job = None
-        if event_manager.get_mode() == "full":
+        if event_manager.get_mode() == "tracking":
             tracking.activate()
-
-    def stop_revive_tracking(self):
-        if self.revive_tracking_job:
-            cron.cancel(self.revive_tracking_job)
-            self.revive_tracking_job = None
-
-    def await_revive_tracking(self):
-        self.stop_revive_tracking()
-        self.revive_tracking_job = cron.after("300ms", tracking.activate)
 
     def show_utility_selector(self):
         ui_manager.show_utility_selector()
 
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()
-
-    def show_settings(self):
-        print("Settings UI - not implemented yet")
-
-    def scroll_with_stop(self, direction: str):
-        self.stopper()
-        self.scroll(direction)
-
-    def scroll_with_temp_stop(self, direction: str):
-        self.stop_temporarily()
-        self.scroll(direction)
-
-    def scroll_with_mode_reset(self, direction: str):
-        tracking.freeze()
-        event_manager.set_mode("default")
-        self.scroll(direction)
-
-    def is_active(self):
-        return tracking.is_tracking or movement.is_moving() or actions.user.mouse_rig_state_is_scrolling()
 
 parrot_actions = ParrotActions()

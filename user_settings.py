@@ -1,16 +1,11 @@
-MOVEMENT_SETTINGS = {
-    "speed": 3,
-    "boost": 10,
-    "boost_small": 9,
-}
-
-SCROLLING_SETTINGS = {
-    "speed": 0.4,
-}
-
-FULL_MODE_SETTINGS = {
-    "stop_time": 1000,
-}
+MOVE_SPEED = 3
+BOOST_AMOUNT = 10
+BOOST_OVER_MS = 1000
+BOOST_RELEASE_MS = 1000
+BOOST_SMALL_AMOUNT = 9
+BOOST_SMALL_REVERT_MS = 400
+SCROLL_SPEED = 0.4
+FULL_MODE_STOP_MS = 1000
 
 CLICK_BEHAVIOR = {
     "move": "stop",

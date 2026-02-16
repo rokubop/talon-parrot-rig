@@ -1,21 +1,10 @@
-from talon import ui, ctrl, actions
+from talon import actions
 import os
-
-def get_screen():
-    current_screen = None
-    (x, y) = ctrl.mouse_pos()
-    for screen in ui.screens():
-        if screen.contains(x, y):
-            current_screen = screen
-
-    return current_screen
 
 class Utils:
     def update_time_of_file(self, filepath, filename):
         try:
-            # Touch the file by updating its modification time
-            import time
-            os.utime(filepath, None)  # Updates to current time
+            os.utime(filepath, None)
         except Exception as e:
             print(f"Error updating {filename}: {e}")
 
@@ -39,6 +28,6 @@ class Utils:
                 self.update_time_of_file(filepath, filename)
                 touched_count += 1
 
-        print(f"✓ Parrot mode reset and {touched_count} files touched for reload")
+        print(f"Parrot mode reset and {touched_count} files touched for reload")
 
 utils = Utils()
