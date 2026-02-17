@@ -21,7 +21,7 @@ input_map_common = {
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", actions.user.parrot_rig_tracking_activate),
-    "er":     ("utility2", actions.user.parrot_rig_utility2),
+    "er":     ("scroll mode", actions.user.parrot_rig_toggle_scroll_move),
     "palate": ("utility", actions.user.parrot_rig_utility),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
@@ -67,10 +67,26 @@ input_map_tracking = {
     "shush_stop:db_170": ("", actions.user.parrot_rig_scroll_stop_temp),
 }
 
+input_map_scroll_move = {
+    **input_map_common,
+    "ah":         ("scroll left", lambda: actions.user.parrot_rig_scroll_move_or_slow("left")),
+    "oh":         ("scroll right", lambda: actions.user.parrot_rig_scroll_move_or_slow("right")),
+    "t":          ("scroll up", lambda: actions.user.parrot_rig_scroll_move_or_slow("up")),
+    "guh":        ("scroll down", lambda: actions.user.parrot_rig_scroll_move_or_slow("down")),
+    "eh":         ("toggle scroll glide", actions.user.parrot_rig_scroll_toggle_glide),
+    "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
+    "mm":         ("click", actions.user.parrot_rig_click),
+    "shush":      ("scroll boost", actions.user.parrot_rig_scroll_boost),
+    "shush_stop": ("", lambda: None),
+    "hiss":       ("scroll boost small", actions.user.parrot_rig_scroll_boost_small),
+    "hiss_stop":  ("", lambda: None),
+}
+
 input_map = {
     "default": input_map_default,
     "move": input_map_move,
     "tracking": input_map_tracking,
+    "scroll_move": input_map_scroll_move,
     **utility_input_maps({
         "selectors": ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"],
         "cancel": ["tut"],
@@ -228,6 +244,34 @@ class Actions:
     def parrot_rig_get_mode():
         """Get current mode (default/move/boost/glide/tracking)"""
         return parrot_actions.parrot_mode_get_mode()
+
+    def parrot_rig_toggle_scroll_move():
+        """Toggle scroll move mode"""
+        parrot_actions.toggle_scroll_move()
+
+    def parrot_rig_scroll_move(direction: str):
+        """Scroll in direction using scroll move mode"""
+        parrot_actions.scroll_move_dir(direction)
+
+    def parrot_rig_scroll_move_or_slow(direction: str):
+        """Scroll or slow down if already scrolling in that direction"""
+        parrot_actions.scroll_move_or_slow_dir(direction)
+
+    def parrot_rig_scroll_toggle_glide():
+        """Toggle scroll glide mode"""
+        parrot_actions.scroll_toggle_glide()
+
+    def parrot_rig_scroll_boost():
+        """Boost scroll speed in current direction"""
+        parrot_actions.scroll_boost()
+
+    def parrot_rig_scroll_boost_small():
+        """Small temporary scroll speed boost"""
+        parrot_actions.scroll_boost_small()
+
+    def parrot_rig_scroll_stop_stay():
+        """Stop scrolling but stay in scroll mode"""
+        parrot_actions.scroll_stop_stay()
 
     def parrot_rig_show_help():
         """Show parrot rig cheatsheet"""

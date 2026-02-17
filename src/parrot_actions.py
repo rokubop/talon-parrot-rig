@@ -14,6 +14,13 @@ from ..parrot_rig_settings import (
     BOOST_SMALL_AMOUNT,
     BOOST_SMALL_REVERT_MS,
     SCROLL_SPEED,
+    SCROLL_MOVE_SPEED,
+    SCROLL_SLOW_MODE_MULTIPLIER,
+    SCROLL_BOOST_AMOUNT,
+    SCROLL_BOOST_OVER_MS,
+    SCROLL_BOOST_RELEASE_MS,
+    SCROLL_BOOST_SMALL_AMOUNT,
+    SCROLL_BOOST_SMALL_REVERT_MS,
     TRACKING_STOP_MS,
     CLICK_BEHAVIOR,
 )
@@ -240,5 +247,58 @@ class ParrotActions:
 
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()
+
+    def toggle_scroll_move(self):
+        mode = event_manager.get_mode()
+        if mode in ("scroll_move", "scroll_glide", "scroll_boost"):
+            actions.user.mouse_rig_scroll_stop()
+            event_manager.set_mode("default")
+        else:
+            event_manager.set_mode("scroll_move")
+
+    def scroll_move_dir(self, direction: str):
+        tracking.freeze()
+        actions.user.mouse_rig_stop()
+        mode = event_manager.get_mode()
+        if mode in ("scroll_glide", "scroll_boost"):
+            actions.user.mouse_rig_scroll_go_natural(direction, SCROLL_MOVE_SPEED, False)
+        else:
+            actions.user.mouse_rig_scroll_go_natural(direction, SCROLL_MOVE_SPEED, False)
+
+    def scroll_move_or_slow_dir(self, direction: str):
+        rig = actions.user.mouse_rig()
+        cardinal = rig.state.scroll.direction_cardinal.current
+        if actions.user.mouse_rig_state_is_scrolling() and cardinal == direction:
+            actions.user.mouse_rig_scroll_speed_mul(SCROLL_SLOW_MODE_MULTIPLIER)
+        else:
+            self.scroll_move_dir(direction)
+
+    def scroll_toggle_glide(self):
+        rig = actions.user.mouse_rig()
+        rig.bake()
+        if event_manager.get_mode() == "scroll_glide":
+            event_manager.set_mode("scroll_move")
+        else:
+            event_manager.set_mode("scroll_glide")
+
+    def scroll_boost(self):
+        event_manager.set_mode("scroll_boost")
+        actions.user.mouse_rig_scroll_boost(
+            SCROLL_BOOST_AMOUNT,
+            over_ms=SCROLL_BOOST_OVER_MS,
+            release_ms=SCROLL_BOOST_RELEASE_MS
+        ).then(
+            lambda: event_manager.return_to_previous_mode()
+                if event_manager.get_mode() == "scroll_boost" else None
+        )
+
+    def scroll_boost_small(self):
+        rig = actions.user.mouse_rig()
+        rig.scroll.speed.offset.add(SCROLL_BOOST_SMALL_AMOUNT).revert(
+            SCROLL_BOOST_SMALL_REVERT_MS, "ease_out2"
+        )
+
+    def scroll_stop_stay(self):
+        actions.user.mouse_rig_scroll_stop()
 
 parrot_actions = ParrotActions()
