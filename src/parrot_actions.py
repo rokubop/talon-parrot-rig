@@ -258,12 +258,14 @@ class ParrotActions:
 
     def scroll_move_dir(self, direction: str):
         tracking.freeze()
-        actions.user.mouse_rig_stop()
+        actions.user.mouse_rig_move_stop()
         mode = event_manager.get_mode()
         if mode in ("scroll_glide", "scroll_boost"):
-            actions.user.mouse_rig_scroll_go_natural(direction, SCROLL_MOVE_SPEED, False)
+            actions.user.mouse_rig_scroll_go_natural(direction, SCROLL_MOVE_SPEED, scale=3.0)
         else:
-            actions.user.mouse_rig_scroll_go_natural(direction, SCROLL_MOVE_SPEED, False)
+            actions.user.mouse_rig_scroll_go(direction, SCROLL_MOVE_SPEED)
+        if mode not in ("scroll_glide", "scroll_boost"):
+            event_manager.set_mode("scroll_move")
 
     def scroll_move_or_slow_dir(self, direction: str):
         rig = actions.user.mouse_rig()
@@ -275,7 +277,7 @@ class ParrotActions:
 
     def scroll_toggle_glide(self):
         rig = actions.user.mouse_rig()
-        rig.bake()
+        rig.scroll.bake()
         if event_manager.get_mode() == "scroll_glide":
             event_manager.set_mode("scroll_move")
         else:
@@ -300,5 +302,6 @@ class ParrotActions:
 
     def scroll_stop_stay(self):
         actions.user.mouse_rig_scroll_stop()
+        event_manager.set_mode("scroll_move")
 
 parrot_actions = ParrotActions()

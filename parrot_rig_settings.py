@@ -17,7 +17,7 @@ BOOST_SMALL_REVERT_MS = 400
 SCROLL_SPEED = 0.4
 
 # Scroll mode
-SCROLL_MOVE_SPEED = 0.15
+SCROLL_MOVE_SPEED = 0.05
 SCROLL_SLOW_MODE_MULTIPLIER = 0.5
 SCROLL_BOOST_AMOUNT = 0.3
 SCROLL_BOOST_OVER_MS = 1000
@@ -46,9 +46,9 @@ MODE_COLORS = {
     "boost": "#2AE33C",
     "glide": "#578EF5",
     "tracking": "#A7D3FF",
-    "scroll_move": "#A855F7",
-    "scroll_glide": "#7555F7",
-    "scroll_boost": "#DE62EE",
+    "scroll_move": "#9D52F3",
+    "scroll_boost": "#9D00FF",
+    "scroll_glide": "#6200FF",
 }
 
 # Modifier colors
