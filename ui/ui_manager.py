@@ -15,14 +15,20 @@ class UIManager:
         # Store callbacks so we can unsubscribe later
         self._mode_callback = self._on_mode_changed
         self._modifiers_callback = self._on_modifiers_changed
+        self._speed_level_callback = self._on_speed_level_changed
+        self._scroll_direction_callback = self._on_scroll_direction_changed
 
         event_manager.subscribe("mode_changed", self._mode_callback)
         event_manager.subscribe("modifiers_changed", self._modifiers_callback)
+        event_manager.subscribe("speed_level_changed", self._speed_level_callback)
+        event_manager.subscribe("scroll_direction_changed", self._scroll_direction_callback)
 
         # Track subscriptions for cleanup
         self._event_callbacks = [
             ("mode_changed", self._mode_callback),
-            ("modifiers_changed", self._modifiers_callback)
+            ("modifiers_changed", self._modifiers_callback),
+            ("speed_level_changed", self._speed_level_callback),
+            ("scroll_direction_changed", self._scroll_direction_callback),
         ]
 
     def cleanup(self):
@@ -41,6 +47,14 @@ class UIManager:
         cursor_ui_instance.clear_modifiers()
         for modifier in modifiers:
             cursor_ui_instance.add_modifier(modifier)
+
+    def _on_speed_level_changed(self, data):
+        level = data.get("level", 0)
+        cursor_ui_instance.set_speed_level(level)
+
+    def _on_scroll_direction_changed(self, data):
+        direction = data.get("direction", "down")
+        cursor_ui_instance.set_scroll_direction(direction)
 
     def show(self):
         cursor_ui_instance.show()

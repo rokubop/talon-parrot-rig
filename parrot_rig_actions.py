@@ -1,4 +1,4 @@
-from talon import Module, Context, actions, ctrl
+from talon import Module, actions, ctrl
 from .src.parrot_actions import parrot_actions
 from .src.events import event_manager
 from .parrot_rig_settings import CLICK_HOLD_MS
@@ -8,10 +8,7 @@ from .src.select import utility_input_maps
 mod = Module()
 mod.mode("parrot_rig", "parrot rig")
 
-ctx_parrot_rig = Context()
-ctx_parrot_rig.matches = """
-mode: user.parrot_rig
-"""
+CHANNEL = "parrot_rig"
 
 input_map_common = {
     "ee":     ("stop", actions.user.parrot_rig_stop),
@@ -24,6 +21,7 @@ input_map_common = {
     "er":     ("scroll mode", actions.user.parrot_rig_toggle_scroll_move),
     "palate": ("utility", actions.user.parrot_rig_utility),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
+    "tut":        ("reset speed", actions.user.parrot_rig_reset_speed_level),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
     "tut ee":     ("disable modifiers", actions.user.parrot_rig_disable_modifiers),
     "tut ah":     ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
@@ -52,10 +50,10 @@ input_map_move = {
     "guh":        ("move down", lambda: actions.user.parrot_rig_move_or_slow("down")),
     "eh":         ("toggle glide", actions.user.parrot_rig_toggle_glide),
     "mm":         ("click", actions.user.parrot_rig_click_mode),
-    "shush":      ("boost", actions.user.parrot_rig_boost),
+    "shush":      ("boost long", actions.user.parrot_rig_boost_long),
     "shush_stop": ("", lambda: None),
-    "hiss":       ("boost small", actions.user.parrot_rig_boost_small),
-    "hiss_stop":  ("", lambda: None),
+    "hiss":            ("boost burst", actions.user.parrot_rig_boost_burst),
+    "hiss_stop:db_30": ("", actions.user.parrot_rig_boost_burst_stop),
 }
 
 input_map_tracking = {
@@ -67,6 +65,22 @@ input_map_tracking = {
     "shush_stop:db_170": ("", actions.user.parrot_rig_scroll_stop_temp),
 }
 
+input_map_scroll_stop = {
+    **input_map_common,
+    "mm":     ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
+    "pop":    ("toggle ctrl", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
+    "palate": ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
+    "ah":     ("scroll left", lambda: actions.user.parrot_rig_scroll_move("left")),
+    "oh":     ("scroll right", lambda: actions.user.parrot_rig_scroll_move("right")),
+    "t":      ("scroll up", lambda: actions.user.parrot_rig_scroll_move("up")),
+    "guh":    ("scroll down", lambda: actions.user.parrot_rig_scroll_move("down")),
+    "shush":      ("scroll resume", actions.user.parrot_rig_scroll_resume),
+    "shush_stop": ("", lambda: None),
+    "hiss":       ("scroll resume", actions.user.parrot_rig_scroll_resume),
+    "hiss_stop":  ("", lambda: None),
+    "er":     ("exit scroll", actions.user.parrot_rig_stop),
+}
+
 input_map_scroll_move = {
     **input_map_common,
     "ah":         ("scroll left", lambda: actions.user.parrot_rig_scroll_move_or_slow("left")),
@@ -75,17 +89,20 @@ input_map_scroll_move = {
     "guh":        ("scroll down", lambda: actions.user.parrot_rig_scroll_move_or_slow("down")),
     "eh":         ("toggle scroll glide", actions.user.parrot_rig_scroll_toggle_glide),
     "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
-    "mm":         ("click", actions.user.parrot_rig_click),
-    "shush":      ("scroll boost", actions.user.parrot_rig_scroll_boost),
+    "mm":         ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
+    "pop":        ("toggle ctrl", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
+    "palate":     ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
+    "shush":      ("scroll boost long", actions.user.parrot_rig_scroll_boost_long),
     "shush_stop": ("", lambda: None),
-    "hiss":       ("scroll boost small", actions.user.parrot_rig_scroll_boost_small),
-    "hiss_stop":  ("", lambda: None),
+    "hiss":            ("scroll boost burst", actions.user.parrot_rig_scroll_boost_burst),
+    "hiss_stop:db_30": ("", actions.user.parrot_rig_scroll_boost_burst_stop),
 }
 
 input_map = {
     "default": input_map_default,
     "move": input_map_move,
     "tracking": input_map_tracking,
+    "scroll_stop": input_map_scroll_stop,
     "scroll_move": input_map_scroll_move,
     **utility_input_maps({
         "selectors": ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"],
@@ -93,10 +110,15 @@ input_map = {
     }),
 }
 
-@ctx_parrot_rig.action_class("user")
-class Actions:
-    def input_map():
-        return input_map
+def channel_init():
+    """Register the parrot_rig channel if not already registered."""
+    if CHANNEL not in actions.user.input_map_channel_list():
+        actions.user.input_map_channel_register(CHANNEL, input_map)
+
+def channel_reset():
+    """Unregister and re-register the channel with fresh data."""
+    actions.user.input_map_channel_unregister(CHANNEL)
+    actions.user.input_map_channel_register(CHANNEL, input_map)
 
 @mod.action_class
 class Actions:
@@ -132,13 +154,17 @@ class Actions:
         """Stop all mouse movement, scrolling, and tracking"""
         parrot_actions.stopper()
 
-    def parrot_rig_boost():
+    def parrot_rig_boost_long():
         """Boost mouse speed in current direction"""
-        parrot_actions.mouse_boost()
+        parrot_actions.mouse_boost_long()
 
-    def parrot_rig_boost_small():
+    def parrot_rig_boost_burst():
         """Small temporary speed boost"""
-        parrot_actions.mouse_boost_small()
+        parrot_actions.mouse_boost_burst()
+
+    def parrot_rig_boost_burst_stop():
+        """Stop small speed boost (fade out)"""
+        parrot_actions.mouse_boost_burst_stop()
 
     def parrot_rig_click_exit():
         """Click and exit parrot mode"""
@@ -213,6 +239,10 @@ class Actions:
             parrot_actions.hide_utility2_selector()
         event_manager.return_to_previous_mode()
 
+    def parrot_rig_reset_speed_level():
+        """Reset speed level back to normal"""
+        parrot_actions.reset_speed_level()
+
     def parrot_rig_repeat_command():
         """Repeat last command"""
         parrot_actions.repeat_command()
@@ -261,17 +291,29 @@ class Actions:
         """Toggle scroll glide mode"""
         parrot_actions.scroll_toggle_glide()
 
-    def parrot_rig_scroll_boost():
+    def parrot_rig_scroll_boost_long():
         """Boost scroll speed in current direction"""
-        parrot_actions.scroll_boost()
+        parrot_actions.scroll_boost_long()
 
-    def parrot_rig_scroll_boost_small():
+    def parrot_rig_scroll_boost_burst():
         """Small temporary scroll speed boost"""
-        parrot_actions.scroll_boost_small()
+        parrot_actions.scroll_boost_burst()
+
+    def parrot_rig_scroll_boost_burst_stop():
+        """Stop small scroll speed boost (fade out)"""
+        parrot_actions.scroll_boost_burst_stop()
 
     def parrot_rig_scroll_stop_stay():
-        """Stop scrolling but stay in scroll mode"""
+        """Stop scrolling but stay in scroll stop mode"""
         parrot_actions.scroll_stop_stay()
+
+    def parrot_rig_scroll_ramp(direction: str):
+        """Start scrolling with ramp-up bounce-back effect"""
+        parrot_actions.scroll_ramp_dir(direction)
+
+    def parrot_rig_scroll_resume():
+        """Resume scrolling in the last scroll direction"""
+        parrot_actions.scroll_resume()
 
     def parrot_rig_show_help():
         """Show parrot rig cheatsheet"""

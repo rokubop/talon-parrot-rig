@@ -11,7 +11,7 @@ def _make_selector(name: str, util_map: dict):
         text, state = actions.user.ui_elements(["text", "state"])
 
         title = props.get("title", name)
-        legend = actions.user.input_map_get_legend(mode=f"{name}_select")
+        legend = actions.user.input_map_channel_get_legend("parrot_rig", mode=f"{name}_select")
         try:
             current_mode = actions.user.input_map_single_mode_get(name)
         except (ValueError, KeyError):

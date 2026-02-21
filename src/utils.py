@@ -12,7 +12,7 @@ def show_reloading_notification():
                     padding=15,
                     margin=50,
                     background_color="#0088ffdd",
-                    border_radius=10
+                    border_radius=10,
                 )[
                     text("Reloading parrot rig...", font_size=20, color="white", font_weight="bold")
                 ]
@@ -24,6 +24,7 @@ def show_reloading_notification():
 
 def reload_files():
     actions.user.parrot_rig_disable()
+    actions.user.input_map_channel_unregister("parrot_rig")
 
     show_reloading_notification()
     time.sleep(0.1)

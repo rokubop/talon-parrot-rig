@@ -2,6 +2,36 @@ from talon import actions
 from ..parrot_rig_settings import MODE_COLORS, MODIFIER_COLORS
 from ..parrot_rig_settings import CURSOR_UI_ENABLED
 
+SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide"}
+
+TRIANGLE_PATHS = {
+    "down":  "M 12 19 L 4 5 L 20 5 Z",
+    "up":    "M 12 5 L 4 19 L 20 19 Z",
+    "left":  "M 5 12 L 19 4 L 19 20 Z",
+    "right": "M 19 12 L 5 4 L 5 20 Z",
+}
+
+TRIANGLE_BORDER_OUTER = {
+    "down":  "M 12 21 L 2 3 L 22 3 Z",
+    "up":    "M 12 3 L 2 21 L 22 21 Z",
+    "left":  "M 3 12 L 21 2 L 21 22 Z",
+    "right": "M 21 12 L 3 2 L 3 22 Z",
+}
+
+TRIANGLE_BORDER_MID = {
+    "down":  "M 12 20 L 3 4 L 21 4 Z",
+    "up":    "M 12 4 L 3 20 L 21 20 Z",
+    "left":  "M 4 12 L 20 3 L 20 21 Z",
+    "right": "M 20 12 L 4 3 L 4 21 Z",
+}
+
+TRIANGLE_BORDER_INNER = {
+    "down":  "M 12 18 L 5 6 L 19 6 Z",
+    "up":    "M 12 6 L 5 18 L 19 18 Z",
+    "left":  "M 6 12 L 18 5 L 18 19 Z",
+    "right": "M 18 12 L 6 5 L 6 19 Z",
+}
+
 default_cursor_color = "FF0000"
 default_border_color = "FFFFFF"
 
@@ -9,11 +39,13 @@ def cursor_ui():
     screen, cursor, svg, circle, state = actions.user.ui_elements(
         ["screen", "cursor", "svg", "circle", "state"]
     )
+    div, text, path = actions.user.ui_elements(["div", "text", "path"])
 
     cursor_color = state.get("cursor_color")
     border_color = state.get("border_color")
     show_border = state.get("show_border")
     modifiers = state.get("modifiers")
+    speed_level = state.get("speed_level")
 
     modifier_elements = []
     if modifiers:
@@ -28,18 +60,57 @@ def cursor_ui():
                 )
                 offset_x += 11
 
+    speed_label = None
+    if speed_level and speed_level > 0:
+        speed_label = div(
+            position="absolute",
+            left=30,
+            top=12,
+            width=20,
+            height=20,
+            justify_content="center",
+            align_items="center",
+        )[
+            text(
+                str(speed_level),
+                color="white",
+                font_size=12,
+                font_weight="bold",
+                stroke_color="000000",
+                stroke_width=3,
+            )
+        ]
+
+    mode = state.get("mode")
+    is_scroll = mode in SCROLL_MODES
+
+    if is_scroll:
+        scroll_dir = state.get("scroll_direction") or "down"
+        cursor_shape = svg(position="absolute", left=10, top=10)[
+            path(d=TRIANGLE_PATHS[scroll_dir], fill=cursor_color)
+        ]
+        border_shape = svg(position="absolute", left=10, top=10)[
+            path(d=TRIANGLE_BORDER_OUTER[scroll_dir], fill="black"),
+            path(d=TRIANGLE_BORDER_MID[scroll_dir], fill=border_color),
+            path(d=TRIANGLE_BORDER_INNER[scroll_dir], fill="black"),
+        ] if show_border else None
+    else:
+        # Circle for move modes
+        cursor_shape = svg(position="absolute", left=10, top=10)[
+            circle(r=7, cx=12, cy=12, fill=cursor_color)
+        ]
+        border_shape = svg(position="absolute", left=10, top=10)[
+            circle(r=11, cx=12, cy=12, fill="black"),
+            circle(r=10, cx=12, cy=12, fill=border_color),
+            circle(r=8, cx=12, cy=12, fill="black")
+        ] if show_border else None
+
     return screen()[
         cursor()[
-            # Border (if enabled)
-            svg(position="absolute", left=10, top=10)[
-                circle(r=11, cx=12, cy=12, fill="black"),
-                circle(r=10, cx=12, cy=12, fill=border_color),
-                circle(r=8, cx=12, cy=12, fill="black")
-            ] if show_border else None,
-            # Main cursor
-            svg(position="absolute", left=10, top=10)[
-                circle(r=7, cx=12, cy=12, fill=cursor_color)
-            ],
+            border_shape,
+            cursor_shape,
+            # Speed level number
+            speed_label,
             # Modifiers
             *modifier_elements
         ]
@@ -52,6 +123,8 @@ class CursorUI:
         self._border_show = False
         self._modifiers = set()
         self._mode = "default"
+        self._speed_level = 0
+        self._scroll_direction = "down"
 
     def _get_state(self):
         return {
@@ -59,7 +132,9 @@ class CursorUI:
             "border_color": self._border_color,
             "show_border": self._border_show,
             "modifiers": self._modifiers,
-            "mode": self._mode
+            "mode": self._mode,
+            "speed_level": self._speed_level,
+            "scroll_direction": self._scroll_direction,
         }
 
     def show(self):
@@ -80,6 +155,8 @@ class CursorUI:
         self._border_show = False
         self._modifiers = set()
         self._mode = "default"
+        self._speed_level = 0
+        self._scroll_direction = "down"
 
     def color(self, color):
         if not CURSOR_UI_ENABLED:
@@ -122,6 +199,18 @@ class CursorUI:
             return
         self._mode = mode
         actions.user.ui_elements_set_state("mode", mode)
+
+    def set_speed_level(self, level: int):
+        if not CURSOR_UI_ENABLED:
+            return
+        self._speed_level = level
+        actions.user.ui_elements_set_state("speed_level", level)
+
+    def set_scroll_direction(self, direction: str):
+        if not CURSOR_UI_ENABLED:
+            return
+        self._scroll_direction = direction
+        actions.user.ui_elements_set_state("scroll_direction", direction)
 
     def get_mode(self) -> str:
         return self._mode

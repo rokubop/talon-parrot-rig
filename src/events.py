@@ -41,7 +41,7 @@ class ParrotEventManager:
             self._current_mode = mode
 
             if has_input_map:
-                actions.user.input_map_mode_set(mode)
+                actions.user.input_map_channel_mode_set("parrot_rig", mode)
 
             self.emit("mode_changed", {
                 "current_mode": self._current_mode,
