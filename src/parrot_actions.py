@@ -67,7 +67,8 @@ class ParrotActions:
         actions.user.mouse_rig_scroll_stop()
         mode = event_manager.get_mode()
         speed = self._get_move_speed()
-        if mode in ("glide", "boost"):
+        current_speed = actions.user.mouse_rig_state_speed()
+        if mode in ("glide", "boost") or current_speed > speed:
             actions.user.mouse_rig_go_natural(direction, speed)
         else:
             actions.user.mouse_rig_go(direction, speed)
@@ -324,7 +325,9 @@ class ParrotActions:
         actions.user.mouse_rig_move_stop()
         mode = event_manager.get_mode()
         speed = self._get_scroll_move_speed()
-        if mode in ("scroll_glide", "scroll_boost"):
+        rig = actions.user.mouse_rig()
+        current_scroll_speed = rig.state.scroll_speed
+        if mode in ("scroll_glide", "scroll_boost") or current_scroll_speed > speed:
             actions.user.mouse_rig_scroll_go_natural(direction, speed, scale=3.0)
         else:
             actions.user.mouse_rig_scroll_go(direction, speed)
