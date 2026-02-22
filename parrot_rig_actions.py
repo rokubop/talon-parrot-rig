@@ -52,8 +52,8 @@ input_map_move = {
     "mm":         ("click", actions.user.parrot_rig_click_mode),
     "shush":      ("boost long", actions.user.parrot_rig_boost_long),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("boost burst", actions.user.parrot_rig_boost_burst),
-    "hiss_stop:db_30": ("", actions.user.parrot_rig_boost_burst_stop),
+    "hiss":            ("burst break", actions.user.parrot_rig_burst_break),
+    "hiss_stop:db_50": ("", actions.user.parrot_rig_burst_break_stop),
 }
 
 input_map_tracking = {
@@ -90,8 +90,8 @@ input_map_scroll_move = {
     "mm":         ("click", actions.user.parrot_rig_click_mode),
     "shush":      ("scroll boost long", actions.user.parrot_rig_scroll_boost_long),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("scroll boost burst", actions.user.parrot_rig_scroll_boost_burst),
-    "hiss_stop:db_30": ("", actions.user.parrot_rig_scroll_boost_burst_stop),
+    "hiss":            ("scroll burst break", actions.user.parrot_rig_scroll_burst_break),
+    "hiss_stop:db_50": ("", actions.user.parrot_rig_scroll_burst_break_stop),
 }
 
 input_map_scroll_tracking = {
@@ -162,13 +162,13 @@ class Actions:
         """Boost mouse speed in current direction"""
         parrot_actions.mouse_boost_long()
 
-    def parrot_rig_boost_burst():
-        """Small temporary speed boost"""
-        parrot_actions.mouse_boost_burst()
+    def parrot_rig_burst_break():
+        """Speed burst or break (release glide/boost)"""
+        parrot_actions.mouse_burst_break()
 
-    def parrot_rig_boost_burst_stop():
-        """Stop small speed boost (fade out)"""
-        parrot_actions.mouse_boost_burst_stop()
+    def parrot_rig_burst_break_stop():
+        """Stop burst (fade out)"""
+        parrot_actions.mouse_burst_break_stop()
 
     def parrot_rig_click_exit():
         """Click and exit parrot mode"""
@@ -303,13 +303,13 @@ class Actions:
         """Boost scroll speed in current direction"""
         parrot_actions.scroll_boost_long()
 
-    def parrot_rig_scroll_boost_burst():
-        """Small temporary scroll speed boost"""
-        parrot_actions.scroll_boost_burst()
+    def parrot_rig_scroll_burst_break():
+        """Scroll burst or break (release scroll glide/boost)"""
+        parrot_actions.scroll_burst_break()
 
-    def parrot_rig_scroll_boost_burst_stop():
-        """Stop small scroll speed boost (fade out)"""
-        parrot_actions.scroll_boost_burst_stop()
+    def parrot_rig_scroll_burst_break_stop():
+        """Stop scroll burst (fade out)"""
+        parrot_actions.scroll_burst_break_stop()
 
     def parrot_rig_scroll_stop_stay():
         """Stop scrolling but stay in scroll stop mode"""
