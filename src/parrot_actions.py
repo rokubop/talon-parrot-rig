@@ -12,8 +12,8 @@ from ..parrot_rig_settings import (
     BOOST_LONG_OVER_MS,
     BOOST_LONG_RELEASE_MS,
     BOOST_LONG_MAX,
-    BURST_BREAK_AMOUNT,
-    BURST_BREAK_REVERT_MS,
+    BURST_AMOUNT,
+    BRAKE_REVERT_MS,
     GLIDE_RELEASE_RATE,
     SCROLL_SPEED,
     SCROLL_MOVE_SPEED,
@@ -21,8 +21,8 @@ from ..parrot_rig_settings import (
     SCROLL_BOOST_LONG_AMOUNT,
     SCROLL_BOOST_LONG_OVER_MS,
     SCROLL_BOOST_LONG_RELEASE_MS,
-    SCROLL_BURST_BREAK_AMOUNT,
-    SCROLL_BURST_BREAK_REVERT_MS,
+    SCROLL_BURST_AMOUNT,
+    SCROLL_BRAKE_REVERT_MS,
     SCROLL_RAMP_AMOUNT,
     SCROLL_RAMP_REVERT_MS,
     SCROLL_GLIDE_RELEASE_RATE,
@@ -39,8 +39,8 @@ class ParrotActions:
         self._move_speed_level = 0
         self._scroll_speed_level = 0
         self._scroll_direction = "down"
-        self._burst_break_did_break = False
-        self._scroll_burst_break_did_break = False
+        self._burst_or_brake_did_break = False
+        self._scroll_burst_or_brake_did_break = False
 
     def _get_move_speed(self):
         return MOVE_SPEED * (SLOW_MODE_MULTIPLIER ** self._move_speed_level)
@@ -105,25 +105,25 @@ class ParrotActions:
             lambda: event_manager.return_to_previous_mode()
                 if event_manager.get_mode() == "boost" else None)
 
-    def mouse_burst_break(self):
+    def mouse_burst_or_brake(self):
         if event_manager.get_mode() in ("boost", "glide"):
             rig = actions.user.mouse_rig()
             rig.bake()
             speed = self._get_move_speed()
             rig.speed.to(speed).over(rate=GLIDE_RELEASE_RATE, easing="ease_out2")
             event_manager.set_mode("move")
-            self._burst_break_did_break = True
+            self._burst_or_brake_did_break = True
             return
-        self._burst_break_did_break = False
+        self._burst_or_brake_did_break = False
         rig = actions.user.mouse_rig()
-        rig.layer("hiss_boost").stack(1).speed.offset.add(BURST_BREAK_AMOUNT)
+        rig.layer("hiss_boost").stack(1).speed.offset.add(BURST_AMOUNT)
 
-    def mouse_burst_break_stop(self):
-        if self._burst_break_did_break:
-            self._burst_break_did_break = False
+    def mouse_burst_or_brake_stop(self):
+        if self._burst_or_brake_did_break:
+            self._burst_or_brake_did_break = False
             return
         rig = actions.user.mouse_rig()
-        rig.layer("hiss_boost").revert(BURST_BREAK_REVERT_MS, "ease_out2")
+        rig.layer("hiss_boost").revert(BRAKE_REVERT_MS, "ease_out2")
 
     def tracking_activate(self):
         actions.user.mouse_rig_stop()
@@ -388,25 +388,25 @@ class ParrotActions:
                 if event_manager.get_mode() == "scroll_boost" else None
         )
 
-    def scroll_burst_break(self):
+    def scroll_burst_or_brake(self):
         if event_manager.get_mode() in ("scroll_boost", "scroll_glide"):
             rig = actions.user.mouse_rig()
             rig.scroll.bake()
             speed = self._get_scroll_move_speed()
             rig.scroll.speed.to(speed).over(rate=SCROLL_GLIDE_RELEASE_RATE, easing="ease_out2")
             event_manager.set_mode("scroll_move")
-            self._scroll_burst_break_did_break = True
+            self._scroll_burst_or_brake_did_break = True
             return
-        self._scroll_burst_break_did_break = False
+        self._scroll_burst_or_brake_did_break = False
         rig = actions.user.mouse_rig()
-        rig.layer("hiss_scroll_boost").stack(1).scroll.speed.offset.add(SCROLL_BURST_BREAK_AMOUNT)
+        rig.layer("hiss_scroll_boost").stack(1).scroll.speed.offset.add(SCROLL_BURST_AMOUNT)
 
-    def scroll_burst_break_stop(self):
-        if self._scroll_burst_break_did_break:
-            self._scroll_burst_break_did_break = False
+    def scroll_burst_or_brake_stop(self):
+        if self._scroll_burst_or_brake_did_break:
+            self._scroll_burst_or_brake_did_break = False
             return
         rig = actions.user.mouse_rig()
-        rig.layer("hiss_scroll_boost").revert(SCROLL_BURST_BREAK_REVERT_MS, "ease_out2")
+        rig.layer("hiss_scroll_boost").revert(SCROLL_BRAKE_REVERT_MS, "ease_out2")
 
     def scroll_stop_stay(self):
         actions.user.mouse_rig_scroll_stop()

@@ -21,10 +21,10 @@ def _make_selector(name: str, util_map: dict):
         noise_list = list(legend.keys())
 
         header_row = tr()[
-            th(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR)[
+            th(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR, min_width=80)[
                 text("Noise", color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
             ],
-            th(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR)[
+            th(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR, min_width=120)[
                 text(title, color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
             ],
         ]

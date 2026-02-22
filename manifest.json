@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "talon-input-map": {
-      "min_version": "0.7.0",
+      "min_version": "0.7.1",
       "namespace": "user.input_map",
       "github": "https://github.com/rokubop/talon-input-map/"
     },
@@ -30,7 +30,7 @@
       "github": "https://github.com/rokubop/talon-mouse-rig"
     },
     "talon-ui-elements": {
-      "min_version": "0.14.1",
+      "min_version": "0.15.0",
       "namespace": "user.ui_elements",
       "github": "https://github.com/rokubop/talon-ui-elements"
     }
@@ -42,11 +42,10 @@
     ],
     "actions": [
       "user.parrot_rig_boost_long",
-      "user.parrot_rig_burst_break",
-      "user.parrot_rig_burst_break_stop",
+      "user.parrot_rig_burst_or_brake",
+      "user.parrot_rig_burst_or_brake_stop",
       "user.parrot_rig_click",
       "user.parrot_rig_click_exit",
-      "user.parrot_rig_click_mode",
       "user.parrot_rig_disable",
       "user.parrot_rig_disable_modifiers",
       "user.parrot_rig_enable",
@@ -63,8 +62,8 @@
       "user.parrot_rig_reverse_phrase",
       "user.parrot_rig_scroll",
       "user.parrot_rig_scroll_boost_long",
-      "user.parrot_rig_scroll_burst_break",
-      "user.parrot_rig_scroll_burst_break_stop",
+      "user.parrot_rig_scroll_burst_or_brake",
+      "user.parrot_rig_scroll_burst_or_brake_stop",
       "user.parrot_rig_scroll_move",
       "user.parrot_rig_scroll_move_or_slow",
       "user.parrot_rig_scroll_ramp",
@@ -75,7 +74,6 @@
       "user.parrot_rig_scroll_toggle_glide",
       "user.parrot_rig_scroll_tracking_activate",
       "user.parrot_rig_show_help",
-      "user.parrot_rig_show_utility2_selector",
       "user.parrot_rig_show_utility_selector",
       "user.parrot_rig_simple_click",
       "user.parrot_rig_stop",
@@ -85,7 +83,6 @@
       "user.parrot_rig_toggle_scroll_move",
       "user.parrot_rig_tracking_activate",
       "user.parrot_rig_utility",
-      "user.parrot_rig_utility2",
       "user.parrot_rig_utility_select",
       "user.parrot_rig_utility_select_close",
       "user.parrot_rig_version"

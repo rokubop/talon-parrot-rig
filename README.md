@@ -17,9 +17,9 @@ You'll need at least 9 noises to use this, 14 recommended for the full experienc
 - [**Talon Beta**](https://talon.wiki/Help/beta_talon/)
 - **Eye Tracker** (recommended) - Eye tracking device (e.g., Tobii 4C or Tobii 5)
 - **Parrot** - Trained parrot model with `parrot_integration.py` and `patterns.json` files
-- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.7.0+)
+- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.7.1+)
 - [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v2.2.0+)
-- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.14.1+)
+- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.15.0+)
 
 ### Install
 
@@ -68,6 +68,10 @@ Use this table to understand what role each noise plays, then decide which of yo
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.
 
+Say **"parrot help"** to see the full input map reference in-app:
+
+![parrot rig help](./parrot_rig_help_preview.png)
+
 ### Remapping steps
 
 You'll edit 3 files. In each file, replace every occurrence of the old noise name with your noise name.
@@ -84,6 +88,8 @@ You'll edit 3 files. In each file, replace every occurrence of the old noise nam
 Replace all instances of that noise throughout the file (it appears in multiple mode maps).
 
 If you don't have enough noises, you can use combos to free up single noises for more actions. For example, `"tut ah"`, `"tut oh"`, `"tut mm"` as combos instead of using those noises alone.
+
+**Mac users:** Change `"ctrl"` to `"cmd"` in the modifier toggle for `tut t` in `input_map_common`.
 
 **2. [parrot_rig_input.talon](./parrot_rig_input.talon)** - Match the `parrot(...)` trigger on the left to your noise. The string on the right must match the key you used in step 1:
 

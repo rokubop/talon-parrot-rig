@@ -18,15 +18,15 @@ input_map_common = {
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", actions.user.parrot_rig_tracking_activate),
-    "er":     ("scroll mode", actions.user.parrot_rig_toggle_scroll_move),
+    "er":     ("toggle scroll mode", actions.user.parrot_rig_toggle_scroll_move),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
-    "tut":        ("reset speed", actions.user.parrot_rig_reset_speed_level),
+    "tut":        ("reset slow", actions.user.parrot_rig_reset_speed_level),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
     "tut ee":     ("disable modifiers", actions.user.parrot_rig_disable_modifiers),
     "tut ah":     ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
     "tut shush":  ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
-    "tut guh":    ("toggle control", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
+    "tut t":      ("toggle control", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
     "tut mm":     ("middle click hold", lambda: actions.user.parrot_rig_click(2)),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1", "palate")),
@@ -42,61 +42,61 @@ input_map_default = {
 
 input_map_move = {
     **input_map_common,
-    "ah":         ("move left", lambda: actions.user.parrot_rig_move_or_slow("left")),
-    "oh":         ("move right", lambda: actions.user.parrot_rig_move_or_slow("right")),
-    "t":          ("move up", lambda: actions.user.parrot_rig_move_or_slow("up")),
-    "guh":        ("move down", lambda: actions.user.parrot_rig_move_or_slow("down")),
+    "ah":         ("move left or slow", lambda: actions.user.parrot_rig_move_or_slow("left")),
+    "oh":         ("move right or slow", lambda: actions.user.parrot_rig_move_or_slow("right")),
+    "t":          ("move up or slow", lambda: actions.user.parrot_rig_move_or_slow("up")),
+    "guh":        ("move down or slow", lambda: actions.user.parrot_rig_move_or_slow("down")),
     "eh":         ("toggle glide", actions.user.parrot_rig_toggle_glide),
     "mm":         ("click", actions.user.parrot_rig_click),
     "shush":      ("boost long", actions.user.parrot_rig_boost_long),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("burst break", actions.user.parrot_rig_burst_break),
-    "hiss_stop:db_50": ("", actions.user.parrot_rig_burst_break_stop),
+    "hiss":            ("burst or brake", actions.user.parrot_rig_burst_or_brake),
+    "hiss_stop:db_50": ("", actions.user.parrot_rig_burst_or_brake_stop),
 }
 
 input_map_tracking = {
     **input_map_common,
-    "mm":                ("click temp stop", actions.user.parrot_rig_click),
-    "hiss":              ("scroll down", lambda: actions.user.parrot_rig_scroll("down")),
+    "mm":                ("click (pause track)", actions.user.parrot_rig_click),
+    "hiss":              ("scroll down (pause track)", lambda: actions.user.parrot_rig_scroll("down")),
     "hiss_stop:db_170":  ("", actions.user.parrot_rig_scroll_stop_temp),
-    "shush":             ("scroll up", lambda: actions.user.parrot_rig_scroll("up")),
+    "shush":             ("scroll up (pause track)", lambda: actions.user.parrot_rig_scroll("up")),
     "shush_stop:db_170": ("", actions.user.parrot_rig_scroll_stop_temp),
 }
 
 input_map_scroll_stop = {
     **input_map_common,
-    "ah":     ("scroll left", lambda: actions.user.parrot_rig_scroll_move("left")),
-    "oh":     ("scroll right", lambda: actions.user.parrot_rig_scroll_move("right")),
-    "t":      ("scroll up", lambda: actions.user.parrot_rig_scroll_move("up")),
-    "guh":    ("scroll down", lambda: actions.user.parrot_rig_scroll_move("down")),
+    "ah":     ("scroll go left", lambda: actions.user.parrot_rig_scroll_move("left")),
+    "oh":     ("scroll go right", lambda: actions.user.parrot_rig_scroll_move("right")),
+    "t":      ("scroll go up", lambda: actions.user.parrot_rig_scroll_move("up")),
+    "guh":    ("scroll go down", lambda: actions.user.parrot_rig_scroll_move("down")),
     "eh":     ("scroll track", actions.user.parrot_rig_scroll_tracking_activate),
     "shush":      ("scroll resume", actions.user.parrot_rig_scroll_resume),
     "shush_stop": ("", lambda: None),
     "hiss":       ("scroll resume", actions.user.parrot_rig_scroll_resume),
     "hiss_stop":  ("", lambda: None),
-    "er":     ("exit scroll", actions.user.parrot_rig_stop),
+    "er":     ("toggle scroll mode", actions.user.parrot_rig_stop),
 }
 
 input_map_scroll_move = {
     **input_map_common,
-    "ah":         ("scroll left", lambda: actions.user.parrot_rig_scroll_move_or_slow("left")),
-    "oh":         ("scroll right", lambda: actions.user.parrot_rig_scroll_move_or_slow("right")),
-    "t":          ("scroll up", lambda: actions.user.parrot_rig_scroll_move_or_slow("up")),
-    "guh":        ("scroll down", lambda: actions.user.parrot_rig_scroll_move_or_slow("down")),
+    "ah":         ("scroll go left or slow", lambda: actions.user.parrot_rig_scroll_move_or_slow("left")),
+    "oh":         ("scroll go right or slow", lambda: actions.user.parrot_rig_scroll_move_or_slow("right")),
+    "t":          ("scroll go up or slow", lambda: actions.user.parrot_rig_scroll_move_or_slow("up")),
+    "guh":        ("scroll go down or slow", lambda: actions.user.parrot_rig_scroll_move_or_slow("down")),
     "eh":         ("toggle scroll glide", actions.user.parrot_rig_scroll_toggle_glide),
     "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
     "mm":         ("click", actions.user.parrot_rig_click),
     "shush":      ("scroll boost long", actions.user.parrot_rig_scroll_boost_long),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("scroll burst break", actions.user.parrot_rig_scroll_burst_break),
-    "hiss_stop:db_50": ("", actions.user.parrot_rig_scroll_burst_break_stop),
+    "hiss":            ("scroll burst or brake", actions.user.parrot_rig_scroll_burst_or_brake),
+    "hiss_stop:db_50": ("", actions.user.parrot_rig_scroll_burst_or_brake_stop),
 }
 
 input_map_scroll_tracking = {
     **input_map_scroll_stop,
     "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
-    "mm":         ("click temp stop", actions.user.parrot_rig_click),
-    "er":         ("track mode", actions.user.parrot_rig_toggle_scroll_move),
+    "mm":         ("click (pause track)", actions.user.parrot_rig_click),
+    "er":         ("toggle scroll mode", actions.user.parrot_rig_toggle_scroll_move),
 }
 
 utility_maps = {
@@ -174,13 +174,13 @@ class Actions:
         """Boost mouse speed in current direction"""
         parrot_actions.mouse_boost_long()
 
-    def parrot_rig_burst_break():
-        """Speed burst or break (release glide/boost)"""
-        parrot_actions.mouse_burst_break()
+    def parrot_rig_burst_or_brake():
+        """Speed burst or brake (release glide/boost)"""
+        parrot_actions.mouse_burst_or_brake()
 
-    def parrot_rig_burst_break_stop():
+    def parrot_rig_burst_or_brake_stop():
         """Stop burst (fade out)"""
-        parrot_actions.mouse_burst_break_stop()
+        parrot_actions.mouse_burst_or_brake_stop()
 
     def parrot_rig_click_exit():
         """Click and exit parrot mode"""
@@ -274,13 +274,13 @@ class Actions:
         """Boost scroll speed in current direction"""
         parrot_actions.scroll_boost_long()
 
-    def parrot_rig_scroll_burst_break():
-        """Scroll burst or break (release scroll glide/boost)"""
-        parrot_actions.scroll_burst_break()
+    def parrot_rig_scroll_burst_or_brake():
+        """Scroll burst or brake (release scroll glide/boost)"""
+        parrot_actions.scroll_burst_or_brake()
 
-    def parrot_rig_scroll_burst_break_stop():
+    def parrot_rig_scroll_burst_or_brake_stop():
         """Stop scroll burst (fade out)"""
-        parrot_actions.scroll_burst_break_stop()
+        parrot_actions.scroll_burst_or_brake_stop()
 
     def parrot_rig_scroll_stop_stay():
         """Stop scrolling but stay in scroll stop mode"""
@@ -322,6 +322,5 @@ class Actions:
         actions.user.parrot_rig_utility_select_close(name)
 
     def parrot_rig_utility_select_close(name: str):
-        """Close utility selector and revert mode"""
+        """Close utility selector (on_unmount handles mode revert)"""
         parrot_actions.hide_utility_selector(name)
-        event_manager.return_to_previous_mode()
