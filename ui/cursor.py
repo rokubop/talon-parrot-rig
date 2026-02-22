@@ -12,24 +12,24 @@ TRIANGLE_PATHS = {
 }
 
 TRIANGLE_BORDER_OUTER = {
-    "down":  "M 12 21 L 2 3 L 22 3 Z",
-    "up":    "M 12 3 L 2 21 L 22 21 Z",
-    "left":  "M 3 12 L 21 2 L 21 22 Z",
-    "right": "M 21 12 L 3 2 L 3 22 Z",
+    "down":  "M 12 24 L 0 2 L 24 2 Z",
+    "up":    "M 12 0 L 0 22 L 24 22 Z",
+    "left":  "M 0 12 L 22 0 L 22 24 Z",
+    "right": "M 24 12 L 2 0 L 2 24 Z",
 }
 
 TRIANGLE_BORDER_MID = {
-    "down":  "M 12 20 L 3 4 L 21 4 Z",
-    "up":    "M 12 4 L 3 20 L 21 20 Z",
-    "left":  "M 4 12 L 20 3 L 20 21 Z",
-    "right": "M 20 12 L 4 3 L 4 21 Z",
+    "down":  "M 12 23 L 1 3 L 23 3 Z",
+    "up":    "M 12 1 L 1 21 L 23 21 Z",
+    "left":  "M 1 12 L 21 1 L 21 23 Z",
+    "right": "M 23 12 L 3 1 L 3 23 Z",
 }
 
 TRIANGLE_BORDER_INNER = {
-    "down":  "M 12 18 L 5 6 L 19 6 Z",
-    "up":    "M 12 6 L 5 18 L 19 18 Z",
-    "left":  "M 6 12 L 18 5 L 18 19 Z",
-    "right": "M 18 12 L 6 5 L 6 19 Z",
+    "down":  "M 12 21 L 3 4 L 21 4 Z",
+    "up":    "M 12 3 L 3 20 L 21 20 Z",
+    "left":  "M 3 12 L 20 3 L 20 21 Z",
+    "right": "M 21 12 L 4 3 L 4 21 Z",
 }
 
 default_cursor_color = "FF0000"

@@ -169,7 +169,7 @@ class ParrotActions:
         current_mode = event_manager.get_mode()
 
         should_stop = hold != True and (
-            (current_mode in CLICK_BEHAVIOR and CLICK_BEHAVIOR[current_mode] == "stop") or
+            (current_mode in CLICK_BEHAVIOR) or
             (current_mode in ("tracking", "scroll_tracking"))
         )
 
@@ -186,6 +186,9 @@ class ParrotActions:
         if should_stop:
             if current_mode in ("tracking", "scroll_tracking"):
                 self.stop_temporarily()
+            elif current_mode in CLICK_BEHAVIOR and CLICK_BEHAVIOR[current_mode] == "scroll_stop":
+                actions.user.mouse_rig_scroll_stop()
+                event_manager.set_mode("scroll_stop")
             else:
                 self.stopper()
 
