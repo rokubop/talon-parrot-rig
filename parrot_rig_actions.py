@@ -12,6 +12,7 @@ CHANNEL = "parrot_rig"
 
 input_map_common = {
     "ee":     ("stop", actions.user.parrot_rig_stop),
+    "mm":     ("click", actions.user.parrot_rig_click),
     "pop":    ("click exit", actions.user.parrot_rig_click_exit),
     "ah":     ("move left", lambda: actions.user.parrot_rig_move("left")),
     "oh":     ("move right", lambda: actions.user.parrot_rig_move("right")),
@@ -35,7 +36,6 @@ input_map_common = {
 
 input_map_default = {
     **input_map_common,
-    "mm":                ("click", actions.user.parrot_rig_click),
     "hiss":              ("scroll down", lambda: actions.user.parrot_rig_scroll("down")),
     "hiss_stop:db_170":  ("", actions.user.parrot_rig_scroll_stop),
     "shush":             ("scroll up", lambda: actions.user.parrot_rig_scroll("up")),
@@ -67,13 +67,11 @@ input_map_tracking = {
 
 input_map_scroll_stop = {
     **input_map_common,
-    "mm":     ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
-    "pop":    ("toggle ctrl", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
-    "palate": ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
     "ah":     ("scroll left", lambda: actions.user.parrot_rig_scroll_move("left")),
     "oh":     ("scroll right", lambda: actions.user.parrot_rig_scroll_move("right")),
     "t":      ("scroll up", lambda: actions.user.parrot_rig_scroll_move("up")),
     "guh":    ("scroll down", lambda: actions.user.parrot_rig_scroll_move("down")),
+    "eh":     ("scroll track", actions.user.parrot_rig_scroll_tracking_activate),
     "shush":      ("scroll resume", actions.user.parrot_rig_scroll_resume),
     "shush_stop": ("", lambda: None),
     "hiss":       ("scroll resume", actions.user.parrot_rig_scroll_resume),
@@ -89,13 +87,18 @@ input_map_scroll_move = {
     "guh":        ("scroll down", lambda: actions.user.parrot_rig_scroll_move_or_slow("down")),
     "eh":         ("toggle scroll glide", actions.user.parrot_rig_scroll_toggle_glide),
     "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
-    "mm":         ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
-    "pop":        ("toggle ctrl", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
-    "palate":     ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
+    "mm":         ("click", actions.user.parrot_rig_click_mode),
     "shush":      ("scroll boost long", actions.user.parrot_rig_scroll_boost_long),
     "shush_stop": ("", lambda: None),
     "hiss":            ("scroll boost burst", actions.user.parrot_rig_scroll_boost_burst),
     "hiss_stop:db_30": ("", actions.user.parrot_rig_scroll_boost_burst_stop),
+}
+
+input_map_scroll_tracking = {
+    **input_map_scroll_stop,
+    "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
+    "mm":         ("click temp stop", actions.user.parrot_rig_click_mode),
+    "er":         ("track mode", actions.user.parrot_rig_toggle_scroll_move),
 }
 
 input_map = {
@@ -104,6 +107,7 @@ input_map = {
     "tracking": input_map_tracking,
     "scroll_stop": input_map_scroll_stop,
     "scroll_move": input_map_scroll_move,
+    "scroll_tracking": input_map_scroll_tracking,
     **utility_input_maps({
         "selectors": ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"],
         "cancel": ["tut"],
@@ -266,6 +270,10 @@ class Actions:
     def parrot_rig_tracking_activate():
         """Activate head tracking mode"""
         parrot_actions.tracking_activate()
+
+    def parrot_rig_scroll_tracking_activate():
+        """Activate scroll tracking mode (triangle + tracking)"""
+        parrot_actions.scroll_tracking_activate()
 
     def parrot_rig_reload():
         """Reload parrot rig files"""

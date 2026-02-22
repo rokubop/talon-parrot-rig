@@ -47,7 +47,7 @@ class ParrotActions:
 
     def _emit_speed_level(self):
         mode = event_manager.get_mode()
-        if mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost"):
+        if mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost", "scroll_tracking"):
             level = self._scroll_speed_level
         else:
             level = self._move_speed_level
@@ -115,6 +115,12 @@ class ParrotActions:
         tracking.activate()
         event_manager.set_mode("tracking")
 
+    def scroll_tracking_activate(self):
+        actions.user.mouse_rig_scroll_stop()
+        actions.user.mouse_rig_stop()
+        tracking.activate()
+        event_manager.set_mode("scroll_tracking")
+
     def click_exit(self):
         self.mouse_click()
         self.parrot_mode_disable()
@@ -136,7 +142,7 @@ class ParrotActions:
 
     def reset_speed_level(self):
         mode = event_manager.get_mode()
-        if mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost"):
+        if mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost", "scroll_tracking"):
             if self._scroll_speed_level == 0:
                 return
             level = self._scroll_speed_level
@@ -164,7 +170,7 @@ class ParrotActions:
 
         should_stop = hold != True and (
             (current_mode in CLICK_BEHAVIOR and CLICK_BEHAVIOR[current_mode] == "stop") or
-            (current_mode == "tracking")
+            (current_mode in ("tracking", "scroll_tracking"))
         )
 
         if self._is_left_click_held:
@@ -178,7 +184,7 @@ class ParrotActions:
             ui_manager.hide_border()
 
         if should_stop:
-            if current_mode == "tracking":
+            if current_mode in ("tracking", "scroll_tracking"):
                 self.stop_temporarily()
             else:
                 self.stopper()
@@ -292,7 +298,7 @@ class ParrotActions:
 
     def _reactivate_full_mode(self):
         self._stop_time_job = None
-        if event_manager.get_mode() == "tracking":
+        if event_manager.get_mode() in ("tracking", "scroll_tracking"):
             tracking.activate()
 
     def show_utility_selector(self, title: str = "Utility"):
@@ -312,7 +318,11 @@ class ParrotActions:
 
     def toggle_scroll_move(self):
         mode = event_manager.get_mode()
-        if mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost"):
+        if mode == "tracking":
+            event_manager.set_mode("scroll_tracking")
+        elif mode == "scroll_tracking":
+            event_manager.set_mode("tracking")
+        elif mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost"):
             actions.user.mouse_rig_scroll_stop()
             event_manager.set_mode("default")
         else:
@@ -379,6 +389,7 @@ class ParrotActions:
 
     def scroll_stop_stay(self):
         actions.user.mouse_rig_scroll_stop()
+        tracking.freeze()
         event_manager.set_mode("scroll_stop")
 
     def scroll_ramp_dir(self, direction: str):

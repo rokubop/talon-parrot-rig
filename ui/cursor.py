@@ -2,7 +2,7 @@ from talon import actions
 from ..parrot_rig_settings import MODE_COLORS, MODIFIER_COLORS
 from ..parrot_rig_settings import CURSOR_UI_ENABLED
 
-SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide"}
+SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide", "scroll_tracking"}
 
 TRIANGLE_PATHS = {
     "down":  "M 12 19 L 4 5 L 20 5 Z",

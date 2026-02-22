@@ -50,6 +50,7 @@ MODE_COLORS = {
     "boost": "#2AE33C",
     "glide": "#578EF5",
     "tracking": "#A7D3FF",
+    "scroll_tracking": "#A7D3FF",
     "scroll_stop": "#FF4444",
     "scroll_move": "#FFFF44",
     "scroll_boost": "#44E84E",
