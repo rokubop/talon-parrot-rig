@@ -1,5 +1,5 @@
 from talon import actions
-from ..parrot_rig_utilities import utility_map, utility2_map
+from ..parrot_rig_actions import utility_maps
 from ..parrot_rig_settings import (
     UI_BORDER_COLOR, UI_BACKGROUND_COLOR, UI_TEXT_COLOR, UI_SELECTED_COLOR,
 )
@@ -73,24 +73,17 @@ def _make_selector(name: str, util_map: dict):
         ]
     return selector_ui
 
-utility_selector = _make_selector("utility", utility_map)
-utility2_selector = _make_selector("utility2", utility2_map)
+_selectors = {name: _make_selector(name, util_map) for name, util_map in utility_maps.items()}
 
 def _on_unmount():
     from ..src.events import event_manager
     event_manager.return_to_previous_mode()
 
-def show_utility_selector(title: str = "Utility"):
-    actions.user.ui_elements_show(utility_selector, props={"title": title}, show_hints=False, on_unmount=_on_unmount)
+def show_utility_selector(name: str, title: str = ""):
+    actions.user.ui_elements_show(_selectors[name], props={"title": title or name}, show_hints=False, on_unmount=_on_unmount)
 
-def show_utility2_selector(title: str = "Utility 2"):
-    actions.user.ui_elements_show(utility2_selector, props={"title": title}, show_hints=False, on_unmount=_on_unmount)
-
-def hide_utility_selector():
-    actions.user.ui_elements_hide(utility_selector)
-
-def hide_utility2_selector():
-    actions.user.ui_elements_hide(utility2_selector)
+def hide_utility_selector(name: str):
+    actions.user.ui_elements_hide(_selectors[name])
 
 def _utility_notification(props):
     screen, div = actions.user.ui_elements(["screen", "div"])

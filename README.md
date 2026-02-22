@@ -6,7 +6,7 @@
 
 A general-purpose 14-noise parrot mode for hands-free mouse control in [Talon](https://talonvoice.com/). This is my daily driver for general mouse use.
 
-You'll need at least 9 noises to use this, 14 recommended for the full experience, or 14 with both utility slots. See remapping instructions below to make it your own.
+You'll need at least 9 noises to use this, 14 recommended for the full experience. See remapping instructions below to make it your own.
 
 ![preview](./preview.png)
 
@@ -63,7 +63,7 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
 | `er` | scroll mode | Toggle scroll mode |
 | `cluck` | exit | Exit parrot rig |
-| `palate` | utility | Execute utility action |
+| `palate` | utility_1 | Execute utility action |
 | `tut` | combo prefix / reset | Reset speed, prefix for combos (e.g. `tut oh` = right click) |
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.
@@ -83,13 +83,15 @@ You'll edit 3 files. In each file, replace every occurrence of the old noise nam
 
 Replace all instances of that noise throughout the file (it appears in multiple mode maps).
 
+If you don't have enough noises, you can use combos to free up single noises for more actions. For example, `"tut ah"`, `"tut oh"`, `"tut mm"` as combos instead of using those noises alone.
+
 **2. [parrot_rig_input.talon](./parrot_rig_input.talon)** - Match the `parrot(...)` trigger on the left to your noise. The string on the right must match the key you used in step 1:
 
 ```talon
 parrot(alveolar_click): user.input_map_channel_handle("parrot_rig", "alveolar_click")
 ```
 
-**3. [parrot.talon](./parrot.talon)** - Noises outside parrot rig mode. You need at least one noise or voice command to call `user.parrot_rig_enable()` as your entry point:
+**3. [parrot.talon](./parrot.talon)** - Noises outside parrot rig mode. Only use noises here that won't interfere with your voice commands. You need at least one noise or voice command to call `user.parrot_rig_enable()` as your entry point:
 
 ```talon
 parrot(cluck): user.parrot_rig_enable()
@@ -104,6 +106,8 @@ See [talon-input-map](https://github.com/rokubop/talon-input-map/) for the full 
 - **debounce** (`:db_170`) - delay firing so brief interruptions don't trigger it (used on `_stop` events like `hiss_stop`, `shush_stop`)
 - **hold/release**, **repeat**, and more
 
+> **Important:** After any changes to this repo, say **"parrot reload"** (or **"parrot reset"**). Talon often won't pick up mapping changes automatically due to how the repo is structured.
+
 ### Optional: [parrot_rig_settings.py](./parrot_rig_settings.py)
 
 Speeds, timings, colors, and click behavior. Say **"parrot rig reload"** after changing these.
@@ -117,20 +121,30 @@ TRACKING_STOP_MS = 800
 CLICK_HOLD_MS = 16000
 ```
 
-### Optional: [parrot_rig_utilities.py](./parrot_rig_utilities.py)
+### Optional: Utilities
 
-Two utility slots you can cycle through at runtime using a noise-triggered selector. The first key in each map is the default. Add, remove, or reorder options:
+Utilities let you bind extra actions to a single noise. Each utility slot holds one active action at a time. By default, `utility_1` is assigned to `palate`.
+
+To assign a utility to a noise, add two entries in `parrot_rig_actions.py` in `input_map_common`:
 
 ```python
-utility_map = {
-    "hold_click":  ("Hold Click",  lambda: actions.user.parrot_rig_click(0, True)),
-    "click":       ("Click",       lambda: actions.user.parrot_rig_click(0)),
-    "right_click": ("Right Click", lambda: actions.user.parrot_rig_click(1)),
-    ...
-}
+"palate":     ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),              # fires the active action
+"tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1", "palate")),  # opens the picker
+```
 
-utility2_map = {
-    "middle_click": ("Middle Click", lambda: actions.user.parrot_rig_click(2)),
-    ...
+To use it, just make the noise — it fires the currently selected action. To change which action is selected, use the selector combo to open a picker, then make one of the selector noises to choose an option. The first key in each map is the default on startup.
+
+To add more utility slots, add a new entry to `utility_maps` and wire it to a noise the same way.
+
+Add, remove, or reorder options:
+
+```python
+utility_maps = {
+    "utility_1": {
+        "hold_click":  ("Hold Click",  lambda: actions.user.parrot_rig_click(0, True)),
+        "click":       ("Click",       lambda: actions.user.parrot_rig_click(0)),
+        "right_click": ("Right Click", lambda: actions.user.parrot_rig_click(1)),
+        ...
+    },
 }
 ```

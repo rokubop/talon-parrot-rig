@@ -2,7 +2,6 @@ from talon import Module, actions, ctrl
 from .src.parrot_actions import parrot_actions
 from .src.events import event_manager
 from .parrot_rig_settings import CLICK_HOLD_MS
-from .parrot_rig_utilities import utility_map, utility2_map
 from .src.select import utility_input_maps
 
 mod = Module()
@@ -20,7 +19,7 @@ input_map_common = {
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", actions.user.parrot_rig_tracking_activate),
     "er":     ("scroll mode", actions.user.parrot_rig_toggle_scroll_move),
-    "palate": ("utility", actions.user.parrot_rig_utility),
+    "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
     "tut":        ("reset speed", actions.user.parrot_rig_reset_speed_level),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
@@ -30,8 +29,7 @@ input_map_common = {
     "tut guh":    ("toggle control", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
     "tut mm":     ("middle click hold", lambda: actions.user.parrot_rig_click(2)),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
-    "tut palate": ("utility selector", lambda: actions.user.parrot_rig_show_utility_selector("palate")),
-    "tut er":     ("utility2 selector", lambda: actions.user.parrot_rig_show_utility2_selector("er")),
+    "tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1", "palate")),
 }
 
 input_map_default = {
@@ -49,7 +47,7 @@ input_map_move = {
     "t":          ("move up", lambda: actions.user.parrot_rig_move_or_slow("up")),
     "guh":        ("move down", lambda: actions.user.parrot_rig_move_or_slow("down")),
     "eh":         ("toggle glide", actions.user.parrot_rig_toggle_glide),
-    "mm":         ("click", actions.user.parrot_rig_click_mode),
+    "mm":         ("click", actions.user.parrot_rig_click),
     "shush":      ("boost long", actions.user.parrot_rig_boost_long),
     "shush_stop": ("", lambda: None),
     "hiss":            ("burst break", actions.user.parrot_rig_burst_break),
@@ -58,7 +56,7 @@ input_map_move = {
 
 input_map_tracking = {
     **input_map_common,
-    "mm":                ("click temp stop", actions.user.parrot_rig_click_mode),
+    "mm":                ("click temp stop", actions.user.parrot_rig_click),
     "hiss":              ("scroll down", lambda: actions.user.parrot_rig_scroll("down")),
     "hiss_stop:db_170":  ("", actions.user.parrot_rig_scroll_stop_temp),
     "shush":             ("scroll up", lambda: actions.user.parrot_rig_scroll("up")),
@@ -87,7 +85,7 @@ input_map_scroll_move = {
     "guh":        ("scroll down", lambda: actions.user.parrot_rig_scroll_move_or_slow("down")),
     "eh":         ("toggle scroll glide", actions.user.parrot_rig_scroll_toggle_glide),
     "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
-    "mm":         ("click", actions.user.parrot_rig_click_mode),
+    "mm":         ("click", actions.user.parrot_rig_click),
     "shush":      ("scroll boost long", actions.user.parrot_rig_scroll_boost_long),
     "shush_stop": ("", lambda: None),
     "hiss":            ("scroll burst break", actions.user.parrot_rig_scroll_burst_break),
@@ -97,8 +95,21 @@ input_map_scroll_move = {
 input_map_scroll_tracking = {
     **input_map_scroll_stop,
     "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
-    "mm":         ("click temp stop", actions.user.parrot_rig_click_mode),
+    "mm":         ("click temp stop", actions.user.parrot_rig_click),
     "er":         ("track mode", actions.user.parrot_rig_toggle_scroll_move),
+}
+
+utility_maps = {
+    "utility_1": {
+        "hold_click":       ("Hold Click",       lambda: actions.user.parrot_rig_click(0, True)),
+        "click":            ("Click",            lambda: actions.user.parrot_rig_click(0)),
+        "right_click":      ("Right Click",      lambda: actions.user.parrot_rig_click(1)),
+        "hold_right_click": ("Hold Right Click", lambda: actions.user.parrot_rig_click(1, True)),
+        "middle_click":     ("Middle Click",     lambda: actions.user.parrot_rig_click(2)),
+        "middle_hold":      ("Middle Hold",      lambda: actions.user.parrot_rig_click(2, True)),
+        "repeat_last":      ("Repeat Last",      lambda: actions.core.repeat_command()),
+        "repeat_phrase":    ("Repeat Phrase",    lambda: actions.user.parrot_rig_repeat_phrase()),
+    },
 }
 
 input_map = {
@@ -108,10 +119,11 @@ input_map = {
     "scroll_stop": input_map_scroll_stop,
     "scroll_move": input_map_scroll_move,
     "scroll_tracking": input_map_scroll_tracking,
-    **utility_input_maps({
-        "selectors": ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"],
-        "cancel": ["tut"],
-    }),
+    **utility_input_maps(
+        maps=utility_maps,
+        ui_selectors=["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"],
+        ui_cancel=["tut"],
+    ),
 }
 
 def channel_init():
@@ -178,10 +190,6 @@ class Actions:
         """Exit parrot mode (tracking-aware)"""
         parrot_actions.exit()
 
-    def parrot_rig_click_mode():
-        """Click with mode-aware stop behavior"""
-        parrot_actions.click_with_mode_behavior()
-
     def parrot_rig_scroll(direction: str):
         """Scroll in direction (up/down)"""
         parrot_actions.scroll(direction)
@@ -198,14 +206,6 @@ class Actions:
         """Toggle glide mode"""
         parrot_actions.mouse_toggle_glide()
 
-    def parrot_rig_utility():
-        """Execute the currently selected utility action"""
-        actions.user.input_map_single("utility", utility_map)
-
-    def parrot_rig_utility2():
-        """Execute the currently selected utility2 action"""
-        actions.user.input_map_single("utility2", utility2_map)
-
     def parrot_rig_toggle_modifier(modifier: str):
         """Toggle a modifier key (shift/ctrl/alt)"""
         parrot_actions.toggle_modifier(modifier)
@@ -213,35 +213,6 @@ class Actions:
     def parrot_rig_disable_modifiers():
         """Release all held modifier keys"""
         parrot_actions.disable_modifiers()
-
-    def parrot_rig_show_utility_selector(noise: str = "palate"):
-        """Show utility selector UI and enter select mode"""
-        event_manager.set_mode("utility_select")
-        parrot_actions.show_utility_selector(f"Utility ({noise})")
-
-    def parrot_rig_show_utility2_selector(noise: str = "er"):
-        """Show utility2 selector UI and enter select mode"""
-        event_manager.set_mode("utility2_select")
-        parrot_actions.show_utility2_selector(f"Utility 2 ({noise})")
-
-    def parrot_rig_utility_select(name: str, slot: int, noise: str = ""):
-        """Select a utility option by slot index"""
-        from .ui.utility_selector import show_utility_notification
-        util_map = utility_map if name == "utility" else utility2_map
-        keys = list(util_map.keys())
-        if slot < len(keys):
-            actions.user.input_map_single_mode_set(name, keys[slot], util_map)
-            label = util_map[keys[slot]][0]
-            show_utility_notification(noise or name, label)
-        actions.user.parrot_rig_utility_select_close(name)
-
-    def parrot_rig_utility_select_close(name: str):
-        """Close utility selector and revert mode"""
-        if name == "utility":
-            parrot_actions.hide_utility_selector()
-        else:
-            parrot_actions.hide_utility2_selector()
-        event_manager.return_to_previous_mode()
 
     def parrot_rig_reset_speed_level():
         """Reset speed level back to normal"""
@@ -326,3 +297,31 @@ class Actions:
     def parrot_rig_show_help():
         """Show parrot rig cheatsheet"""
         parrot_actions.show_cheatsheet()
+
+    # Utility actions
+
+    def parrot_rig_utility(name: str):
+        """Execute the currently selected utility action"""
+        actions.user.input_map_single(name, utility_maps[name])
+
+    def parrot_rig_show_utility_selector(name: str, noise: str = ""):
+        """Show utility selector UI and enter select mode"""
+        event_manager.set_mode(f"{name}_select")
+        title = f"{name} ({noise})" if noise else name
+        parrot_actions.show_utility_selector(name, title)
+
+    def parrot_rig_utility_select(name: str, slot: int):
+        """Select a utility option by slot index"""
+        from .ui.utility_selector import show_utility_notification
+        util_map = utility_maps[name]
+        keys = list(util_map.keys())
+        if slot < len(keys):
+            actions.user.input_map_single_mode_set(name, keys[slot], util_map)
+            label = util_map[keys[slot]][0]
+            show_utility_notification(name, label)
+        actions.user.parrot_rig_utility_select_close(name)
+
+    def parrot_rig_utility_select_close(name: str):
+        """Close utility selector and revert mode"""
+        parrot_actions.hide_utility_selector(name)
+        event_manager.return_to_previous_mode()

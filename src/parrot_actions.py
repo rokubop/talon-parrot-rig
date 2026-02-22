@@ -207,9 +207,6 @@ class ParrotActions:
             else:
                 self.stopper()
 
-    def click_with_mode_behavior(self):
-        self.mouse_click()
-
     def scroll(self, direction: str):
         actions.user.mouse_rig_scroll_go(direction, SCROLL_SPEED)
 
@@ -319,17 +316,11 @@ class ParrotActions:
         if event_manager.get_mode() in ("tracking", "scroll_tracking"):
             tracking.activate()
 
-    def show_utility_selector(self, title: str = "Utility"):
-        ui_manager.show_utility_selector(title)
+    def show_utility_selector(self, name: str, title: str = ""):
+        ui_manager.show_utility_selector(name, title)
 
-    def show_utility2_selector(self, title: str = "Utility 2"):
-        ui_manager.show_utility2_selector(title)
-
-    def hide_utility_selector(self):
-        ui_manager.hide_utility_selector()
-
-    def hide_utility2_selector(self):
-        ui_manager.hide_utility2_selector()
+    def hide_utility_selector(self, name: str):
+        ui_manager.hide_utility_selector(name)
 
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()
