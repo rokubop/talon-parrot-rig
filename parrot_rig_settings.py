@@ -38,6 +38,9 @@ CLICK_BEHAVIOR = {
     "move": "stop",
     "boost": "stop",
     "glide": "stop",
+    "scroll_move": "stop",
+    "scroll_glide": "stop",
+    "scroll_boost": "stop",
 }
 
 # Cursor UI
