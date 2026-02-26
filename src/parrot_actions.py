@@ -72,9 +72,9 @@ class ParrotActions:
         speed = self._get_move_speed()
         current_speed = actions.user.mouse_rig_state_speed()
         if mode in ("glide", "boost") or current_speed > speed:
-            actions.user.mouse_rig_go_natural(direction, speed)
+            actions.user.mouse_rig_move_continuous_smooth(direction, speed)
         else:
-            actions.user.mouse_rig_go(direction, speed)
+            actions.user.mouse_rig_move_continuous(direction, speed)
         if mode not in ("glide", "boost"):
             event_manager.set_mode("move")
             self._emit_speed_level()
@@ -208,7 +208,7 @@ class ParrotActions:
                 self.stopper()
 
     def scroll(self, direction: str):
-        actions.user.mouse_rig_scroll_go(direction, SCROLL_SPEED)
+        actions.user.mouse_rig_scroll_continuous(direction, SCROLL_SPEED)
 
     def scroll_stop(self):
         actions.user.mouse_rig_scroll_stop()
@@ -347,9 +347,9 @@ class ParrotActions:
         rig = actions.user.mouse_rig()
         current_scroll_speed = rig.state.scroll_speed
         if mode in ("scroll_glide", "scroll_boost") or current_scroll_speed > speed:
-            actions.user.mouse_rig_scroll_go_natural(direction, speed, scale=3.0)
+            actions.user.mouse_rig_scroll_continuous_smooth(direction, speed, scale=3.0)
         else:
-            actions.user.mouse_rig_scroll_go(direction, speed)
+            actions.user.mouse_rig_scroll_continuous(direction, speed)
         self._scroll_direction = direction
         event_manager.emit("scroll_direction_changed", {"direction": direction})
         if mode not in ("scroll_glide", "scroll_boost"):
