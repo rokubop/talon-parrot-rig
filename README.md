@@ -10,32 +10,35 @@ You'll need at least 9 noises to use this, 14 recommended for the full experienc
 
 ![preview](./preview.png)
 
+
 ## Installation
 
 ### Dependencies
 
 - [**Talon Beta**](https://talon.wiki/Help/beta_talon/)
-- **Eye Tracker** (recommended) - Eye tracking device (e.g., Tobii 4C or Tobii 5)
+- **Eye Tracker** - Eye tracking device (e.g., Tobii 4C or Tobii 5)
 - **Parrot** - Trained parrot model with `parrot_integration.py` and `patterns.json` files
 - [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.7.1+)
-- [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v2.2.0+)
+- [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v4.0.0+)
 - [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.15.0+)
+- [**talon-rig-core**](https://github.com/rokubop/talon-rig-core) (v0.5.0+) — required by talon-mouse-rig
 
 ### Install
 
 Clone the dependencies and this repo into your [Talon](https://talonvoice.com/) user directory:
 
 ```sh
-# mac and linux
+# Mac/Linux
 cd ~/.talon/user
 
-# windows
+# Windows
 cd ~/AppData/Roaming/talon/user
 
 # Dependencies
 git clone https://github.com/rokubop/talon-input-map/
 git clone https://github.com/rokubop/talon-mouse-rig
 git clone https://github.com/rokubop/talon-ui-elements
+git clone https://github.com/rokubop/talon-rig-core
 
 # This repo
 git clone https://github.com/rokubop/talon-parrot-rig
