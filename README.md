@@ -1,6 +1,6 @@
 # Parrot Rig
 
-![Version](https://img.shields.io/badge/version-1.3.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.0-blue)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 ![License](https://img.shields.io/badge/license-Unlicense-green)
 
@@ -18,10 +18,10 @@ You'll need at least 9 noises to use this, 14 recommended for the full experienc
 - [**Talon Beta**](https://talon.wiki/Help/beta_talon/)
 - **Eye Tracker** - Eye tracking device (e.g., Tobii 4C or Tobii 5)
 - **Parrot** - Trained parrot model with `parrot_integration.py` and `patterns.json` files
-- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v0.7.1+)
-- [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v4.0.0+)
+- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v1.0.0+)
+- [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v4.1.0+)
 - [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.15.0+)
-- [**talon-rig-core**](https://github.com/rokubop/talon-rig-core) (v0.5.0+) — required by talon-mouse-rig
+- [**talon-rig-core**](https://github.com/rokubop/talon-rig-core) (v0.5.0+) - required by talon-mouse-rig
 
 ### Install
 
@@ -141,7 +141,7 @@ To assign a utility to a noise, add two entries in `parrot_rig_actions.py` in `i
 "tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1", "palate")),  # opens the picker
 ```
 
-To use it, just make the noise — it fires the currently selected action. To change which action is selected, use the selector combo to open a picker, then make one of the selector noises to choose an option. The first key in each map is the default on startup.
+To use it, just make the noise - it fires the currently selected action. To change which action is selected, use the selector combo to open a picker, then make one of the selector noises to choose an option. The first key in each map is the default on startup.
 
 To add more utility slots, add a new entry to `utility_maps` and wire it to a noise the same way.
 
