@@ -2,7 +2,7 @@
   "name": "talon-parrot-rig",
   "title": "Parrot Rig",
   "description": "A general-purpose 14-noise parrot mode for hands-free mouse control in Talon.",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "status": "experimental",
   "namespace": "user.parrot_rig",
   "github": "https://github.com/rokubop/talon-parrot-rig",
@@ -20,17 +20,17 @@
   ],
   "dependencies": {
     "talon-input-map": {
-      "min_version": "1.0.0",
+      "min_version": "1.0.1",
       "namespace": "user.input_map",
       "github": "https://github.com/rokubop/talon-input-map/"
     },
     "talon-mouse-rig": {
-      "min_version": "4.1.0",
+      "min_version": "4.1.1",
       "namespace": "user.mouse_rig",
       "github": "https://github.com/rokubop/talon-mouse-rig"
     },
     "talon-rig-core": {
-      "min_version": "0.5.0",
+      "min_version": "0.6.5",
       "namespace": "user.rig_core",
       "required_by": [
         "talon-mouse-rig"
@@ -38,7 +38,7 @@
       "github": "https://github.com/rokubop/talon-rig-core"
     },
     "talon-ui-elements": {
-      "min_version": "0.15.0",
+      "min_version": "0.16.0",
       "namespace": "user.ui_elements",
       "github": "https://github.com/rokubop/talon-ui-elements"
     }

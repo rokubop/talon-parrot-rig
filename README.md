@@ -1,6 +1,6 @@
 # Parrot Rig
 
-![Version](https://img.shields.io/badge/version-1.4.0-blue)
+![Version](https://img.shields.io/badge/version-1.4.1-blue)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 ![License](https://img.shields.io/badge/license-Unlicense-green)
 
@@ -18,10 +18,10 @@ You'll need at least 9 noises to use this, 14 recommended for the full experienc
 - [**Talon Beta**](https://talon.wiki/Help/beta_talon/)
 - **Eye Tracker** - Eye tracking device (e.g., Tobii 4C or Tobii 5)
 - **Parrot** - Trained parrot model with `parrot_integration.py` and `patterns.json` files
-- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v1.0.0+)
-- [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v4.1.0+)
-- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.15.0+)
-- [**talon-rig-core**](https://github.com/rokubop/talon-rig-core) (v0.5.0+) - required by talon-mouse-rig
+- [**talon-input-map**](https://github.com/rokubop/talon-input-map/) (v1.0.1+)
+- [**talon-mouse-rig**](https://github.com/rokubop/talon-mouse-rig) (v4.1.1+)
+- [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.16.0+)
+- [**talon-rig-core**](https://github.com/rokubop/talon-rig-core) (v0.6.5+) - required by talon-mouse-rig
 
 ### Install
 
