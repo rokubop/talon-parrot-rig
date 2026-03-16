@@ -157,3 +157,6 @@ utility_maps = {
     },
 }
 ```
+
+## More Talon packages
+Check out my other Talon packages for UI, mouse control, input mapping, and more at [talon-hub-roku](https://github.com/rokubop/talon-hub-roku).
