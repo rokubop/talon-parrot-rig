@@ -110,7 +110,7 @@ class ParrotActions:
             rig = actions.user.mouse_rig()
             rig.bake()
             speed = self._get_move_speed()
-            rig.speed.to(speed).over(rate=GLIDE_RELEASE_RATE, easing="ease_out2")
+            rig.speed.to(speed)
             event_manager.set_mode("move")
             self._burst_or_brake_did_break = True
             return
