@@ -3,22 +3,26 @@ from .src.parrot_actions import parrot_actions
 from .src.events import event_manager
 from .parrot_rig_settings import CLICK_HOLD_MS
 from .src.select import utility_input_maps
+from .src.settings_menu import setting_maps, setting_set, setting_label, setting_title
 
 mod = Module()
 mod.mode("parrot_rig", "parrot rig")
 
 CHANNEL = "parrot_rig"
 
+# Noises that pick slot 1, 2, 3... in any selector menu
+SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
+
 input_map_common = {
     "ee":     ("stop", actions.user.parrot_rig_stop),
     "mm":     ("click", actions.user.parrot_rig_click),
-    "pop":    ("click exit", actions.user.parrot_rig_click_exit),
+    "pop":    ("click exit / snap", actions.user.parrot_rig_pop),
     "ah":     ("move left", lambda: actions.user.parrot_rig_move("left")),
     "oh":     ("move right", lambda: actions.user.parrot_rig_move("right")),
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", actions.user.parrot_rig_tracking_activate),
-    "er":     ("toggle scroll mode", actions.user.parrot_rig_toggle_scroll_move),
+    "er":     ("scroll mode or middle drag", actions.user.parrot_rig_er),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
     "tut":        ("reset slow", actions.user.parrot_rig_reset_speed_level),
@@ -27,7 +31,10 @@ input_map_common = {
     "tut ah":     ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
     "tut shush":  ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
     "tut t":      ("toggle control", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
-    "tut mm":     ("middle click hold", lambda: actions.user.parrot_rig_click(2)),
+    "tut mm":     ("click settings", lambda: actions.user.parrot_rig_show_setting_selector("click_freeze", "tut mm")),
+    "tut er":     ("er settings", lambda: actions.user.parrot_rig_show_setting_selector("er_mode", "tut er")),
+    "tut eh":     ("move settings", lambda: actions.user.parrot_rig_show_setting_selector("move_mode", "tut eh")),
+    "tut hiss":   ("turn settings", lambda: actions.user.parrot_rig_show_setting_selector("turn_speed", "tut hiss")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1", "palate")),
 }
@@ -46,7 +53,7 @@ input_map_move = {
     "oh":         ("move right or slow", lambda: actions.user.parrot_rig_move_or_slow("right")),
     "t":          ("move up or slow", lambda: actions.user.parrot_rig_move_or_slow("up")),
     "guh":        ("move down or slow", lambda: actions.user.parrot_rig_move_or_slow("down")),
-    "eh":         ("toggle glide", actions.user.parrot_rig_toggle_glide),
+    "eh":         ("toggle glide / lock turn", actions.user.parrot_rig_toggle_glide),
     "mm":         ("click", actions.user.parrot_rig_click),
     "shush":      ("boost long", actions.user.parrot_rig_boost_long),
     "shush_stop": ("", lambda: None),
@@ -121,8 +128,15 @@ input_map = {
     "scroll_tracking": input_map_scroll_tracking,
     **utility_input_maps(
         maps=utility_maps,
-        ui_selectors=["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"],
+        ui_selectors=SELECT_NOISES,
         ui_cancel=["tut"],
+    ),
+    **utility_input_maps(
+        maps=setting_maps,
+        ui_selectors=SELECT_NOISES,
+        ui_cancel=["tut"],
+        select=lambda n, i: actions.user.parrot_rig_setting_select(n, i),
+        close=lambda n: actions.user.parrot_rig_setting_select_close(n),
     ),
 }
 
@@ -323,4 +337,42 @@ class Actions:
 
     def parrot_rig_utility_select_close(name: str):
         """Close utility selector (on_unmount handles mode revert)"""
+        parrot_actions.hide_utility_selector(name)
+
+    # Settings menus
+
+    def parrot_rig_er():
+        """Toggle scroll mode or middle drag, per the er_mode setting"""
+        parrot_actions.er_toggle()
+
+    def parrot_rig_pop():
+        """Snap if a snap condition applies, otherwise click and exit"""
+        parrot_actions.pop_action()
+
+    def parrot_rig_snap():
+        """Snap the cursor now (center by default), without stopping movement"""
+        parrot_actions.snap_now()
+
+    def parrot_rig_setting_get(name: str) -> str:
+        """Get the current value of a settings-menu setting"""
+        from .src.settings_menu import setting_get
+        return setting_get(name)
+
+    def parrot_rig_show_setting_selector(name: str, noise: str = ""):
+        """Show a settings selector UI and enter select mode"""
+        event_manager.set_mode(f"{name}_select")
+        title = setting_title(name)
+        parrot_actions.show_utility_selector(name, f"{title} ({noise})" if noise else title)
+
+    def parrot_rig_setting_select(name: str, slot: int):
+        """Select a setting value by slot index"""
+        from .ui.utility_selector import show_utility_notification
+        keys = list(setting_maps[name].keys())
+        if slot < len(keys):
+            setting_set(name, keys[slot])
+            show_utility_notification(setting_title(name), setting_label(name))
+        actions.user.parrot_rig_setting_select_close(name)
+
+    def parrot_rig_setting_select_close(name: str):
+        """Close settings selector (on_unmount handles mode revert)"""
         parrot_actions.hide_utility_selector(name)

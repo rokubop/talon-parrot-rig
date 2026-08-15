@@ -30,10 +30,13 @@ from ..parrot_rig_settings import (
     CLICK_BEHAVIOR,
 )
 from .utils import reload_files
+from .settings_menu import setting_get, setting_set, setting_label, setting_title, turn_scale
+from . import snap
 
 class ParrotActions:
     def __init__(self):
         self._is_left_click_held = False
+        self._is_middle_drag = False
         self._parrot_mode_enabled = False
         self._stop_time_job = None
         self._move_speed_level = 0
@@ -71,19 +74,27 @@ class ParrotActions:
         mode = event_manager.get_mode()
         speed = self._get_move_speed()
         current_speed = actions.user.mouse_rig_state_speed()
-        if mode in ("glide", "boost") or current_speed > speed:
-            actions.user.mouse_rig_move_continuous_smooth(direction, speed)
+        always_glide = setting_get("move_mode") == "always_glide"
+        if always_glide or mode in ("glide", "boost") or current_speed > speed:
+            actions.user.mouse_rig_move_continuous_smooth(direction, speed, scale=turn_scale())
         else:
             actions.user.mouse_rig_move_continuous(direction, speed)
         if mode not in ("glide", "boost"):
-            event_manager.set_mode("move")
+            event_manager.set_mode("glide" if always_glide else "move")
             self._emit_speed_level()
 
     def mouse_move_dir(self, direction: str):
         self.move(direction)
 
+    def _is_turning(self):
+        """True while a smooth turn is still sweeping toward its target."""
+        return actions.user.mouse_rig().state.direction.target is not None
+
     def mouse_toggle_glide(self):
         rig = actions.user.mouse_rig()
+        if event_manager.get_mode() == "glide" and self._is_turning():
+            rig.direction.bake()
+            return
         rig.bake()
         if event_manager.get_mode() == "glide":
             speed = self._get_move_speed()
@@ -140,6 +151,18 @@ class ParrotActions:
         self.mouse_click()
         self.parrot_mode_disable()
 
+    def pop_action(self):
+        """Snap if a snap condition applies, otherwise click and exit."""
+        rule = snap.active_rule()
+        if rule:
+            snap.do_snap(rule)
+        else:
+            self.click_exit()
+
+    def snap_now(self):
+        """Snap regardless of condition, using the active rule if there is one."""
+        snap.do_snap(snap.active_rule())
+
     def exit(self):
         self.parrot_mode_disable(stop_tracking=not tracking.is_tracking)
 
@@ -183,7 +206,7 @@ class ParrotActions:
     def mouse_click(self, button=0, hold=False):
         current_mode = event_manager.get_mode()
 
-        should_stop = hold != True and (
+        should_stop = hold != True and setting_get("click_freeze") == "freeze" and (
             (current_mode in CLICK_BEHAVIOR) or
             (current_mode in ("tracking", "scroll_tracking"))
         )
@@ -251,6 +274,8 @@ class ParrotActions:
         if self._is_left_click_held:
             self.click_release()
 
+        self.middle_drag_release()
+
         actions.mode.disable("user.parrot_rig")
         actions.mode.enable("command")
         print("Parrot mode disabled")
@@ -264,6 +289,9 @@ class ParrotActions:
             "mode": event_manager.get_mode(),
             "modifiers": event_manager.get_modifiers(),
             "click_held": self._is_left_click_held,
+            "middle_drag": self._is_middle_drag,
+            "click_freeze": setting_get("click_freeze"),
+            "er_mode": setting_get("er_mode"),
         }
 
     def parrot_mode_get_mode(self):
@@ -324,6 +352,33 @@ class ParrotActions:
 
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()
+
+    def er_toggle(self):
+        """What "er" does, per the er_mode setting."""
+        if setting_get("er_mode") == "middle_drag":
+            self.toggle_middle_drag()
+        else:
+            self.toggle_scroll_move()
+
+    def toggle_middle_drag(self):
+        """Hold middle mouse down and keep regular movement; toggle to release."""
+        if self._is_middle_drag:
+            self.middle_drag_release()
+            self.stopper()
+        else:
+            ctrl.mouse_click(button=2, down=True)
+            self._is_middle_drag = True
+            ui_manager.show_border()
+            # default mode maps hiss/shush to scroll, move mode gives boost/burst
+            event_manager.set_mode("move")
+
+    def middle_drag_release(self):
+        if not self._is_middle_drag:
+            return
+        ctrl.mouse_click(button=2, up=True)
+        self._is_middle_drag = False
+        if not self._is_left_click_held:
+            ui_manager.hide_border()
 
     def toggle_scroll_move(self):
         mode = event_manager.get_mode()
@@ -425,3 +480,12 @@ class ParrotActions:
         self.scroll_move_dir(self._scroll_direction)
 
 parrot_actions = ParrotActions()
+
+# Release before the jump so the jump itself isn't dragged, then re-press.
+snap.snap_rule(
+    "middle_drag",
+    when=lambda: parrot_actions._is_middle_drag,
+    target="center",
+    before=lambda: ctrl.mouse_click(button=2, up=True),
+    after=lambda: ctrl.mouse_click(button=2, down=True),
+)

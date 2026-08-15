@@ -1,10 +1,11 @@
 from talon import actions
 from ..parrot_rig_actions import utility_maps
+from ..src.settings_menu import setting_maps, setting_get
 from ..parrot_rig_settings import (
     UI_BORDER_COLOR, UI_BACKGROUND_COLOR, UI_TEXT_COLOR, UI_SELECTED_COLOR,
 )
 
-def _make_selector(name: str, util_map: dict):
+def _make_selector(name: str, util_map: dict, get_current):
     def selector_ui(props):
         screen, window = actions.user.ui_elements(["screen", "window"])
         table, tr, td, th = actions.user.ui_elements(["table", "tr", "td", "th"])
@@ -12,10 +13,7 @@ def _make_selector(name: str, util_map: dict):
 
         title = props.get("title", name)
         legend = actions.user.input_map_channel_get_legend("parrot_rig", mode=f"{name}_select")
-        try:
-            current_mode = actions.user.input_map_single_mode_get(name)
-        except (ValueError, KeyError):
-            current_mode = next(iter(util_map))
+        current_mode = get_current()
         keys = list(util_map.keys())
 
         noise_list = list(legend.keys())
@@ -73,7 +71,24 @@ def _make_selector(name: str, util_map: dict):
         ]
     return selector_ui
 
-_selectors = {name: _make_selector(name, util_map) for name, util_map in utility_maps.items()}
+def _utility_current(name: str, util_map: dict):
+    def get():
+        try:
+            return actions.user.input_map_single_mode_get(name)
+        except (ValueError, KeyError):
+            return next(iter(util_map))
+    return get
+
+_selectors = {
+    **{
+        name: _make_selector(name, util_map, _utility_current(name, util_map))
+        for name, util_map in utility_maps.items()
+    },
+    **{
+        name: _make_selector(name, options, lambda n=name: setting_get(n))
+        for name, options in setting_maps.items()
+    },
+}
 
 def _on_unmount():
     from ..src.events import event_manager
