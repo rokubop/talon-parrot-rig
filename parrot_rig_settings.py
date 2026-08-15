@@ -18,6 +18,13 @@ GLIDE_RELEASE_RATE = 5
 # Scroll
 SCROLL_SPEED = 0.4
 
+# Jump keys for tut hiss / tut shush. Plain home/end if you want page top
+# and bottom rather than document ends.
+SCROLL_EXTREME_KEYS = {
+    "up": "ctrl-home",
+    "down": "ctrl-end",
+}
+
 # Scroll mode
 SCROLL_MOVE_SPEED = 0.03
 SCROLL_SLOW_MODE_MULTIPLIER = 0.5

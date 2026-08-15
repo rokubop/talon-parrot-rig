@@ -16,6 +16,7 @@ from ..parrot_rig_settings import (
     BRAKE_REVERT_MS,
     GLIDE_RELEASE_RATE,
     SCROLL_SPEED,
+    SCROLL_EXTREME_KEYS,
     SCROLL_MOVE_SPEED,
     SCROLL_SLOW_MODE_MULTIPLIER,
     SCROLL_BOOST_LONG_AMOUNT,
@@ -243,6 +244,11 @@ class ParrotActions:
 
     def scroll_stop(self):
         actions.user.mouse_rig_scroll_stop()
+
+    def scroll_extreme(self, direction: str):
+        """Jump to the end instead of scrolling there. Stops the scroll first so they don't fight."""
+        actions.user.mouse_rig_scroll_stop()
+        actions.key(SCROLL_EXTREME_KEYS[direction])
 
     def scroll_stop_temp(self):
         actions.user.mouse_rig_scroll_stop()

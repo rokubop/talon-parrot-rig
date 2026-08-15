@@ -47,10 +47,11 @@ input_map_common = {
     "tut t":      ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
     "tut guh":    ("toggle control", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
     "tut pop":    ("anchor set / clear", actions.user.parrot_rig_anchor_toggle),
+    "tut hiss":   ("scroll bottom", lambda: actions.user.parrot_rig_scroll_extreme("down")),
+    "tut shush":  ("scroll top", lambda: actions.user.parrot_rig_scroll_extreme("up")),
     "tut mm":     ("click settings", lambda: actions.user.parrot_rig_menu_open("click_freeze")),
     "tut er":     ("er settings", lambda: actions.user.parrot_rig_menu_open("er_mode")),
     "tut eh":     ("move settings", lambda: actions.user.parrot_rig_menu_open("move_mode")),
-    "tut hiss":   ("turn settings", lambda: actions.user.parrot_rig_menu_open("turn_speed")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("settings", lambda: actions.user.parrot_rig_settings_menu()),
 }
@@ -264,6 +265,10 @@ class Actions:
     def parrot_rig_scroll_stop():
         """Stop scrolling"""
         parrot_actions.scroll_stop()
+
+    def parrot_rig_scroll_extreme(direction: str):
+        """Jump to the top or bottom instead of scrolling there"""
+        parrot_actions.scroll_extreme(direction)
 
     def parrot_rig_scroll_stop_temp():
         """Stop scrolling and temporarily pause tracking"""
