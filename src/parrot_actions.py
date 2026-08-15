@@ -31,7 +31,8 @@ from ..parrot_rig_settings import (
 )
 from .utils import reload_files
 from .settings_menu import setting_get, setting_set, setting_label, setting_title, turn_scale
-from . import snap
+from .menu import menu_reset
+from .snap import active_rule, do_snap, snap_rule
 
 class ParrotActions:
     def __init__(self):
@@ -153,15 +154,15 @@ class ParrotActions:
 
     def pop_action(self):
         """Snap if a snap condition applies, otherwise click and exit."""
-        rule = snap.active_rule()
+        rule = active_rule()
         if rule:
-            snap.do_snap(rule)
+            do_snap(rule)
         else:
             self.click_exit()
 
     def snap_now(self):
         """Snap regardless of condition, using the active rule if there is one."""
-        snap.do_snap(snap.active_rule())
+        do_snap(active_rule())
 
     def exit(self):
         self.parrot_mode_disable(stop_tracking=not tracking.is_tracking)
@@ -259,6 +260,7 @@ class ParrotActions:
             disable_mods=True
         ):
         self._parrot_mode_enabled = False
+        menu_reset()
         ui_manager.hide_cheatsheet()
         ui_manager.hide()
 
@@ -482,7 +484,7 @@ class ParrotActions:
 parrot_actions = ParrotActions()
 
 # Release before the jump so the jump itself isn't dragged, then re-press.
-snap.snap_rule(
+snap_rule(
     "middle_drag",
     when=lambda: parrot_actions._is_middle_drag,
     target="center",

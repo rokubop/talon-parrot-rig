@@ -3,7 +3,14 @@ from .src.parrot_actions import parrot_actions
 from .src.events import event_manager
 from .parrot_rig_settings import CLICK_HOLD_MS
 from .src.select import utility_input_maps
-from .src.settings_menu import setting_maps, setting_set, setting_label, setting_title
+from .src.settings_menu import (
+    setting_maps, setting_set, setting_label, setting_title, SETTING_TITLES,
+)
+from .src.menu import menu_open, menu_back, menu_close
+from .src.profiles import (
+    PROFILE_SLOTS, profile_active, profile_delete, profile_load,
+    profile_names, profile_save,
+)
 
 mod = Module()
 mod.mode("parrot_rig", "parrot rig")
@@ -12,6 +19,14 @@ CHANNEL = "parrot_rig"
 
 # Noises that pick slot 1, 2, 3... in any selector menu
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
+
+HUB_MENUS = ["click_freeze", "er_mode", "move_mode", "turn_speed", "utility_1", "profiles"]
+
+MENU_TITLES = {
+    **SETTING_TITLES,
+    "utility_1": "Palate",
+    "profiles": "Profiles",
+}
 
 input_map_common = {
     "ee":     ("stop", actions.user.parrot_rig_stop),
@@ -31,12 +46,12 @@ input_map_common = {
     "tut ah":     ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
     "tut shush":  ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
     "tut t":      ("toggle control", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
-    "tut mm":     ("click settings", lambda: actions.user.parrot_rig_show_setting_selector("click_freeze", "tut mm")),
-    "tut er":     ("er settings", lambda: actions.user.parrot_rig_show_setting_selector("er_mode", "tut er")),
-    "tut eh":     ("move settings", lambda: actions.user.parrot_rig_show_setting_selector("move_mode", "tut eh")),
-    "tut hiss":   ("turn settings", lambda: actions.user.parrot_rig_show_setting_selector("turn_speed", "tut hiss")),
+    "tut mm":     ("click settings", lambda: actions.user.parrot_rig_menu_open("click_freeze")),
+    "tut er":     ("er settings", lambda: actions.user.parrot_rig_menu_open("er_mode")),
+    "tut eh":     ("move settings", lambda: actions.user.parrot_rig_menu_open("move_mode")),
+    "tut hiss":   ("turn settings", lambda: actions.user.parrot_rig_menu_open("turn_speed")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
-    "tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1", "palate")),
+    "tut palate": ("settings", lambda: actions.user.parrot_rig_settings_menu()),
 }
 
 input_map_default = {
@@ -119,6 +134,39 @@ utility_maps = {
     },
 }
 
+def _hub_input_map():
+    mode = {}
+    for i, name in enumerate(HUB_MENUS):
+        if i < len(SELECT_NOISES):
+            mode[SELECT_NOISES[i]] = (
+                MENU_TITLES.get(name, name),
+                lambda n=name: actions.user.parrot_rig_menu_open(n),
+            )
+    mode["tut"] = ("close", actions.user.parrot_rig_menu_back)
+    return mode
+
+
+def _profiles_input_map():
+    mode = {}
+    for i in range(min(PROFILE_SLOTS, len(SELECT_NOISES))):
+        mode[SELECT_NOISES[i]] = (
+            f"profile {i + 1}",
+            lambda i=i: actions.user.parrot_rig_profile_slot(i),
+        )
+    mode["palate"] = ("overwrite active", actions.user.parrot_rig_profile_save_current)
+    mode["tut"] = ("back", actions.user.parrot_rig_menu_back)
+    return mode
+
+
+def _profile_name_input_map():
+    # Deliberately inert. Talking while typing must not fire noises, so only a
+    # double tut escapes. The bare tut is a no-op prefix for the combo.
+    return {
+        "tut": ("", lambda: None),
+        "tut tut": ("cancel", actions.user.parrot_rig_menu_back),
+    }
+
+
 input_map = {
     "default": input_map_default,
     "move": input_map_move,
@@ -126,17 +174,21 @@ input_map = {
     "scroll_stop": input_map_scroll_stop,
     "scroll_move": input_map_scroll_move,
     "scroll_tracking": input_map_scroll_tracking,
+    "hub_select": _hub_input_map(),
+    "profiles_select": _profiles_input_map(),
+    "profile_name_select": _profile_name_input_map(),
     **utility_input_maps(
         maps=utility_maps,
         ui_selectors=SELECT_NOISES,
         ui_cancel=["tut"],
+        close=lambda n: actions.user.parrot_rig_menu_back(),
     ),
     **utility_input_maps(
         maps=setting_maps,
         ui_selectors=SELECT_NOISES,
         ui_cancel=["tut"],
         select=lambda n, i: actions.user.parrot_rig_setting_select(n, i),
-        close=lambda n: actions.user.parrot_rig_setting_select_close(n),
+        close=lambda n: actions.user.parrot_rig_menu_back(),
     ),
 }
 
@@ -320,9 +372,7 @@ class Actions:
 
     def parrot_rig_show_utility_selector(name: str, noise: str = ""):
         """Show utility selector UI and enter select mode"""
-        event_manager.set_mode(f"{name}_select")
-        title = f"{name} ({noise})" if noise else name
-        parrot_actions.show_utility_selector(name, title)
+        menu_open(name)
 
     def parrot_rig_utility_select(name: str, slot: int):
         """Select a utility option by slot index"""
@@ -331,13 +381,8 @@ class Actions:
         keys = list(util_map.keys())
         if slot < len(keys):
             actions.user.input_map_single_mode_set(name, keys[slot], util_map)
-            label = util_map[keys[slot]][0]
-            show_utility_notification(name, label)
-        actions.user.parrot_rig_utility_select_close(name)
-
-    def parrot_rig_utility_select_close(name: str):
-        """Close utility selector (on_unmount handles mode revert)"""
-        parrot_actions.hide_utility_selector(name)
+            show_utility_notification(MENU_TITLES.get(name, name), util_map[keys[slot]][0])
+        menu_back()
 
     # Settings menus
 
@@ -360,9 +405,7 @@ class Actions:
 
     def parrot_rig_show_setting_selector(name: str, noise: str = ""):
         """Show a settings selector UI and enter select mode"""
-        event_manager.set_mode(f"{name}_select")
-        title = setting_title(name)
-        parrot_actions.show_utility_selector(name, f"{title} ({noise})" if noise else title)
+        menu_open(name)
 
     def parrot_rig_setting_select(name: str, slot: int):
         """Select a setting value by slot index"""
@@ -371,8 +414,85 @@ class Actions:
         if slot < len(keys):
             setting_set(name, keys[slot])
             show_utility_notification(setting_title(name), setting_label(name))
-        actions.user.parrot_rig_setting_select_close(name)
+        menu_back()
 
-    def parrot_rig_setting_select_close(name: str):
-        """Close settings selector (on_unmount handles mode revert)"""
-        parrot_actions.hide_utility_selector(name)
+    # Menu navigation
+
+    def parrot_rig_settings_menu():
+        """Open the settings hub"""
+        menu_open("hub")
+
+    def parrot_rig_menu_open(name: str):
+        """Open a menu by name, drilling in from whatever is open"""
+        menu_open(name)
+
+    def parrot_rig_menu_back():
+        """Back one menu level, closing out at the top"""
+        menu_back()
+
+    def parrot_rig_menu_close():
+        """Close every open menu"""
+        menu_close()
+
+    # Profiles
+
+    def parrot_rig_profile_slot(slot: int):
+        """Load the profile in a slot, or name a new one if it is the next free slot"""
+        from .ui.utility_selector import show_utility_notification
+        names = profile_names()
+        if slot == len(names):
+            actions.user.parrot_rig_profile_name_prompt()
+            return
+        if slot > len(names):
+            return
+        profile_load(names[slot])
+        show_utility_notification("Profile", names[slot])
+        menu_back()
+
+    def parrot_rig_profile_save_current():
+        """Save to the active profile, or prompt for a name if it is locked"""
+        from .ui.utility_selector import show_utility_notification
+        name = profile_active()
+        if not profile_save(name):
+            actions.user.parrot_rig_profile_name_prompt()
+            return
+        show_utility_notification("Profile", f"saved {name}")
+
+    def parrot_rig_profile_name_prompt():
+        """Open the name input for saving a new profile"""
+        menu_open("profile_name")
+
+    def parrot_rig_profile_name_submit(name: str):
+        """Save under the typed name and return to the profiles menu"""
+        from .ui.utility_selector import show_utility_notification
+        name = (name or "").strip()
+        if not name:
+            return
+        if not profile_save(name):
+            show_utility_notification("Profile", f"{name} is locked")
+            return
+        menu_back()
+        show_utility_notification("Profile", f"saved {name}")
+
+    def parrot_rig_profile_save(name: str):
+        """Save current settings as a named profile"""
+        if not profile_save(name):
+            print(f"parrot rig: {name} is locked")
+            return
+        print(f"parrot rig: saved profile {name}")
+
+    def parrot_rig_profile_load(name: str):
+        """Load a named profile"""
+        if not profile_load(name):
+            print(f"parrot rig: no profile {name}")
+
+    def parrot_rig_profile_delete(name: str):
+        """Delete a named profile"""
+        if not profile_delete(name):
+            print(f"parrot rig: no profile {name}, or it is locked")
+
+    def parrot_rig_profile_list() -> list:
+        """List saved profile names"""
+        names = profile_names()
+        print(f"parrot rig profiles: {names or 'none'}")
+        return names

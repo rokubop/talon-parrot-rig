@@ -1,9 +1,15 @@
 from talon import actions
 from ..parrot_rig_actions import utility_maps
+from ..src.menu import menu_register
 from ..src.settings_menu import setting_maps, setting_get
 from ..parrot_rig_settings import (
     UI_BORDER_COLOR, UI_BACKGROUND_COLOR, UI_TEXT_COLOR, UI_SELECTED_COLOR,
 )
+
+
+def _menu_title(name: str) -> str:
+    from ..parrot_rig_actions import MENU_TITLES
+    return MENU_TITLES.get(name, name)
 
 def _make_selector(name: str, util_map: dict, get_current):
     def selector_ui(props):
@@ -52,7 +58,7 @@ def _make_selector(name: str, util_map: dict, get_current):
                 text(cancel_label, color=UI_TEXT_COLOR, font_family="monospace", font_weight="bold")
             ],
             td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
-                text("Cancel", color=UI_TEXT_COLOR, font_weight="bold")
+                text("Back", color=UI_TEXT_COLOR, font_weight="bold")
             ],
         ]
 
@@ -90,15 +96,18 @@ _selectors = {
     },
 }
 
-def _on_unmount():
-    from ..src.events import event_manager
-    event_manager.return_to_previous_mode()
-
 def show_utility_selector(name: str, title: str = ""):
-    actions.user.ui_elements_show(_selectors[name], props={"title": title or name}, show_hints=False, on_unmount=_on_unmount)
+    actions.user.ui_elements_show(_selectors[name], props={"title": title or name}, show_hints=False)
 
 def hide_utility_selector(name: str):
     actions.user.ui_elements_hide(_selectors[name])
+
+for _name in _selectors:
+    menu_register(
+        _name,
+        lambda n=_name: show_utility_selector(n, _menu_title(n)),
+        lambda n=_name: hide_utility_selector(n),
+    )
 
 def _utility_notification(props):
     screen, div = actions.user.ui_elements(["screen", "div"])
