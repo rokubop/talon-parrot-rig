@@ -30,6 +30,11 @@ SCROLL_RAMP_AMOUNT = 0.3
 SCROLL_RAMP_REVERT_MS = 400
 SCROLL_GLIDE_RELEASE_RATE = 0.1
 
+# Anchor
+ANCHOR_MOVE_MS = 200
+ANCHOR_MOVE_EASING = "ease_in_out"
+ANCHOR_MARKER_COLOR = "FFFFFF"
+
 # Timing
 TRACKING_STOP_MS = 800
 REVERSE_TIMEOUT = "2s"
@@ -61,11 +66,11 @@ MODE_COLORS = {
     "scroll_glide": "#6B9EF7",
 }
 
-# Modifier colors
-MODIFIER_COLORS = {
-    "shift": "#0490c9",
-    "ctrl": "#84E773",
-    "alt": "#FF6DD9",
+# Modifier letters, shown next to the cursor in this order
+MODIFIER_LETTERS = {
+    "shift": "S",
+    "ctrl": "C",
+    "alt": "A",
 }
 
 # UI colors

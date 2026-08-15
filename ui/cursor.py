@@ -1,5 +1,5 @@
 from talon import actions
-from ..parrot_rig_settings import MODE_COLORS, MODIFIER_COLORS
+from ..parrot_rig_settings import MODE_COLORS, MODIFIER_LETTERS
 from ..parrot_rig_settings import CURSOR_UI_ENABLED
 
 SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide", "scroll_tracking"}
@@ -47,18 +47,35 @@ def cursor_ui():
     modifiers = state.get("modifiers")
     speed_level = state.get("speed_level")
 
-    modifier_elements = []
+    modifier_label = None
     if modifiers:
-        offset_x = 31
-        for modifier in ["shift", "ctrl", "alt"]:
-            if modifier in modifiers:
-                modifier_color = MODIFIER_COLORS.get(modifier, "FFFFFF")
-                modifier_elements.append(
-                    svg(position="absolute", left=offset_x, top=30)[
-                        circle(r=5, cx=5, cy=5, fill=modifier_color)
-                    ]
+        letters = [
+            letter for mod, letter in MODIFIER_LETTERS.items() if mod in modifiers
+        ]
+        # One text per letter, since the stroke on each glyph swallows the
+        # font's own spacing and there is no letter_spacing property.
+        modifier_label = div(
+            position="absolute",
+            left=33,
+            top=30,
+            width=48,
+            height=20,
+            flex_direction="row",
+            align_items="center",
+            gap=4,
+        )[
+            *[
+                text(
+                    letter,
+                    color="white",
+                    font_size=14,
+                    font_weight="bold",
+                    stroke_color="000000",
+                    stroke_width=3,
                 )
-                offset_x += 11
+                for letter in letters
+            ]
+        ]
 
     speed_label = None
     if speed_level and speed_level > 0:
@@ -112,7 +129,7 @@ def cursor_ui():
             # Speed level number
             speed_label,
             # Modifiers
-            *modifier_elements
+            modifier_label,
         ]
     ]
 
@@ -217,9 +234,6 @@ class CursorUI:
 
     def get_mode_color(self, mode: str) -> str:
         return MODE_COLORS.get(mode, "#FF0000")
-
-    def get_modifier_color(self, modifier: str) -> str:
-        return MODIFIER_COLORS.get(modifier, "#FFFFFF")
 
     def cleanup(self):
         try:

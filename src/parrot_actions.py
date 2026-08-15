@@ -32,6 +32,7 @@ from ..parrot_rig_settings import (
 from .utils import reload_files
 from .settings_menu import setting_get, setting_set, setting_label, setting_title, turn_scale
 from .menu import menu_reset
+from .anchor import anchor_go, anchor_toggle
 from .snap import active_rule, do_snap, snap_rule
 
 class ParrotActions:
@@ -153,12 +154,18 @@ class ParrotActions:
         self.parrot_mode_disable()
 
     def pop_action(self):
-        """Snap if a snap condition applies, otherwise click and exit."""
+        """Go to the anchor if there is one, else snap if a rule applies, else click and exit."""
+        if anchor_go():
+            return
         rule = active_rule()
         if rule:
             do_snap(rule)
         else:
             self.click_exit()
+
+    def toggle_anchor(self):
+        from ..ui.utility_selector import show_utility_notification
+        show_utility_notification("Anchor", "set" if anchor_toggle() else "cleared")
 
     def snap_now(self):
         """Snap regardless of condition, using the active rule if there is one."""

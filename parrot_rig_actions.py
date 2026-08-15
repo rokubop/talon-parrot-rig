@@ -20,7 +20,7 @@ CHANNEL = "parrot_rig"
 # Noises that pick slot 1, 2, 3... in any selector menu
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
 
-HUB_MENUS = ["click_freeze", "er_mode", "move_mode", "turn_speed", "utility_1", "profiles"]
+HUB_MENUS = ["click_freeze", "er_mode", "move_mode", "turn_speed", "anchor_move", "utility_1", "profiles"]
 
 MENU_TITLES = {
     **SETTING_TITLES,
@@ -31,7 +31,7 @@ MENU_TITLES = {
 input_map_common = {
     "ee":     ("stop", actions.user.parrot_rig_stop),
     "mm":     ("click", actions.user.parrot_rig_click),
-    "pop":    ("click exit / snap", actions.user.parrot_rig_pop),
+    "pop":    ("anchor / snap / click exit", actions.user.parrot_rig_pop),
     "ah":     ("move left", lambda: actions.user.parrot_rig_move("left")),
     "oh":     ("move right", lambda: actions.user.parrot_rig_move("right")),
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
@@ -44,8 +44,9 @@ input_map_common = {
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
     "tut ee":     ("disable modifiers", actions.user.parrot_rig_disable_modifiers),
     "tut ah":     ("toggle alt", lambda: actions.user.parrot_rig_toggle_modifier("alt")),
-    "tut shush":  ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
-    "tut t":      ("toggle control", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
+    "tut t":      ("toggle shift", lambda: actions.user.parrot_rig_toggle_modifier("shift")),
+    "tut guh":    ("toggle control", lambda: actions.user.parrot_rig_toggle_modifier("ctrl")),
+    "tut pop":    ("anchor set / clear", actions.user.parrot_rig_anchor_toggle),
     "tut mm":     ("click settings", lambda: actions.user.parrot_rig_menu_open("click_freeze")),
     "tut er":     ("er settings", lambda: actions.user.parrot_rig_menu_open("er_mode")),
     "tut eh":     ("move settings", lambda: actions.user.parrot_rig_menu_open("move_mode")),
@@ -397,6 +398,15 @@ class Actions:
     def parrot_rig_snap():
         """Snap the cursor now (center by default), without stopping movement"""
         parrot_actions.snap_now()
+
+    def parrot_rig_anchor_toggle():
+        """Anchor at the cursor, or clear the existing anchor"""
+        parrot_actions.toggle_anchor()
+
+    def parrot_rig_anchor_clear():
+        """Clear the anchor"""
+        from .src.anchor import anchor_clear
+        anchor_clear()
 
     def parrot_rig_setting_get(name: str) -> str:
         """Get the current value of a settings-menu setting"""

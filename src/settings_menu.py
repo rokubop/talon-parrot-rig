@@ -22,6 +22,10 @@ setting_maps = {
         "slow":      ("Slow",),
         "very_slow": ("Very Slow",),
     },
+    "anchor_move": {
+        "smooth":  ("Over Time",),
+        "instant": ("Instant",),
+    },
 }
 
 SETTING_TITLES = {
@@ -29,6 +33,7 @@ SETTING_TITLES = {
     "er_mode": "Er",
     "move_mode": "Move",
     "turn_speed": "Turn",
+    "anchor_move": "Anchor",
 }
 
 TURN_SCALES = {
