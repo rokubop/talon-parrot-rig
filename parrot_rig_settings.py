@@ -41,6 +41,9 @@ SCROLL_GLIDE_RELEASE_RATE = 0.1
 ANCHOR_MOVE_MS = 200
 ANCHOR_MOVE_EASING = "ease_in_out"
 ANCHOR_MARKER_COLOR = "FFFFFF"
+# How close counts as standing on an anchor, for removing it and for skipping
+# it as a pop target
+ANCHOR_HIT_RADIUS = 24
 
 # Timing
 TRACKING_STOP_MS = 800

@@ -1,47 +1,63 @@
-"""A saved cursor position. While one is set, pop relocates there instead of
-clicking or snapping. Set and cleared with the same noise.
+"""Saved cursor positions. While any are set, pop travels to the nearest one
+instead of clicking or snapping. The same noise drops an anchor or removes the
+one you are standing on.
 """
 
 from talon import actions, ctrl
 from .settings_menu import setting_get
-from ..ui.anchor_marker import anchor_marker_hide, anchor_marker_show
-from ..parrot_rig_settings import ANCHOR_MOVE_MS, ANCHOR_MOVE_EASING
+from ..ui.anchor_marker import anchor_markers_show
+from ..parrot_rig_settings import (
+    ANCHOR_MOVE_MS, ANCHOR_MOVE_EASING, ANCHOR_HIT_RADIUS,
+)
 
-_pos = None
-
-
-def anchor_get():
-    return _pos
+_anchors = []
 
 
-def anchor_set(pos=None):
-    global _pos
-    _pos = tuple(pos) if pos else ctrl.mouse_pos()
-    anchor_marker_show(*_pos)
+def anchors() -> list:
+    return list(_anchors)
 
 
-def anchor_clear():
-    global _pos
-    _pos = None
-    anchor_marker_hide()
+def anchor_index_at(x: float, y: float):
+    """Index of the anchor you are standing on, or None."""
+    for i, (ax, ay) in enumerate(_anchors):
+        if (ax - x) ** 2 + (ay - y) ** 2 <= ANCHOR_HIT_RADIUS ** 2:
+            return i
+    return None
 
 
-def anchor_toggle() -> bool:
-    """Set at the cursor, or clear an existing one. True if an anchor is now set."""
-    if _pos:
-        anchor_clear()
-        return False
-    anchor_set()
-    return True
+def anchor_toggle() -> str:
+    """Drop an anchor at the cursor, or remove the one under it. "set" or "cleared"."""
+    x, y = ctrl.mouse_pos()
+    index = anchor_index_at(x, y)
+    if index is None:
+        _anchors.append((x, y))
+        result = "set"
+    else:
+        _anchors.pop(index)
+        result = "cleared"
+    anchor_markers_show(_anchors)
+    return result
+
+
+def anchor_clear_all():
+    _anchors.clear()
+    anchor_markers_show(_anchors)
 
 
 def anchor_go() -> bool:
-    """Move to the anchor. False if there is nothing to move to."""
-    if not _pos:
+    """Move to the nearest anchor, or the next one round if already on one."""
+    if not _anchors:
         return False
-    x, y = _pos
-    if setting_get("anchor_move") == "instant":
-        actions.user.mouse_rig_move_to(x, y)
+    x, y = ctrl.mouse_pos()
+    here = anchor_index_at(x, y)
+    if here is None:
+        tx, ty = min(_anchors, key=lambda a: (a[0] - x) ** 2 + (a[1] - y) ** 2)
+    elif len(_anchors) == 1:
+        return False
     else:
-        actions.user.mouse_rig_move_to(x, y, ANCHOR_MOVE_MS, ANCHOR_MOVE_EASING)
+        tx, ty = _anchors[(here + 1) % len(_anchors)]
+    if setting_get("anchor_move") == "instant":
+        actions.user.mouse_rig_move_to(tx, ty)
+    else:
+        actions.user.mouse_rig_move_to(tx, ty, ANCHOR_MOVE_MS, ANCHOR_MOVE_EASING)
     return True

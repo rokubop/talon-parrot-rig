@@ -1,5 +1,5 @@
 from talon import actions
-from ..src.anchor import anchor_get
+from ..src.anchor import anchors
 from ..src.menu import menu_register
 from ..src.profiles import (
     PROFILE_SLOTS, profile_active, profile_is_locked, profile_names,
@@ -16,7 +16,8 @@ def _menus():
 
 def menu_value(name: str) -> str:
     if name == "anchor_move":
-        return f"{setting_label(name)} (set)" if anchor_get() else setting_label(name)
+        count = len(anchors())
+        return f"{setting_label(name)} ({count})" if count else setting_label(name)
     if name in setting_maps:
         return setting_label(name)
     if name == "profiles":

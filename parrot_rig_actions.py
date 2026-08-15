@@ -405,13 +405,15 @@ class Actions:
         parrot_actions.snap_now()
 
     def parrot_rig_anchor_toggle():
-        """Anchor at the cursor, or clear the existing anchor"""
+        """Drop an anchor at the cursor, or remove the one under it"""
         parrot_actions.toggle_anchor()
 
-    def parrot_rig_anchor_clear():
-        """Clear the anchor"""
-        from .src.anchor import anchor_clear
-        anchor_clear()
+    def parrot_rig_anchor_clear_all():
+        """Remove every anchor"""
+        from .src.anchor import anchor_clear_all
+        from .ui.utility_selector import show_utility_notification
+        anchor_clear_all()
+        show_utility_notification("Anchor", "cleared all")
 
     def parrot_rig_setting_get(name: str) -> str:
         """Get the current value of a settings-menu setting"""
@@ -423,11 +425,16 @@ class Actions:
         menu_open(name)
 
     def parrot_rig_setting_select(name: str, slot: int):
-        """Select a setting value by slot index"""
+        """Select a setting value by slot index, or run its action if it has one"""
         from .ui.utility_selector import show_utility_notification
-        keys = list(setting_maps[name].keys())
-        if slot < len(keys):
-            setting_set(name, keys[slot])
+        entries = list(setting_maps[name].items())
+        if slot < len(entries):
+            key, entry = entries[slot]
+            if len(entry) > 1:
+                menu_back()
+                getattr(actions.user, entry[1])()
+                return
+            setting_set(name, key)
             show_utility_notification(setting_title(name), setting_label(name))
         menu_back()
 

@@ -22,9 +22,11 @@ setting_maps = {
         "slow":      ("Slow",),
         "very_slow": ("Very Slow",),
     },
+    # A second tuple entry names an action to run instead of setting the value
     "anchor_move": {
         "smooth":  ("Over Time",),
         "instant": ("Instant",),
+        "clear":   ("Clear All", "parrot_rig_anchor_clear_all"),
     },
 }
 

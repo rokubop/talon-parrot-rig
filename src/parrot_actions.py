@@ -33,7 +33,7 @@ from ..parrot_rig_settings import (
 from .utils import reload_files
 from .settings_menu import setting_get, setting_set, setting_label, setting_title, turn_scale
 from .menu import menu_reset
-from .anchor import anchor_go, anchor_toggle
+from .anchor import anchor_go, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
 
 class ParrotActions:
@@ -166,7 +166,8 @@ class ParrotActions:
 
     def toggle_anchor(self):
         from ..ui.utility_selector import show_utility_notification
-        show_utility_notification("Anchor", "set" if anchor_toggle() else "cleared")
+        result = anchor_toggle()
+        show_utility_notification("Anchor", f"{result} ({len(anchors())})")
 
     def snap_now(self):
         """Snap regardless of condition, using the active rule if there is one."""
