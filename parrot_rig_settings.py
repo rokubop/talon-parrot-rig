@@ -25,6 +25,15 @@ SCROLL_EXTREME_KEYS = {
     "down": "ctrl-end",
 }
 
+# Modifier scroll. Every wheel tick is a zoom step in most apps, so this runs
+# slower than plain scroll.
+MOD_SCROLL_SPEED = 0.015
+
+# How long after entering scroll mode the follow-up noise still means "modifier
+# scroll" instead of its normal action. Matches the input map combo window,
+# since it stands in for a combo that a mode switch would otherwise eat.
+MOD_SCROLL_CHASE_MS = 300
+
 # Scroll mode
 SCROLL_MOVE_SPEED = 0.03
 SCROLL_SLOW_MODE_MULTIPLIER = 0.5
@@ -57,6 +66,7 @@ CLICK_BEHAVIOR = {
     "scroll_move": "scroll_stop",
     "scroll_glide": "scroll_stop",
     "scroll_boost": "scroll_stop",
+    "mod_scroll_move": "mod_scroll",
 }
 
 # Cursor UI
@@ -74,6 +84,8 @@ MODE_COLORS = {
     "scroll_move": "#FFFF44",
     "scroll_boost": "#44E84E",
     "scroll_glide": "#6B9EF7",
+    "mod_scroll": "#FF4444",
+    "mod_scroll_move": "#FFFF44",
 }
 
 # Modifier letters, shown next to the cursor in this order

@@ -28,15 +28,21 @@ CHANNEL = "parrot_rig"
 # Noises that pick slot 1, 2, 3... in any selector menu
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
 
-HUB_MENUS = ["click_freeze", "alt_move_mode", "move_mode", "speeds", "anchor_move", "utility_1", "profiles"]
+HUB_MENUS = [
+    "click_freeze", "alt_move_mode", "mod_scroll", "move_mode",
+    "speeds", "anchor_move", "utility_1", "profiles",
+]
 
 SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "scroll_move_speed", "boost_power"]
+
+MOD_SCROLL_MENUS = ["mod_scroll_y_mod", "mod_scroll_y_wheel", "mod_scroll_x_mod", "mod_scroll_x_wheel"]
 
 MENU_TITLES = {
     **SETTING_TITLES,
     "utility_1": "Palate",
     "profiles": "Profiles",
     "speeds": "Speeds",
+    "mod_scroll": "Mod Scroll",
 }
 
 input_map_common = {
@@ -48,7 +54,7 @@ input_map_common = {
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", actions.user.parrot_rig_tracking_activate),
-    "er":     ("scroll mode or middle drag", actions.user.parrot_rig_alt_move_toggle),
+    "er":     ("alt move", actions.user.parrot_rig_alt_move_toggle),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
     "tut":        ("reset slow", actions.user.parrot_rig_reset_speed_level),
@@ -65,6 +71,7 @@ input_map_common = {
     "tut eh":     ("move settings", lambda: actions.user.parrot_rig_menu_open("move_mode")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("settings", lambda: actions.user.parrot_rig_settings_menu()),
+    "tut cluck":  ("modifier scroll", actions.user.parrot_rig_mod_scroll_toggle),
 }
 
 input_map_default = {
@@ -105,7 +112,7 @@ input_map_scroll_stop = {
     "t":      ("scroll go up", lambda: actions.user.parrot_rig_scroll_move("up")),
     "guh":    ("scroll go down", lambda: actions.user.parrot_rig_scroll_move("down")),
     "eh":     ("scroll track", actions.user.parrot_rig_scroll_tracking_activate),
-    "shush":      ("scroll resume", actions.user.parrot_rig_scroll_resume),
+    "shush":      ("mod scroll, or scroll resume", actions.user.parrot_rig_scroll_resume_or_mod_scroll),
     "shush_stop": ("", lambda: None),
     "hiss":       ("scroll resume", actions.user.parrot_rig_scroll_resume),
     "hiss_stop":  ("", lambda: None),
@@ -125,6 +132,20 @@ input_map_scroll_move = {
     "shush_stop": ("", lambda: None),
     "hiss":            ("scroll burst or brake", actions.user.parrot_rig_scroll_burst_or_brake),
     "hiss_stop:db_50": ("", actions.user.parrot_rig_scroll_burst_or_brake_stop),
+}
+
+input_map_mod_scroll = {
+    **input_map_common,
+    "ah":     ("x axis left", lambda: actions.user.parrot_rig_mod_scroll("left")),
+    "oh":     ("x axis right", lambda: actions.user.parrot_rig_mod_scroll("right")),
+    "t":      ("y axis up", lambda: actions.user.parrot_rig_mod_scroll("up")),
+    "guh":    ("y axis down", lambda: actions.user.parrot_rig_mod_scroll("down")),
+    "ee":     ("stop, stay in mod scroll", actions.user.parrot_rig_mod_scroll_stop),
+    "er":     ("exit mod scroll", actions.user.parrot_rig_mod_scroll_toggle),
+    "hiss":              ("plain scroll down", lambda: actions.user.parrot_rig_mod_scroll_plain("down")),
+    "hiss_stop:db_170":  ("", actions.user.parrot_rig_scroll_stop),
+    "shush":             ("plain scroll up", lambda: actions.user.parrot_rig_mod_scroll_plain("up")),
+    "shush_stop:db_170": ("", actions.user.parrot_rig_scroll_stop),
 }
 
 input_map_scroll_tracking = {
@@ -188,8 +209,10 @@ input_map = {
     "scroll_stop": input_map_scroll_stop,
     "scroll_move": input_map_scroll_move,
     "scroll_tracking": input_map_scroll_tracking,
+    "mod_scroll": input_map_mod_scroll,
     "hub_select": _menu_list_input_map(HUB_MENUS, "close"),
     "speeds_select": _menu_list_input_map(SPEED_MENUS),
+    "mod_scroll_select": _menu_list_input_map(MOD_SCROLL_MENUS),
     "profiles_select": _profiles_input_map(),
     "profile_name_select": _typing_input_map(),
     "setting_custom_select": _typing_input_map(),
@@ -413,6 +436,26 @@ class Actions:
     def parrot_rig_middle_drag_toggle():
         """Hold middle mouse down and keep moving; toggle again to release"""
         parrot_actions.toggle_middle_drag()
+
+    def parrot_rig_scroll_resume_or_mod_scroll():
+        """Modifier scroll when it lands right after alt move, else scroll resume"""
+        parrot_actions.scroll_resume_or_mod_scroll()
+
+    def parrot_rig_mod_scroll_toggle():
+        """Enter or leave modifier scroll, whatever the alt_move_mode setting is"""
+        parrot_actions.mod_scroll_toggle()
+
+    def parrot_rig_mod_scroll(direction: str):
+        """Scroll with the axis modifier held, so the app zooms or pans"""
+        parrot_actions.mod_scroll_dir(direction)
+
+    def parrot_rig_mod_scroll_stop():
+        """Stop modifier scroll and release the held modifier, staying in the mode"""
+        parrot_actions.mod_scroll_stop()
+
+    def parrot_rig_mod_scroll_plain(direction: str):
+        """Ordinary scroll from inside modifier scroll, no modifier held"""
+        parrot_actions.mod_scroll_plain(direction)
 
     def parrot_rig_return():
         """Return to an anchor, else to the snap target, else click and exit"""

@@ -69,6 +69,38 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `palate` | utility_1 | Execute utility action |
 | `tut` | combo prefix / reset | Reset speed, prefix for combos (e.g. `tut oh` = right click) |
 
+Alt move has three modes, picked in settings under **Alt Move**:
+
+| Mode | What `er` does |
+|------|----------------|
+| Scroll Mode | Directions scroll the page |
+| Middle Drag | Holds middle mouse, directions drag |
+| Modifier Scroll | Directions scroll with a modifier held, so the app zooms and pans |
+
+Modifier scroll holds a modifier while scrolling, because that is how apps
+expose zoom and horizontal pan. Apps mostly read the vertical wheel and tell the
+gestures apart by the modifier, so the two axes are a parrot convenience, not
+two wheel directions.
+
+Each axis picks a modifier and which wheel it sends, under **Mod Scroll** in
+settings. Defaults are what most desktop apps do:
+
+| Axis | Modifier | Wheel | Result in most apps |
+|------|----------|-------|---------------------|
+| up / down | `ctrl` | up/down | Zoom in and out |
+| left / right | `shift` | up/down | Pan horizontally |
+
+Both axes take any of `ctrl`, `shift`, `alt`, or none, and either wheel. The
+same modifier on both axes with different wheels gives a real x/y. Different
+modifiers on the same wheel gives two gestures on one wheel. The cursor is a
+diamond, with the letter of each axis modifier above and beside it.
+
+Enter it with `er` then `shush`, within 300ms. This is not a combo: `er` fires
+immediately as always, and `shush` checks how long ago alt move started. A combo
+would not work here, because switching the input map mode clears the pending
+chain. `tut cluck` enters it from anywhere, and it can also be the mode `er`
+itself uses, under **Alt Move**.
+
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.
 
 Say **"parrot help"** to see the full input map reference in-app:

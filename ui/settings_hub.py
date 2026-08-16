@@ -43,7 +43,7 @@ def menu_value(name: str) -> str:
         return setting_label(name)
     if name == "profiles":
         return profile_active()
-    if name == "speeds":
+    if name in ("speeds", "mod_scroll"):
         return ""
     from ..parrot_rig_actions import utility_maps
     util_map = utility_maps.get(name)
@@ -134,8 +134,14 @@ def _speed_menus():
     return SPEED_MENUS
 
 
+def _mod_scroll_menus():
+    from ..parrot_rig_actions import MOD_SCROLL_MENUS
+    return MOD_SCROLL_MENUS
+
+
 hub_ui = _make_menu_list("settings_hub", "Settings (tut palate)", _hub_menus, "Close")
 speeds_ui = _make_menu_list("speeds_menu", "Speeds", _speed_menus, "Back")
+mod_scroll_ui = _make_menu_list("mod_scroll_menu", "Mod Scroll", _mod_scroll_menus, "Back")
 
 
 def profiles_ui(props):
@@ -290,8 +296,17 @@ def hide_speeds():
     actions.user.ui_elements_hide(speeds_ui)
 
 
+def show_mod_scroll():
+    actions.user.ui_elements_show(mod_scroll_ui, show_hints=False)
+
+
+def hide_mod_scroll():
+    actions.user.ui_elements_hide(mod_scroll_ui)
+
+
 menu_register("hub", show_hub, hide_hub)
 menu_register("speeds", show_speeds, hide_speeds)
+menu_register("mod_scroll", show_mod_scroll, hide_mod_scroll)
 menu_register("profiles", show_profiles, hide_profiles)
 menu_register("profile_name", show_profile_name, hide_profile_name)
 menu_register("setting_custom", show_setting_custom, hide_setting_custom)

@@ -1,3 +1,4 @@
+import time
 from talon import actions, ctrl, cron
 from .tracking import tracking
 from ..ui.ui_manager import ui_manager
@@ -24,17 +25,29 @@ from ..parrot_rig_settings import (
     SCROLL_RAMP_AMOUNT,
     SCROLL_RAMP_REVERT_MS,
     SCROLL_GLIDE_RELEASE_RATE,
+    MOD_SCROLL_SPEED,
+    MOD_SCROLL_CHASE_MS,
     TRACKING_STOP_MS,
     CLICK_BEHAVIOR,
 )
 from .utils import reload_files
 from .settings_menu import (
     setting_get, setting_set, setting_label, setting_title,
-    setting_number, turn_scale, boost_scale,
+    setting_number, turn_scale, boost_scale, mod_scroll_axis,
 )
 from .menu import menu_reset
 from .anchor import anchor_go, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
+
+# Which wheel event a parrot direction sends, per the axis wheel setting. Apps
+# mostly read the vertical wheel, so a sideways parrot direction still sends it.
+MOD_SCROLL_WHEEL = {
+    "vertical":   {"up": "up", "down": "down", "left": "up", "right": "down"},
+    "horizontal": {"up": "left", "down": "right", "left": "left", "right": "right"},
+}
+
+# Stopped and scrolling, so the cursor color reads like the other families
+MOD_SCROLL_MODES = ("mod_scroll", "mod_scroll_move")
 
 class ParrotActions:
     def __init__(self):
@@ -47,6 +60,8 @@ class ParrotActions:
         self._scroll_direction = "down"
         self._burst_or_brake_did_break = False
         self._scroll_burst_or_brake_did_break = False
+        self._mod_scroll_key = None
+        self._alt_move_at = 0.0
 
     def _get_move_speed(self):
         return setting_number("move_speed") * (SLOW_MODE_MULTIPLIER ** self._move_speed_level)
@@ -56,7 +71,9 @@ class ParrotActions:
 
     def _emit_speed_level(self):
         mode = event_manager.get_mode()
-        if mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost", "scroll_tracking"):
+        if mode == "mod_scroll":
+            level = 0
+        elif mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost", "scroll_tracking"):
             level = self._scroll_speed_level
         else:
             level = self._move_speed_level
@@ -216,6 +233,8 @@ class ParrotActions:
         self._is_left_click_held = False
 
     def mouse_click(self, button=0, hold=False):
+        # Never send a click with the modifier scroll key still down.
+        self._mod_scroll_release()
         current_mode = event_manager.get_mode()
 
         should_stop = hold != True and setting_get("click_freeze") == "freeze" and (
@@ -236,9 +255,9 @@ class ParrotActions:
         if should_stop:
             if current_mode in ("tracking", "scroll_tracking"):
                 self.stop_temporarily()
-            elif current_mode in CLICK_BEHAVIOR and CLICK_BEHAVIOR[current_mode] == "scroll_stop":
+            elif CLICK_BEHAVIOR.get(current_mode) in ("scroll_stop", "mod_scroll"):
                 actions.user.mouse_rig_scroll_stop()
-                event_manager.set_mode("scroll_stop")
+                event_manager.set_mode(CLICK_BEHAVIOR[current_mode])
             else:
                 self.stopper()
 
@@ -293,6 +312,7 @@ class ParrotActions:
             self.click_release()
 
         self.middle_drag_release()
+        self._mod_scroll_release()
 
         actions.mode.disable("user.parrot_rig")
         actions.mode.enable("command")
@@ -374,10 +394,73 @@ class ParrotActions:
     def alt_move_toggle(self):
         """Enter the alternate movement mode named by the alt_move_mode setting:
         the same directions, moving the page or the canvas instead of the cursor."""
-        if setting_get("alt_move_mode") == "middle_drag":
+        mode = setting_get("alt_move_mode")
+        if mode == "middle_drag":
             self.toggle_middle_drag()
+        elif mode == "mod_scroll":
+            self.mod_scroll_toggle()
         else:
             self.toggle_scroll_move()
+            if event_manager.get_mode() == "scroll_stop":
+                self._alt_move_at = time.monotonic()
+
+    def _alt_move_just_activated(self) -> bool:
+        return (time.monotonic() - self._alt_move_at) * 1000 < MOD_SCROLL_CHASE_MS
+
+    def scroll_resume_or_mod_scroll(self):
+        """A mode switch eats a pending combo, so the second noise of the
+        gesture lands here instead. Straight after alt move it means modifier
+        scroll; any later it is an ordinary resume."""
+        if self._alt_move_just_activated():
+            self._alt_move_at = 0.0
+            self.mod_scroll_toggle()
+        else:
+            self.scroll_resume()
+
+    def mod_scroll_toggle(self):
+        if event_manager.get_mode() in MOD_SCROLL_MODES:
+            self.mod_scroll_stop()
+            event_manager.set_mode("default")
+        else:
+            actions.user.mouse_rig_move_stop()
+            actions.user.mouse_rig_scroll_stop()
+            tracking.freeze()
+            event_manager.set_mode("mod_scroll")
+            self._emit_speed_level()
+
+    def mod_scroll_dir(self, direction: str):
+        """Scroll with the axis modifier held, so the app zooms or pans."""
+        modifier, wheel_axis = mod_scroll_axis("y" if direction in ("up", "down") else "x")
+        self._mod_scroll_hold(modifier)
+        wheel = MOD_SCROLL_WHEEL[wheel_axis][direction]
+        actions.user.mouse_rig_scroll_continuous(wheel, MOD_SCROLL_SPEED, force=True)
+        self._scroll_direction = wheel
+        event_manager.set_mode("mod_scroll_move")
+
+    def mod_scroll_stop(self):
+        actions.user.mouse_rig_scroll_stop()
+        self._mod_scroll_release()
+        if event_manager.get_mode() == "mod_scroll_move":
+            event_manager.set_mode("mod_scroll")
+
+    def mod_scroll_plain(self, direction: str):
+        """Ordinary scroll from inside modifier scroll, no modifier held."""
+        self._mod_scroll_release()
+        self.scroll(direction)
+
+    def _mod_scroll_hold(self, modifier: str):
+        if self._mod_scroll_key == modifier:
+            return
+        self._mod_scroll_release()
+        if modifier != "none":
+            actions.key(f"{modifier}:down")
+            self._mod_scroll_key = modifier
+
+    def _mod_scroll_release(self):
+        if not self._mod_scroll_key:
+            return
+        actions.key(f"{self._mod_scroll_key}:up")
+        self._mod_scroll_key = None
 
     def toggle_middle_drag(self):
         """Hold middle mouse down and keep regular movement; toggle to release."""
@@ -499,6 +582,16 @@ class ParrotActions:
         self.scroll_move_dir(self._scroll_direction)
 
 parrot_actions = ParrotActions()
+
+
+def _release_mod_scroll_on_exit(data):
+    """Any route out of modifier scroll drops the held key, including exit,
+    stop, tracking, and the settings menus."""
+    if (data.get("previous_mode") in MOD_SCROLL_MODES
+            and data.get("current_mode") not in MOD_SCROLL_MODES):
+        parrot_actions._mod_scroll_release()
+
+event_manager.subscribe("mode_changed", _release_mod_scroll_on_exit)
 
 # Release before the jump so the jump itself isn't dragged, then re-press.
 snap_rule(

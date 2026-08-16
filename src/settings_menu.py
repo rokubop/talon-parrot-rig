@@ -26,6 +26,30 @@ setting_maps = {
     "alt_move_mode": {
         "scroll":      ("Scroll Mode",),
         "middle_drag": ("Middle Drag",),
+        "mod_scroll":  ("Modifier Scroll",),
+    },
+    # Modifier scroll. Each parrot axis picks a modifier and which wheel it
+    # sends. Apps mostly read the vertical wheel and tell the gestures apart by
+    # the modifier, so both axes default to it and only the modifier differs.
+    "mod_scroll_y_mod": {
+        "ctrl":  ("Ctrl",),
+        "shift": ("Shift",),
+        "alt":   ("Alt",),
+        "none":  ("None",),
+    },
+    "mod_scroll_y_wheel": {
+        "vertical":   ("Wheel Up/Down",),
+        "horizontal": ("Wheel Side",),
+    },
+    "mod_scroll_x_mod": {
+        "shift": ("Shift",),
+        "ctrl":  ("Ctrl",),
+        "alt":   ("Alt",),
+        "none":  ("None",),
+    },
+    "mod_scroll_x_wheel": {
+        "vertical":   ("Wheel Up/Down",),
+        "horizontal": ("Wheel Side",),
     },
     "move_mode": {
         "orthogonal":   ("Orthogonal",),
@@ -58,6 +82,10 @@ setting_maps = {
 SETTING_TITLES = {
     "click_freeze": "Click",
     "alt_move_mode": "Alt Move",
+    "mod_scroll_y_mod": "Y Modifier",
+    "mod_scroll_y_wheel": "Y Wheel",
+    "mod_scroll_x_mod": "X Modifier",
+    "mod_scroll_x_wheel": "X Wheel",
     "move_mode": "Move",
     "turn_speed": "Turn",
     "anchor_move": "Anchor",
@@ -112,6 +140,11 @@ def setting_set(name: str, value: str):
 def setting_label(name: str, value: str = None) -> str:
     """Display label for a setting value (defaults to the current one)."""
     return setting_maps[name][value or setting_get(name)][0]
+
+
+def mod_scroll_axis(axis: str) -> tuple:
+    """(modifier, wheel) for the "y" or "x" axis. Modifier may be "none"."""
+    return setting_get(f"mod_scroll_{axis}_mod"), setting_get(f"mod_scroll_{axis}_wheel")
 
 
 def setting_title(name: str) -> str:

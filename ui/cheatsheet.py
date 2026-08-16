@@ -58,7 +58,7 @@ def cheatsheet_ui():
         "move": ["move", "boost", "glide"],
         "scroll_move": ["scroll_move", "scroll_boost", "scroll_glide"],
     }
-    SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide", "scroll_tracking"}
+    SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide", "scroll_tracking", "mod_scroll"}
 
     def _make_icon(mode, cx):
         """Create a circle or triangle icon depending on mode type."""

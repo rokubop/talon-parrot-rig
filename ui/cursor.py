@@ -32,8 +32,22 @@ TRIANGLE_BORDER_INNER = {
     "right": "M 21 12 L 4 3 L 4 21 Z",
 }
 
+MOD_SCROLL_MODES = {"mod_scroll", "mod_scroll_move"}
+
+DIAMOND_PATH = "M 12 4 L 20 12 L 12 20 L 4 12 Z"
+
+DIAMOND_BORDER_OUTER = "M 12 1 L 23 12 L 12 23 L 1 12 Z"
+DIAMOND_BORDER_MID = "M 12 2 L 22 12 L 12 22 L 2 12 Z"
+DIAMOND_BORDER_INNER = "M 12 3 L 21 12 L 12 21 L 3 12 Z"
+
 default_cursor_color = "FF0000"
 default_border_color = "FFFFFF"
+
+
+def _axis_letters():
+    """Modifier letter for the y and x axis, blank where the axis holds none."""
+    from ..src.settings_menu import mod_scroll_axis
+    return [MODIFIER_LETTERS.get(mod_scroll_axis(axis)[0], "") for axis in ("y", "x")]
 
 def cursor_ui():
     screen, cursor, svg, circle, state = actions.user.ui_elements(
@@ -100,8 +114,40 @@ def cursor_ui():
 
     mode = state.get("mode")
     is_scroll = mode in SCROLL_MODES
+    axis_labels = []
 
-    if is_scroll:
+    if mode in MOD_SCROLL_MODES:
+        cursor_shape = svg(position="absolute", left=10, top=10)[
+            path(d=DIAMOND_PATH, fill=cursor_color)
+        ]
+        border_shape = svg(position="absolute", left=10, top=10)[
+            path(d=DIAMOND_BORDER_OUTER, fill="black"),
+            path(d=DIAMOND_BORDER_MID, fill=border_color),
+            path(d=DIAMOND_BORDER_INNER, fill="black"),
+        ] if show_border else None
+        axis_labels = [
+            div(
+                position="absolute",
+                left=left,
+                top=top,
+                width=24,
+                height=16,
+                justify_content="center",
+                align_items="center",
+            )[
+                text(
+                    letter,
+                    color="white",
+                    font_size=12,
+                    font_weight="bold",
+                    stroke_color="000000",
+                    stroke_width=3,
+                )
+            ]
+            for letter, left, top in zip(_axis_letters(), (10, 32), (-6, 14))
+            if letter
+        ]
+    elif is_scroll:
         scroll_dir = state.get("scroll_direction") or "down"
         cursor_shape = svg(position="absolute", left=10, top=10)[
             path(d=TRIANGLE_PATHS[scroll_dir], fill=cursor_color)
@@ -130,6 +176,8 @@ def cursor_ui():
             speed_label,
             # Modifiers
             modifier_label,
+            # Which modifier each axis holds, in modifier scroll
+            *axis_labels,
         ]
     ]
 
