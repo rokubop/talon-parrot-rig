@@ -5,7 +5,6 @@ from .keys import keys
 from .events import event_manager
 from .repeater import repeat_command, repeat_phrase, reverse_command, reverse_phrase
 from ..parrot_rig_settings import (
-    MOVE_SPEED,
     SLOW_MODE_MULTIPLIER,
     CLICK_HOLD_MS,
     BOOST_LONG_AMOUNT,
@@ -15,9 +14,7 @@ from ..parrot_rig_settings import (
     BURST_AMOUNT,
     BRAKE_REVERT_MS,
     GLIDE_RELEASE_RATE,
-    SCROLL_SPEED,
     SCROLL_EXTREME_KEYS,
-    SCROLL_MOVE_SPEED,
     SCROLL_SLOW_MODE_MULTIPLIER,
     SCROLL_BOOST_LONG_AMOUNT,
     SCROLL_BOOST_LONG_OVER_MS,
@@ -31,7 +28,10 @@ from ..parrot_rig_settings import (
     CLICK_BEHAVIOR,
 )
 from .utils import reload_files
-from .settings_menu import setting_get, setting_set, setting_label, setting_title, turn_scale
+from .settings_menu import (
+    setting_get, setting_set, setting_label, setting_title,
+    setting_number, turn_scale, boost_scale,
+)
 from .menu import menu_reset
 from .anchor import anchor_go, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
@@ -49,10 +49,10 @@ class ParrotActions:
         self._scroll_burst_or_brake_did_break = False
 
     def _get_move_speed(self):
-        return MOVE_SPEED * (SLOW_MODE_MULTIPLIER ** self._move_speed_level)
+        return setting_number("move_speed") * (SLOW_MODE_MULTIPLIER ** self._move_speed_level)
 
     def _get_scroll_move_speed(self):
-        return SCROLL_MOVE_SPEED * (SCROLL_SLOW_MODE_MULTIPLIER ** self._scroll_speed_level)
+        return setting_number("scroll_move_speed") * (SCROLL_SLOW_MODE_MULTIPLIER ** self._scroll_speed_level)
 
     def _emit_speed_level(self):
         mode = event_manager.get_mode()
@@ -114,8 +114,9 @@ class ParrotActions:
 
     def mouse_boost_long(self):
         event_manager.set_mode("boost")
-        amount = BOOST_LONG_AMOUNT * self._move_speed_scale()
-        actions.user.mouse_rig_boost(amount, over_ms=BOOST_LONG_OVER_MS, release_ms=BOOST_LONG_RELEASE_MS, max_speed=BOOST_LONG_MAX).then(
+        amount = BOOST_LONG_AMOUNT * boost_scale() * self._move_speed_scale()
+        max_speed = BOOST_LONG_MAX * boost_scale()
+        actions.user.mouse_rig_boost(amount, over_ms=BOOST_LONG_OVER_MS, release_ms=BOOST_LONG_RELEASE_MS, max_speed=max_speed).then(
             lambda: event_manager.return_to_previous_mode()
                 if event_manager.get_mode() == "boost" else None)
 
@@ -130,7 +131,7 @@ class ParrotActions:
             return
         self._burst_or_brake_did_break = False
         rig = actions.user.mouse_rig()
-        rig.layer("hiss_boost").stack(1).speed.offset.add(BURST_AMOUNT)
+        rig.layer("hiss_boost").stack(1).speed.offset.add(BURST_AMOUNT * boost_scale())
 
     def mouse_burst_or_brake_stop(self):
         if self._burst_or_brake_did_break:
@@ -241,7 +242,7 @@ class ParrotActions:
                 self.stopper()
 
     def scroll(self, direction: str):
-        actions.user.mouse_rig_scroll_continuous(direction, SCROLL_SPEED)
+        actions.user.mouse_rig_scroll_continuous(direction, setting_number("scroll_speed"))
 
     def scroll_stop(self):
         actions.user.mouse_rig_scroll_stop()
@@ -449,7 +450,7 @@ class ParrotActions:
 
     def scroll_boost_long(self):
         event_manager.set_mode("scroll_boost")
-        amount = SCROLL_BOOST_LONG_AMOUNT * self._scroll_speed_scale()
+        amount = SCROLL_BOOST_LONG_AMOUNT * boost_scale() * self._scroll_speed_scale()
         actions.user.mouse_rig_scroll_boost(
             amount,
             over_ms=SCROLL_BOOST_LONG_OVER_MS,
@@ -470,7 +471,7 @@ class ParrotActions:
             return
         self._scroll_burst_or_brake_did_break = False
         rig = actions.user.mouse_rig()
-        rig.layer("hiss_scroll_boost").stack(1).scroll.speed.offset.add(SCROLL_BURST_AMOUNT)
+        rig.layer("hiss_scroll_boost").stack(1).scroll.speed.offset.add(SCROLL_BURST_AMOUNT * boost_scale())
 
     def scroll_burst_or_brake_stop(self):
         if self._scroll_burst_or_brake_did_break:

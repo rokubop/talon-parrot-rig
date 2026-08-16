@@ -5,6 +5,7 @@ from .parrot_rig_settings import CLICK_HOLD_MS
 from .src.select import utility_input_maps
 from .src.settings_menu import (
     setting_maps, setting_set, setting_label, setting_title, SETTING_TITLES,
+    setting_set_custom, setting_number_text, is_numeric,
 )
 from .src.menu import menu_open, menu_back, menu_close
 from .src.profiles import (
@@ -15,17 +16,27 @@ from .src.profiles import (
 mod = Module()
 mod.mode("parrot_rig", "parrot rig")
 
+
+def setting_summary(name: str) -> str:
+    """Label, plus the number behind it when there is one."""
+    if is_numeric(name):
+        return f"{setting_label(name)} {setting_number_text(name)}"
+    return setting_label(name)
+
 CHANNEL = "parrot_rig"
 
 # Noises that pick slot 1, 2, 3... in any selector menu
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
 
-HUB_MENUS = ["click_freeze", "er_mode", "move_mode", "turn_speed", "anchor_move", "utility_1", "profiles"]
+HUB_MENUS = ["click_freeze", "er_mode", "move_mode", "speeds", "anchor_move", "utility_1", "profiles"]
+
+SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "scroll_move_speed", "boost_power"]
 
 MENU_TITLES = {
     **SETTING_TITLES,
     "utility_1": "Palate",
     "profiles": "Profiles",
+    "speeds": "Speeds",
 }
 
 input_map_common = {
@@ -136,15 +147,16 @@ utility_maps = {
     },
 }
 
-def _hub_input_map():
+def _menu_list_input_map(names, back_label="back"):
+    """Input map for a menu whose rows open other menus."""
     mode = {}
-    for i, name in enumerate(HUB_MENUS):
+    for i, name in enumerate(names):
         if i < len(SELECT_NOISES):
             mode[SELECT_NOISES[i]] = (
                 MENU_TITLES.get(name, name),
                 lambda n=name: actions.user.parrot_rig_menu_open(n),
             )
-    mode["tut"] = ("close", actions.user.parrot_rig_menu_back)
+    mode["tut"] = (back_label, actions.user.parrot_rig_menu_back)
     return mode
 
 
@@ -160,9 +172,9 @@ def _profiles_input_map():
     return mode
 
 
-def _profile_name_input_map():
-    # Deliberately inert. Talking while typing must not fire noises, so only a
-    # double tut escapes. The bare tut is a no-op prefix for the combo.
+def _typing_input_map():
+    # Talking while typing must not fire noises. Only a double tut escapes,
+    # and the bare tut is just the combo prefix.
     return {
         "tut": ("", lambda: None),
         "tut tut": ("cancel", actions.user.parrot_rig_menu_back),
@@ -176,9 +188,11 @@ input_map = {
     "scroll_stop": input_map_scroll_stop,
     "scroll_move": input_map_scroll_move,
     "scroll_tracking": input_map_scroll_tracking,
-    "hub_select": _hub_input_map(),
+    "hub_select": _menu_list_input_map(HUB_MENUS, "close"),
+    "speeds_select": _menu_list_input_map(SPEED_MENUS),
     "profiles_select": _profiles_input_map(),
-    "profile_name_select": _profile_name_input_map(),
+    "profile_name_select": _typing_input_map(),
+    "setting_custom_select": _typing_input_map(),
     **utility_input_maps(
         maps=utility_maps,
         ui_selectors=SELECT_NOISES,
@@ -430,13 +444,38 @@ class Actions:
         entries = list(setting_maps[name].items())
         if slot < len(entries):
             key, entry = entries[slot]
+            if key == "custom":
+                actions.user.parrot_rig_setting_custom_prompt(name)
+                return
             if len(entry) > 1:
                 menu_back()
                 getattr(actions.user, entry[1])()
                 return
             setting_set(name, key)
-            show_utility_notification(setting_title(name), setting_label(name))
+            show_utility_notification(setting_title(name), setting_summary(name))
         menu_back()
+
+    def parrot_rig_setting_custom_prompt(name: str):
+        """Open the number input for a numeric setting"""
+        from .ui.settings_hub import set_custom_pending
+        set_custom_pending(name)
+        menu_open("setting_custom")
+
+    def parrot_rig_setting_custom_submit(text: str):
+        """Store a typed number for the pending setting"""
+        from .ui.settings_hub import custom_pending
+        from .ui.utility_selector import show_utility_notification
+        name = custom_pending()
+        if not name:
+            return
+        try:
+            number = float((text or "").strip())
+        except ValueError:
+            show_utility_notification(setting_title(name), "not a number")
+            return
+        setting_set_custom(name, number)
+        menu_back()
+        show_utility_notification(setting_title(name), setting_summary(name))
 
     # Menu navigation
 

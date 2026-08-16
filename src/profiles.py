@@ -6,7 +6,9 @@ profile is saved.
 """
 
 from talon import actions, storage
-from .settings_menu import setting_maps, setting_get, setting_set
+from .settings_menu import (
+    setting_maps, setting_get, setting_set, setting_customs, setting_apply_customs,
+)
 
 PROFILES_KEY = "parrot_rig_profiles"
 PROFILE_SLOTS = 8
@@ -28,6 +30,7 @@ def factory_defaults() -> dict:
     return {
         "settings": {name: next(iter(options)) for name, options in setting_maps.items()},
         "utilities": {name: next(iter(m)) for name, m in _utility_maps().items()},
+        "customs": {},
     }
 
 
@@ -41,10 +44,12 @@ def profile_snapshot() -> dict:
     return {
         "settings": {name: setting_get(name) for name in setting_maps},
         "utilities": utilities,
+        "customs": setting_customs(),
     }
 
 
 def profile_apply(data: dict):
+    setting_apply_customs(data.get("customs"))
     for name, value in (data.get("settings") or {}).items():
         if name in setting_maps and value in setting_maps[name]:
             setting_set(name, value)

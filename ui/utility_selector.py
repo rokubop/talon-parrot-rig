@@ -1,7 +1,7 @@
 from talon import actions
 from ..parrot_rig_actions import utility_maps
 from ..src.menu import menu_register
-from ..src.settings_menu import setting_maps, setting_get
+from ..src.settings_menu import setting_maps, setting_get, setting_number_text, is_numeric
 from ..parrot_rig_settings import (
     UI_BORDER_COLOR, UI_BACKGROUND_COLOR, UI_TEXT_COLOR, UI_SELECTED_COLOR,
 )
@@ -24,6 +24,8 @@ def _make_selector(name: str, util_map: dict, get_current):
 
         noise_list = list(legend.keys())
 
+        numeric = is_numeric(name)
+
         header_row = tr()[
             th(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR, min_width=80)[
                 text("Noise", color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
@@ -31,6 +33,9 @@ def _make_selector(name: str, util_map: dict, get_current):
             th(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR, min_width=120)[
                 text(title, color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
             ],
+            th(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR, min_width=80)[
+                text("Value", color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
+            ] if numeric else None,
         ]
 
         cancel_noises = [k for k, v in legend.items() if v == "back"]
@@ -50,6 +55,9 @@ def _make_selector(name: str, util_map: dict, get_current):
                 td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=bg)[
                     text(label, color=UI_TEXT_COLOR, font_weight="bold" if is_selected else "normal")
                 ],
+                td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color=bg)[
+                    text(setting_number_text(name, key), color=UI_TEXT_COLOR, font_family="monospace")
+                ] if numeric else None,
             ])
 
         cancel_label = ", ".join(cancel_noises) if cancel_noises else ""
@@ -60,6 +68,9 @@ def _make_selector(name: str, util_map: dict, get_current):
             td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
                 text("Back", color=UI_TEXT_COLOR, font_weight="bold")
             ],
+            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
+                text("", color=UI_TEXT_COLOR)
+            ] if numeric else None,
         ]
 
         return screen(justify_content="center", align_items="center")[
