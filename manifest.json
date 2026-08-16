@@ -2,7 +2,7 @@
   "name": "talon-parrot-rig",
   "title": "Parrot Rig",
   "description": "A general-purpose 14-noise parrot mode for hands-free mouse control in Talon.",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "status": "experimental",
   "namespace": "user.parrot_rig",
   "github": "https://github.com/rokubop/talon-parrot-rig",
@@ -19,6 +19,9 @@
     "talonBeta"
   ],
   "dependencies": {
+    "community": {
+      "github": "https://github.com/talonhub/community"
+    },
     "talon-input-map": {
       "min_version": "1.0.1",
       "namespace": "user.input_map",
@@ -43,12 +46,13 @@
       "github": "https://github.com/rokubop/talon-ui-elements"
     }
   },
-  "devDependencies": {},
   "contributes": {
     "modes": [
       "user.parrot_rig"
     ],
     "actions": [
+      "user.parrot_rig_anchor_clear_all",
+      "user.parrot_rig_anchor_toggle",
       "user.parrot_rig_boost_long",
       "user.parrot_rig_burst_or_brake",
       "user.parrot_rig_burst_or_brake_stop",
@@ -57,11 +61,24 @@
       "user.parrot_rig_disable",
       "user.parrot_rig_disable_modifiers",
       "user.parrot_rig_enable",
+      "user.parrot_rig_er",
       "user.parrot_rig_exit",
       "user.parrot_rig_get_mode",
       "user.parrot_rig_get_state",
+      "user.parrot_rig_menu_back",
+      "user.parrot_rig_menu_close",
+      "user.parrot_rig_menu_open",
       "user.parrot_rig_move",
       "user.parrot_rig_move_or_slow",
+      "user.parrot_rig_pop",
+      "user.parrot_rig_profile_delete",
+      "user.parrot_rig_profile_list",
+      "user.parrot_rig_profile_load",
+      "user.parrot_rig_profile_name_prompt",
+      "user.parrot_rig_profile_name_submit",
+      "user.parrot_rig_profile_save",
+      "user.parrot_rig_profile_save_current",
+      "user.parrot_rig_profile_slot",
       "user.parrot_rig_reload",
       "user.parrot_rig_repeat_command",
       "user.parrot_rig_repeat_phrase",
@@ -72,6 +89,7 @@
       "user.parrot_rig_scroll_boost_long",
       "user.parrot_rig_scroll_burst_or_brake",
       "user.parrot_rig_scroll_burst_or_brake_stop",
+      "user.parrot_rig_scroll_extreme",
       "user.parrot_rig_scroll_move",
       "user.parrot_rig_scroll_move_or_slow",
       "user.parrot_rig_scroll_ramp",
@@ -81,9 +99,16 @@
       "user.parrot_rig_scroll_stop_temp",
       "user.parrot_rig_scroll_toggle_glide",
       "user.parrot_rig_scroll_tracking_activate",
+      "user.parrot_rig_setting_custom_prompt",
+      "user.parrot_rig_setting_custom_submit",
+      "user.parrot_rig_setting_get",
+      "user.parrot_rig_setting_select",
+      "user.parrot_rig_settings_menu",
       "user.parrot_rig_show_help",
+      "user.parrot_rig_show_setting_selector",
       "user.parrot_rig_show_utility_selector",
       "user.parrot_rig_simple_click",
+      "user.parrot_rig_snap",
       "user.parrot_rig_stop",
       "user.parrot_rig_toggle",
       "user.parrot_rig_toggle_glide",
@@ -92,7 +117,6 @@
       "user.parrot_rig_tracking_activate",
       "user.parrot_rig_utility",
       "user.parrot_rig_utility_select",
-      "user.parrot_rig_utility_select_close",
       "user.parrot_rig_version"
     ]
   },
@@ -113,6 +137,7 @@
       "user.mouse_rig_move_continuous",
       "user.mouse_rig_move_continuous_smooth",
       "user.mouse_rig_move_stop",
+      "user.mouse_rig_move_to",
       "user.mouse_rig_scroll_boost",
       "user.mouse_rig_scroll_continuous",
       "user.mouse_rig_scroll_continuous_smooth",
@@ -124,6 +149,7 @@
       "user.mouse_rig_state_is_scrolling",
       "user.mouse_rig_state_speed",
       "user.mouse_rig_stop",
+      "user.parrot_rig_utility_select_close",
       "user.ui_elements",
       "user.ui_elements_hide",
       "user.ui_elements_is_active",
@@ -134,7 +160,7 @@
   },
   "validateDependencies": true,
   "_generator": "talon-pack",
-  "_generatorVersion": "3.0.0",
+  "_generatorVersion": "3.3.1",
   "_generatorRequiresVersionAction": true,
   "_generatorStrictNamespace": true,
   "_generatorFrozenFields": []
