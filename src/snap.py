@@ -1,4 +1,4 @@
-"""Pop is a click-exit until a snap condition applies. First match wins.
+"""Return is a click-exit until a snap condition applies. First match wins.
 
 Snapping teleports through the rig, not ctrl.mouse_move, so the rig's internal
 position stays in sync and movement carries on from the new spot.

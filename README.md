@@ -59,12 +59,12 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `t` | direction | Move up |
 | `guh` | direction | Move down |
 | `ee` | stop | Stop all movement and scrolling |
-| `pop` | click | Click and exit mode |
+| `pop` | return | Return to anchor, else snap target, else click and exit |
 | `mm` | click | Click (stay in mode) |
 | `hiss` | scroll / boost | Scroll down, boost in move mode |
 | `shush` | scroll / boost | Scroll up, boost in move mode |
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
-| `er` | scroll mode | Toggle scroll mode |
+| `er` | alt move | Toggle alternate movement: scroll mode or middle drag |
 | `cluck` | exit | Exit parrot rig |
 | `palate` | utility_1 | Execute utility action |
 | `tut` | combo prefix / reset | Reset speed, prefix for combos (e.g. `tut oh` = right click) |

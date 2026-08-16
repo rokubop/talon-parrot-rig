@@ -155,8 +155,9 @@ class ParrotActions:
         self.mouse_click()
         self.parrot_mode_disable()
 
-    def pop_action(self):
-        """Go to the anchor if there is one, else snap if a rule applies, else click and exit."""
+    def return_action(self):
+        """Return to the anchor if there is one, else to the snap target if a rule
+        applies, else return control by clicking and exiting."""
         if anchor_go():
             return
         rule = active_rule()
@@ -308,7 +309,7 @@ class ParrotActions:
             "click_held": self._is_left_click_held,
             "middle_drag": self._is_middle_drag,
             "click_freeze": setting_get("click_freeze"),
-            "er_mode": setting_get("er_mode"),
+            "alt_move_mode": setting_get("alt_move_mode"),
         }
 
     def parrot_mode_get_mode(self):
@@ -370,9 +371,10 @@ class ParrotActions:
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()
 
-    def er_toggle(self):
-        """What "er" does, per the er_mode setting."""
-        if setting_get("er_mode") == "middle_drag":
+    def alt_move_toggle(self):
+        """Enter the alternate movement mode named by the alt_move_mode setting:
+        the same directions, moving the page or the canvas instead of the cursor."""
+        if setting_get("alt_move_mode") == "middle_drag":
             self.toggle_middle_drag()
         else:
             self.toggle_scroll_move()

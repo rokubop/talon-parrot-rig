@@ -1,4 +1,4 @@
-"""Saved cursor positions. While any are set, pop travels to the nearest one
+"""Saved cursor positions. While any are set, return travels to the nearest one
 instead of clicking or snapping. The same noise drops an anchor or removes the
 one you are standing on.
 """

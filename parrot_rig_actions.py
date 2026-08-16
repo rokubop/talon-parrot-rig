@@ -28,7 +28,7 @@ CHANNEL = "parrot_rig"
 # Noises that pick slot 1, 2, 3... in any selector menu
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
 
-HUB_MENUS = ["click_freeze", "er_mode", "move_mode", "speeds", "anchor_move", "utility_1", "profiles"]
+HUB_MENUS = ["click_freeze", "alt_move_mode", "move_mode", "speeds", "anchor_move", "utility_1", "profiles"]
 
 SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "scroll_move_speed", "boost_power"]
 
@@ -42,13 +42,13 @@ MENU_TITLES = {
 input_map_common = {
     "ee":     ("stop", actions.user.parrot_rig_stop),
     "mm":     ("click", actions.user.parrot_rig_click),
-    "pop":    ("anchor / snap / click exit", actions.user.parrot_rig_pop),
+    "pop":    ("anchor / snap / click exit", actions.user.parrot_rig_return),
     "ah":     ("move left", lambda: actions.user.parrot_rig_move("left")),
     "oh":     ("move right", lambda: actions.user.parrot_rig_move("right")),
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", actions.user.parrot_rig_tracking_activate),
-    "er":     ("scroll mode or middle drag", actions.user.parrot_rig_er),
+    "er":     ("scroll mode or middle drag", actions.user.parrot_rig_alt_move_toggle),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
     "tut":        ("reset slow", actions.user.parrot_rig_reset_speed_level),
@@ -61,7 +61,7 @@ input_map_common = {
     "tut hiss":   ("scroll bottom", lambda: actions.user.parrot_rig_scroll_extreme("down")),
     "tut shush":  ("scroll top", lambda: actions.user.parrot_rig_scroll_extreme("up")),
     "tut mm":     ("click settings", lambda: actions.user.parrot_rig_menu_open("click_freeze")),
-    "tut er":     ("er settings", lambda: actions.user.parrot_rig_menu_open("er_mode")),
+    "tut er":     ("alt move settings", lambda: actions.user.parrot_rig_menu_open("alt_move_mode")),
     "tut eh":     ("move settings", lambda: actions.user.parrot_rig_menu_open("move_mode")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("settings", lambda: actions.user.parrot_rig_settings_menu()),
@@ -406,13 +406,17 @@ class Actions:
 
     # Settings menus
 
-    def parrot_rig_er():
-        """Toggle scroll mode or middle drag, per the er_mode setting"""
-        parrot_actions.er_toggle()
+    def parrot_rig_alt_move_toggle():
+        """Toggle the alternate movement mode named by the alt_move_mode setting"""
+        parrot_actions.alt_move_toggle()
 
-    def parrot_rig_pop():
-        """Snap if a snap condition applies, otherwise click and exit"""
-        parrot_actions.pop_action()
+    def parrot_rig_middle_drag_toggle():
+        """Hold middle mouse down and keep moving; toggle again to release"""
+        parrot_actions.toggle_middle_drag()
+
+    def parrot_rig_return():
+        """Return to an anchor, else to the snap target, else click and exit"""
+        parrot_actions.return_action()
 
     def parrot_rig_snap():
         """Snap the cursor now (center by default), without stopping movement"""
@@ -421,6 +425,11 @@ class Actions:
     def parrot_rig_anchor_toggle():
         """Drop an anchor at the cursor, or remove the one under it"""
         parrot_actions.toggle_anchor()
+
+    def parrot_rig_anchor_go() -> bool:
+        """Move to the nearest anchor, or the next one round if already on one"""
+        from .src.anchor import anchor_go
+        return anchor_go()
 
     def parrot_rig_anchor_clear_all():
         """Remove every anchor"""

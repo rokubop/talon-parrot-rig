@@ -23,7 +23,7 @@ setting_maps = {
         "freeze":    ("Freeze on Click",),
         "no_freeze": ("Keep Moving",),
     },
-    "er_mode": {
+    "alt_move_mode": {
         "scroll":      ("Scroll Mode",),
         "middle_drag": ("Middle Drag",),
     },
@@ -57,7 +57,7 @@ setting_maps = {
 
 SETTING_TITLES = {
     "click_freeze": "Click",
-    "er_mode": "Er",
+    "alt_move_mode": "Alt Move",
     "move_mode": "Move",
     "turn_speed": "Turn",
     "anchor_move": "Anchor",
