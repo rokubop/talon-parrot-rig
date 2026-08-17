@@ -2,7 +2,7 @@ from talon import actions
 from ..parrot_rig_settings import MODE_COLORS, MODIFIER_LETTERS
 from ..parrot_rig_settings import CURSOR_UI_ENABLED
 
-SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide", "scroll_tracking"}
+CANVAS_MODES = {"canvas_stop", "canvas_move", "canvas_boost", "canvas_glide", "canvas_tracking"}
 
 TRIANGLE_PATHS = {
     "down":  "M 12 19 L 4 5 L 20 5 Z",
@@ -32,7 +32,7 @@ TRIANGLE_BORDER_INNER = {
     "right": "M 21 12 L 4 3 L 4 21 Z",
 }
 
-MOD_SCROLL_MODES = {"mod_scroll", "mod_scroll_move"}
+CANVAS_SCALE_MODES = {"canvas_scale", "canvas_scale_move"}
 
 DIAMOND_PATH = "M 12 4 L 20 12 L 12 20 L 4 12 Z"
 
@@ -46,8 +46,8 @@ default_border_color = "FFFFFF"
 
 def _axis_letters():
     """Modifier letter for the y and x axis, blank where the axis holds none."""
-    from ..src.settings_menu import mod_scroll_axis
-    return [MODIFIER_LETTERS.get(mod_scroll_axis(axis)[0], "") for axis in ("y", "x")]
+    from ..src.settings_menu import canvas_scale_axis
+    return [MODIFIER_LETTERS.get(canvas_scale_axis(axis)[0], "") for axis in ("y", "x")]
 
 def cursor_ui():
     screen, cursor, svg, circle, state = actions.user.ui_elements(
@@ -113,10 +113,10 @@ def cursor_ui():
         ]
 
     mode = state.get("mode")
-    is_scroll = mode in SCROLL_MODES
+    is_canvas = mode in CANVAS_MODES
     axis_labels = []
 
-    if mode in MOD_SCROLL_MODES:
+    if mode in CANVAS_SCALE_MODES:
         cursor_shape = svg(position="absolute", left=10, top=10)[
             path(d=DIAMOND_PATH, fill=cursor_color)
         ]
@@ -147,7 +147,7 @@ def cursor_ui():
             for letter, left, top in zip(_axis_letters(), (10, 32), (-6, 14))
             if letter
         ]
-    elif is_scroll:
+    elif is_canvas:
         scroll_dir = state.get("scroll_direction") or "down"
         cursor_shape = svg(position="absolute", left=10, top=10)[
             path(d=TRIANGLE_PATHS[scroll_dir], fill=cursor_color)
@@ -176,7 +176,7 @@ def cursor_ui():
             speed_label,
             # Modifiers
             modifier_label,
-            # Which modifier each axis holds, in modifier scroll
+            # Which modifier each axis holds, in canvas scale
             *axis_labels,
         ]
     ]

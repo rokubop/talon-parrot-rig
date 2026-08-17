@@ -43,7 +43,7 @@ def menu_value(name: str) -> str:
         return setting_label(name)
     if name == "profiles":
         return profile_active()
-    if name in ("speeds", "mod_scroll"):
+    if name in ("speeds", "canvas_scale"):
         return ""
     from ..parrot_rig_actions import utility_maps
     util_map = utility_maps.get(name)
@@ -134,14 +134,14 @@ def _speed_menus():
     return SPEED_MENUS
 
 
-def _mod_scroll_menus():
-    from ..parrot_rig_actions import MOD_SCROLL_MENUS
-    return MOD_SCROLL_MENUS
+def _canvas_scale_menus():
+    from ..parrot_rig_actions import CANVAS_SCALE_MENUS
+    return CANVAS_SCALE_MENUS
 
 
 hub_ui = _make_menu_list("settings_hub", "Settings (tut palate)", _hub_menus, "Close")
 speeds_ui = _make_menu_list("speeds_menu", "Speeds", _speed_menus, "Back")
-mod_scroll_ui = _make_menu_list("mod_scroll_menu", "Mod Scroll", _mod_scroll_menus, "Back")
+canvas_scale_ui = _make_menu_list("canvas_scale_menu", "Canvas Scale", _canvas_scale_menus, "Back")
 
 
 def profiles_ui(props):
@@ -199,6 +199,36 @@ def profiles_ui(props):
                         text("Back", color=UI_TEXT_COLOR, font_weight="bold")
                     ],
                 ],
+            ]
+        ]
+    ]
+
+
+def anchor_kind_ui(props):
+    screen, window = actions.user.ui_elements(["screen", "window"])
+    table, tr, td = actions.user.ui_elements(["table", "tr", "td"])
+    text = actions.user.ui_elements(["text"])
+    from ..parrot_rig_actions import ANCHOR_KINDS
+    noises = _noises()
+
+    rows = []
+    for i, (_, label) in enumerate(ANCHOR_KINDS):
+        rows.append(tr()[
+            _noise_cell(td, text, noises[i] if i < len(noises) else ""),
+            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
+                text(label, color=UI_TEXT_COLOR)
+            ],
+        ])
+
+    return screen(justify_content="center", align_items="center")[
+        window(id="anchor_kind", title="Anchor", padding=0)[
+            table(width="100%")[
+                tr()[
+                    _th(text, "Noise", 80),
+                    _th(text, "Anchor", 180),
+                ],
+                *rows,
+                _back_row(tr, td, text, "Keep point"),
             ]
         ]
     ]
@@ -296,17 +326,26 @@ def hide_speeds():
     actions.user.ui_elements_hide(speeds_ui)
 
 
-def show_mod_scroll():
-    actions.user.ui_elements_show(mod_scroll_ui, show_hints=False)
+def show_anchor_kind():
+    actions.user.ui_elements_show(anchor_kind_ui, show_hints=False)
 
 
-def hide_mod_scroll():
-    actions.user.ui_elements_hide(mod_scroll_ui)
+def hide_anchor_kind():
+    actions.user.ui_elements_hide(anchor_kind_ui)
+
+
+def show_canvas_scale():
+    actions.user.ui_elements_show(canvas_scale_ui, show_hints=False)
+
+
+def hide_canvas_scale():
+    actions.user.ui_elements_hide(canvas_scale_ui)
 
 
 menu_register("hub", show_hub, hide_hub)
 menu_register("speeds", show_speeds, hide_speeds)
-menu_register("mod_scroll", show_mod_scroll, hide_mod_scroll)
+menu_register("canvas_scale", show_canvas_scale, hide_canvas_scale)
+menu_register("anchor_kind", show_anchor_kind, hide_anchor_kind)
 menu_register("profiles", show_profiles, hide_profiles)
 menu_register("profile_name", show_profile_name, hide_profile_name)
 menu_register("setting_custom", show_setting_custom, hide_setting_custom)

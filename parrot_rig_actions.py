@@ -29,21 +29,34 @@ CHANNEL = "parrot_rig"
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
 
 HUB_MENUS = [
-    "click_freeze", "alt_move_mode", "mod_scroll", "move_mode",
-    "speeds", "anchor_move", "utility_1", "profiles",
+    "click_freeze", "speeds", "move_mode", "canvas_mode", "canvas_scale",
+    "anchor_move", "return_fallback", "utility_1", "profiles",
 ]
 
-SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "scroll_move_speed", "boost_power"]
+SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "canvas_move_speed", "boost_power"]
 
-MOD_SCROLL_MENUS = ["mod_scroll_y_mod", "mod_scroll_y_wheel", "mod_scroll_x_mod", "mod_scroll_x_wheel"]
+CANVAS_SCALE_MENUS = ["canvas_scale_y_mod", "canvas_scale_y_wheel", "canvas_scale_x_mod", "canvas_scale_x_wheel"]
+
+# A line anchor pins one coordinate and leaves the other alone, so return lands
+# on the closest point of the line rather than one spot.
+ANCHOR_KINDS = [
+    ("point", "Point"),
+    ("vertical", "Vertical Line"),
+    ("horizontal", "Horizontal Line"),
+]
 
 MENU_TITLES = {
     **SETTING_TITLES,
     "utility_1": "Palate",
     "profiles": "Profiles",
     "speeds": "Speeds",
-    "mod_scroll": "Mod Scroll",
+    "canvas_scale": "Canvas Scale",
 }
+
+def _anchor_chase(action):
+    """Right after dropping an anchor, this noise picks its kind instead."""
+    return lambda: None if actions.user.parrot_rig_anchor_chase() else action()
+
 
 input_map_common = {
     "ee":     ("stop", actions.user.parrot_rig_stop),
@@ -54,7 +67,7 @@ input_map_common = {
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", actions.user.parrot_rig_tracking_activate),
-    "er":     ("alt move", actions.user.parrot_rig_alt_move_toggle),
+    "er":     ("canvas mode", actions.user.parrot_rig_canvas_toggle),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
     "tut":        ("reset slow", actions.user.parrot_rig_reset_speed_level),
@@ -67,18 +80,18 @@ input_map_common = {
     "tut hiss":   ("scroll bottom", lambda: actions.user.parrot_rig_scroll_extreme("down")),
     "tut shush":  ("scroll top", lambda: actions.user.parrot_rig_scroll_extreme("up")),
     "tut mm":     ("click settings", lambda: actions.user.parrot_rig_menu_open("click_freeze")),
-    "tut er":     ("alt move settings", lambda: actions.user.parrot_rig_menu_open("alt_move_mode")),
+    "tut er":     ("canvas settings", lambda: actions.user.parrot_rig_menu_open("canvas_mode")),
     "tut eh":     ("move settings", lambda: actions.user.parrot_rig_menu_open("move_mode")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("settings", lambda: actions.user.parrot_rig_settings_menu()),
-    "tut cluck":  ("modifier scroll", actions.user.parrot_rig_mod_scroll_toggle),
+    "tut cluck":  ("canvas scale", actions.user.parrot_rig_canvas_scale_toggle),
 }
 
 input_map_default = {
     **input_map_common,
     "hiss":              ("scroll down", lambda: actions.user.parrot_rig_scroll("down")),
     "hiss_stop:db_170":  ("", actions.user.parrot_rig_scroll_stop),
-    "shush":             ("scroll up", lambda: actions.user.parrot_rig_scroll("up")),
+    "shush":             ("scroll up", _anchor_chase(lambda: actions.user.parrot_rig_scroll("up"))),
     "shush_stop:db_170": ("", actions.user.parrot_rig_scroll_stop),
 }
 
@@ -90,7 +103,7 @@ input_map_move = {
     "guh":        ("move down or slow", lambda: actions.user.parrot_rig_move_or_slow("down")),
     "eh":         ("toggle glide / lock turn", actions.user.parrot_rig_toggle_glide),
     "mm":         ("click", actions.user.parrot_rig_click),
-    "shush":      ("boost long", actions.user.parrot_rig_boost_long),
+    "shush":      ("boost long", _anchor_chase(actions.user.parrot_rig_boost_long)),
     "shush_stop": ("", lambda: None),
     "hiss":            ("burst or brake", actions.user.parrot_rig_burst_or_brake),
     "hiss_stop:db_50": ("", actions.user.parrot_rig_burst_or_brake_stop),
@@ -101,58 +114,58 @@ input_map_tracking = {
     "mm":                ("click (pause track)", actions.user.parrot_rig_click),
     "hiss":              ("scroll down (pause track)", lambda: actions.user.parrot_rig_scroll("down")),
     "hiss_stop:db_170":  ("", actions.user.parrot_rig_scroll_stop_temp),
-    "shush":             ("scroll up (pause track)", lambda: actions.user.parrot_rig_scroll("up")),
+    "shush":             ("scroll up (pause track)", _anchor_chase(lambda: actions.user.parrot_rig_scroll("up"))),
     "shush_stop:db_170": ("", actions.user.parrot_rig_scroll_stop_temp),
 }
 
-input_map_scroll_stop = {
+input_map_canvas_stop = {
     **input_map_common,
-    "ah":     ("scroll go left", lambda: actions.user.parrot_rig_scroll_move("left")),
-    "oh":     ("scroll go right", lambda: actions.user.parrot_rig_scroll_move("right")),
-    "t":      ("scroll go up", lambda: actions.user.parrot_rig_scroll_move("up")),
-    "guh":    ("scroll go down", lambda: actions.user.parrot_rig_scroll_move("down")),
-    "eh":     ("scroll track", actions.user.parrot_rig_scroll_tracking_activate),
-    "shush":      ("mod scroll, or scroll resume", actions.user.parrot_rig_scroll_resume_or_mod_scroll),
+    "ah":     ("canvas left", lambda: actions.user.parrot_rig_canvas_move("left")),
+    "oh":     ("canvas right", lambda: actions.user.parrot_rig_canvas_move("right")),
+    "t":      ("canvas up", lambda: actions.user.parrot_rig_canvas_move("up")),
+    "guh":    ("canvas down", lambda: actions.user.parrot_rig_canvas_move("down")),
+    "eh":     ("canvas track", actions.user.parrot_rig_canvas_tracking_activate),
+    "shush":      ("canvas scale, or resume", _anchor_chase(actions.user.parrot_rig_canvas_resume_or_scale)),
     "shush_stop": ("", lambda: None),
-    "hiss":       ("scroll resume", actions.user.parrot_rig_scroll_resume),
+    "hiss":       ("canvas resume", actions.user.parrot_rig_canvas_resume),
     "hiss_stop":  ("", lambda: None),
-    "er":     ("toggle scroll mode", actions.user.parrot_rig_stop),
+    "er":     ("exit canvas mode", actions.user.parrot_rig_stop),
 }
 
-input_map_scroll_move = {
+input_map_canvas_move = {
     **input_map_common,
-    "ah":         ("scroll go left or slow", lambda: actions.user.parrot_rig_scroll_move_or_slow("left")),
-    "oh":         ("scroll go right or slow", lambda: actions.user.parrot_rig_scroll_move_or_slow("right")),
-    "t":          ("scroll go up or slow", lambda: actions.user.parrot_rig_scroll_move_or_slow("up")),
-    "guh":        ("scroll go down or slow", lambda: actions.user.parrot_rig_scroll_move_or_slow("down")),
-    "eh":         ("toggle scroll glide", actions.user.parrot_rig_scroll_toggle_glide),
-    "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
+    "ah":         ("canvas left or slow", lambda: actions.user.parrot_rig_canvas_move_or_slow("left")),
+    "oh":         ("canvas right or slow", lambda: actions.user.parrot_rig_canvas_move_or_slow("right")),
+    "t":          ("canvas up or slow", lambda: actions.user.parrot_rig_canvas_move_or_slow("up")),
+    "guh":        ("canvas down or slow", lambda: actions.user.parrot_rig_canvas_move_or_slow("down")),
+    "eh":         ("toggle canvas glide", actions.user.parrot_rig_canvas_toggle_glide),
+    "ee":         ("canvas stop", actions.user.parrot_rig_canvas_stop),
     "mm":         ("click", actions.user.parrot_rig_click),
-    "shush":      ("scroll boost long", actions.user.parrot_rig_scroll_boost_long),
+    "shush":      ("canvas boost long", _anchor_chase(actions.user.parrot_rig_canvas_boost_long)),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("scroll burst or brake", actions.user.parrot_rig_scroll_burst_or_brake),
-    "hiss_stop:db_50": ("", actions.user.parrot_rig_scroll_burst_or_brake_stop),
+    "hiss":            ("canvas burst or brake", actions.user.parrot_rig_canvas_burst_or_brake),
+    "hiss_stop:db_50": ("", actions.user.parrot_rig_canvas_burst_or_brake_stop),
 }
 
-input_map_mod_scroll = {
+input_map_canvas_scale = {
     **input_map_common,
-    "ah":     ("x axis left", lambda: actions.user.parrot_rig_mod_scroll("left")),
-    "oh":     ("x axis right", lambda: actions.user.parrot_rig_mod_scroll("right")),
-    "t":      ("y axis up", lambda: actions.user.parrot_rig_mod_scroll("up")),
-    "guh":    ("y axis down", lambda: actions.user.parrot_rig_mod_scroll("down")),
-    "ee":     ("stop, stay in mod scroll", actions.user.parrot_rig_mod_scroll_stop),
-    "er":     ("exit mod scroll", actions.user.parrot_rig_mod_scroll_toggle),
-    "hiss":              ("plain scroll down", lambda: actions.user.parrot_rig_mod_scroll_plain("down")),
+    "ah":     ("scale x left", lambda: actions.user.parrot_rig_canvas_scale("left")),
+    "oh":     ("scale x right", lambda: actions.user.parrot_rig_canvas_scale("right")),
+    "t":      ("scale y up", lambda: actions.user.parrot_rig_canvas_scale("up")),
+    "guh":    ("scale y down", lambda: actions.user.parrot_rig_canvas_scale("down")),
+    "ee":     ("stop, stay in canvas scale", actions.user.parrot_rig_canvas_scale_stop),
+    "er":     ("exit canvas scale", actions.user.parrot_rig_canvas_scale_toggle),
+    "hiss":              ("plain scroll down", lambda: actions.user.parrot_rig_canvas_scale_plain("down")),
     "hiss_stop:db_170":  ("", actions.user.parrot_rig_scroll_stop),
-    "shush":             ("plain scroll up", lambda: actions.user.parrot_rig_mod_scroll_plain("up")),
+    "shush":             ("plain scroll up", _anchor_chase(lambda: actions.user.parrot_rig_canvas_scale_plain("up"))),
     "shush_stop:db_170": ("", actions.user.parrot_rig_scroll_stop),
 }
 
-input_map_scroll_tracking = {
-    **input_map_scroll_stop,
-    "ee":         ("scroll stop", actions.user.parrot_rig_scroll_stop_stay),
+input_map_canvas_tracking = {
+    **input_map_canvas_stop,
+    "ee":         ("canvas stop", actions.user.parrot_rig_canvas_stop),
     "mm":         ("click (pause track)", actions.user.parrot_rig_click),
-    "er":         ("toggle scroll mode", actions.user.parrot_rig_toggle_scroll_move),
+    "er":         ("exit canvas mode", actions.user.parrot_rig_canvas_move_toggle),
 }
 
 utility_maps = {
@@ -193,6 +206,18 @@ def _profiles_input_map():
     return mode
 
 
+def _anchor_kind_input_map():
+    mode = {}
+    for i, (kind, label) in enumerate(ANCHOR_KINDS):
+        if i < len(SELECT_NOISES):
+            mode[SELECT_NOISES[i]] = (
+                label,
+                lambda k=kind: actions.user.parrot_rig_anchor_kind(k),
+            )
+    mode["tut"] = ("keep point", actions.user.parrot_rig_menu_back)
+    return mode
+
+
 def _typing_input_map():
     # Talking while typing must not fire noises. Only a double tut escapes,
     # and the bare tut is just the combo prefix.
@@ -206,13 +231,14 @@ input_map = {
     "default": input_map_default,
     "move": input_map_move,
     "tracking": input_map_tracking,
-    "scroll_stop": input_map_scroll_stop,
-    "scroll_move": input_map_scroll_move,
-    "scroll_tracking": input_map_scroll_tracking,
-    "mod_scroll": input_map_mod_scroll,
+    "canvas_stop": input_map_canvas_stop,
+    "canvas_move": input_map_canvas_move,
+    "canvas_tracking": input_map_canvas_tracking,
+    "canvas_scale": input_map_canvas_scale,
     "hub_select": _menu_list_input_map(HUB_MENUS, "close"),
     "speeds_select": _menu_list_input_map(SPEED_MENUS),
-    "mod_scroll_select": _menu_list_input_map(MOD_SCROLL_MENUS),
+    "canvas_scale_select": _menu_list_input_map(CANVAS_SCALE_MENUS),
+    "anchor_kind_select": _anchor_kind_input_map(),
     "profiles_select": _profiles_input_map(),
     "profile_name_select": _typing_input_map(),
     "setting_custom_select": _typing_input_map(),
@@ -351,9 +377,9 @@ class Actions:
         """Activate head tracking mode"""
         parrot_actions.tracking_activate()
 
-    def parrot_rig_scroll_tracking_activate():
-        """Activate scroll tracking mode (triangle + tracking)"""
-        parrot_actions.scroll_tracking_activate()
+    def parrot_rig_canvas_tracking_activate():
+        """Activate canvas tracking mode (triangle + tracking)"""
+        parrot_actions.canvas_tracking_activate()
 
     def parrot_rig_reload():
         """Reload parrot rig files"""
@@ -363,45 +389,45 @@ class Actions:
         """Get current mode (default/move/boost/glide/tracking)"""
         return parrot_actions.parrot_mode_get_mode()
 
-    def parrot_rig_toggle_scroll_move():
+    def parrot_rig_canvas_move_toggle():
         """Toggle scroll move mode"""
-        parrot_actions.toggle_scroll_move()
+        parrot_actions.canvas_move_toggle()
 
-    def parrot_rig_scroll_move(direction: str):
+    def parrot_rig_canvas_move(direction: str):
         """Scroll in direction using scroll move mode"""
-        parrot_actions.scroll_move_dir(direction)
+        parrot_actions.canvas_move_dir(direction)
 
-    def parrot_rig_scroll_move_or_slow(direction: str):
+    def parrot_rig_canvas_move_or_slow(direction: str):
         """Scroll or slow down if already scrolling in that direction"""
-        parrot_actions.scroll_move_or_slow_dir(direction)
+        parrot_actions.canvas_move_or_slow_dir(direction)
 
-    def parrot_rig_scroll_toggle_glide():
-        """Toggle scroll glide mode"""
-        parrot_actions.scroll_toggle_glide()
+    def parrot_rig_canvas_toggle_glide():
+        """Toggle canvas glide mode"""
+        parrot_actions.canvas_toggle_glide()
 
-    def parrot_rig_scroll_boost_long():
+    def parrot_rig_canvas_boost_long():
         """Boost scroll speed in current direction"""
-        parrot_actions.scroll_boost_long()
+        parrot_actions.canvas_boost_long()
 
-    def parrot_rig_scroll_burst_or_brake():
-        """Scroll burst or brake (release scroll glide/boost)"""
-        parrot_actions.scroll_burst_or_brake()
+    def parrot_rig_canvas_burst_or_brake():
+        """Canvas burst or brake (release canvas glide/boost)"""
+        parrot_actions.canvas_burst_or_brake()
 
-    def parrot_rig_scroll_burst_or_brake_stop():
-        """Stop scroll burst (fade out)"""
-        parrot_actions.scroll_burst_or_brake_stop()
+    def parrot_rig_canvas_burst_or_brake_stop():
+        """Stop canvas burst (fade out)"""
+        parrot_actions.canvas_burst_or_brake_stop()
 
-    def parrot_rig_scroll_stop_stay():
-        """Stop scrolling but stay in scroll stop mode"""
-        parrot_actions.scroll_stop_stay()
+    def parrot_rig_canvas_stop():
+        """Stop the canvas but stay in canvas mode"""
+        parrot_actions.canvas_stop()
 
-    def parrot_rig_scroll_ramp(direction: str):
+    def parrot_rig_canvas_ramp(direction: str):
         """Start scrolling with ramp-up bounce-back effect"""
-        parrot_actions.scroll_ramp_dir(direction)
+        parrot_actions.canvas_ramp_dir(direction)
 
-    def parrot_rig_scroll_resume():
+    def parrot_rig_canvas_resume():
         """Resume scrolling in the last scroll direction"""
-        parrot_actions.scroll_resume()
+        parrot_actions.canvas_resume()
 
     def parrot_rig_show_help():
         """Show parrot rig cheatsheet"""
@@ -429,36 +455,36 @@ class Actions:
 
     # Settings menus
 
-    def parrot_rig_alt_move_toggle():
-        """Toggle the alternate movement mode named by the alt_move_mode setting"""
-        parrot_actions.alt_move_toggle()
+    def parrot_rig_canvas_toggle():
+        """Toggle the alternate movement mode named by the canvas_mode setting"""
+        parrot_actions.canvas_toggle()
 
     def parrot_rig_middle_drag_toggle():
         """Hold middle mouse down and keep moving; toggle again to release"""
         parrot_actions.toggle_middle_drag()
 
-    def parrot_rig_scroll_resume_or_mod_scroll():
-        """Modifier scroll when it lands right after alt move, else scroll resume"""
-        parrot_actions.scroll_resume_or_mod_scroll()
+    def parrot_rig_canvas_resume_or_scale():
+        """Canvas scale when it lands right after canvas mode, else canvas resume"""
+        parrot_actions.canvas_resume_or_scale()
 
-    def parrot_rig_mod_scroll_toggle():
-        """Enter or leave modifier scroll, whatever the alt_move_mode setting is"""
-        parrot_actions.mod_scroll_toggle()
+    def parrot_rig_canvas_scale_toggle():
+        """Enter or leave canvas scale, whatever the canvas_mode setting is"""
+        parrot_actions.canvas_scale_toggle()
 
-    def parrot_rig_mod_scroll(direction: str):
+    def parrot_rig_canvas_scale(direction: str):
         """Scroll with the axis modifier held, so the app zooms or pans"""
-        parrot_actions.mod_scroll_dir(direction)
+        parrot_actions.canvas_scale_dir(direction)
 
-    def parrot_rig_mod_scroll_stop():
-        """Stop modifier scroll and release the held modifier, staying in the mode"""
-        parrot_actions.mod_scroll_stop()
+    def parrot_rig_canvas_scale_stop():
+        """Stop canvas scale and release the held modifier, staying in the mode"""
+        parrot_actions.canvas_scale_stop()
 
-    def parrot_rig_mod_scroll_plain(direction: str):
-        """Ordinary scroll from inside modifier scroll, no modifier held"""
-        parrot_actions.mod_scroll_plain(direction)
+    def parrot_rig_canvas_scale_plain(direction: str):
+        """Ordinary scroll from inside canvas scale, no modifier held"""
+        parrot_actions.canvas_scale_plain(direction)
 
     def parrot_rig_return():
-        """Return to an anchor, else to the snap target, else click and exit"""
+        """Return to an anchor if any are set, else the snap target, else click and exit"""
         parrot_actions.return_action()
 
     def parrot_rig_snap():
@@ -468,6 +494,22 @@ class Actions:
     def parrot_rig_anchor_toggle():
         """Drop an anchor at the cursor, or remove the one under it"""
         parrot_actions.toggle_anchor()
+
+    def parrot_rig_anchor_chase() -> bool:
+        """Open the anchor kind picker if an anchor was just dropped. True if it did"""
+        from .src.anchor import anchor_hold
+        if not anchor_hold():
+            return False
+        menu_open("anchor_kind")
+        return True
+
+    def parrot_rig_anchor_kind(kind: str):
+        """Make the anchor just dropped a point, or a line through it"""
+        from .src.anchor import anchor_set_kind
+        from .ui.utility_selector import show_utility_notification
+        anchor_set_kind(kind)
+        show_utility_notification("Anchor", dict(ANCHOR_KINDS).get(kind, kind).lower())
+        menu_back()
 
     def parrot_rig_anchor_go() -> bool:
         """Move to the nearest anchor, or the next one round if already on one"""

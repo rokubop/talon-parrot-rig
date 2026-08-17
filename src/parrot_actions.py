@@ -16,38 +16,38 @@ from ..parrot_rig_settings import (
     BRAKE_REVERT_MS,
     GLIDE_RELEASE_RATE,
     SCROLL_EXTREME_KEYS,
-    SCROLL_SLOW_MODE_MULTIPLIER,
-    SCROLL_BOOST_LONG_AMOUNT,
-    SCROLL_BOOST_LONG_OVER_MS,
-    SCROLL_BOOST_LONG_RELEASE_MS,
-    SCROLL_BURST_AMOUNT,
-    SCROLL_BRAKE_REVERT_MS,
-    SCROLL_RAMP_AMOUNT,
-    SCROLL_RAMP_REVERT_MS,
-    SCROLL_GLIDE_RELEASE_RATE,
-    MOD_SCROLL_SPEED,
-    MOD_SCROLL_CHASE_MS,
+    CANVAS_SLOW_MODE_MULTIPLIER,
+    CANVAS_BOOST_LONG_AMOUNT,
+    CANVAS_BOOST_LONG_OVER_MS,
+    CANVAS_BOOST_LONG_RELEASE_MS,
+    CANVAS_BURST_AMOUNT,
+    CANVAS_BRAKE_REVERT_MS,
+    CANVAS_RAMP_AMOUNT,
+    CANVAS_RAMP_REVERT_MS,
+    CANVAS_GLIDE_RELEASE_RATE,
+    CANVAS_SCALE_SPEED,
+    CANVAS_SCALE_CHASE_MS,
     TRACKING_STOP_MS,
     CLICK_BEHAVIOR,
 )
 from .utils import reload_files
 from .settings_menu import (
     setting_get, setting_set, setting_label, setting_title,
-    setting_number, turn_scale, boost_scale, mod_scroll_axis,
+    setting_number, turn_scale, boost_scale, canvas_scale_axis,
 )
 from .menu import menu_reset
-from .anchor import anchor_go, anchor_toggle, anchors
+from .anchor import anchor_go, anchor_go_screen, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
 
 # Which wheel event a parrot direction sends, per the axis wheel setting. Apps
 # mostly read the vertical wheel, so a sideways parrot direction still sends it.
-MOD_SCROLL_WHEEL = {
+CANVAS_SCALE_WHEEL = {
     "vertical":   {"up": "up", "down": "down", "left": "up", "right": "down"},
     "horizontal": {"up": "left", "down": "right", "left": "left", "right": "right"},
 }
 
-# Stopped and scrolling, so the cursor color reads like the other families
-MOD_SCROLL_MODES = ("mod_scroll", "mod_scroll_move")
+# Stopped and scaling, so the cursor color reads like the other families
+CANVAS_SCALE_MODES = ("canvas_scale", "canvas_scale_move")
 
 class ParrotActions:
     def __init__(self):
@@ -56,25 +56,25 @@ class ParrotActions:
         self._parrot_mode_enabled = False
         self._stop_time_job = None
         self._move_speed_level = 0
-        self._scroll_speed_level = 0
+        self._canvas_speed_level = 0
         self._scroll_direction = "down"
         self._burst_or_brake_did_break = False
-        self._scroll_burst_or_brake_did_break = False
-        self._mod_scroll_key = None
-        self._alt_move_at = 0.0
+        self._canvas_burst_or_brake_did_break = False
+        self._canvas_scale_key = None
+        self._canvas_at = 0.0
 
     def _get_move_speed(self):
         return setting_number("move_speed") * (SLOW_MODE_MULTIPLIER ** self._move_speed_level)
 
-    def _get_scroll_move_speed(self):
-        return setting_number("scroll_move_speed") * (SCROLL_SLOW_MODE_MULTIPLIER ** self._scroll_speed_level)
+    def _get_canvas_move_speed(self):
+        return setting_number("canvas_move_speed") * (CANVAS_SLOW_MODE_MULTIPLIER ** self._canvas_speed_level)
 
     def _emit_speed_level(self):
         mode = event_manager.get_mode()
-        if mode == "mod_scroll":
+        if mode == "canvas_scale":
             level = 0
-        elif mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost", "scroll_tracking"):
-            level = self._scroll_speed_level
+        elif mode in ("canvas_stop", "canvas_move", "canvas_glide", "canvas_boost", "canvas_tracking"):
+            level = self._canvas_speed_level
         else:
             level = self._move_speed_level
         event_manager.emit("speed_level_changed", {"level": level})
@@ -126,8 +126,8 @@ class ParrotActions:
     def _move_speed_scale(self):
         return SLOW_MODE_MULTIPLIER ** self._move_speed_level
 
-    def _scroll_speed_scale(self):
-        return SCROLL_SLOW_MODE_MULTIPLIER ** self._scroll_speed_level
+    def _canvas_speed_scale(self):
+        return CANVAS_SLOW_MODE_MULTIPLIER ** self._canvas_speed_level
 
     def mouse_boost_long(self):
         event_manager.set_mode("boost")
@@ -162,26 +162,29 @@ class ParrotActions:
         tracking.activate()
         event_manager.set_mode("tracking")
 
-    def scroll_tracking_activate(self):
+    def canvas_tracking_activate(self):
         actions.user.mouse_rig_scroll_stop()
         actions.user.mouse_rig_stop()
         tracking.activate()
-        event_manager.set_mode("scroll_tracking")
+        event_manager.set_mode("canvas_tracking")
 
     def click_exit(self):
         self.mouse_click()
         self.parrot_mode_disable()
 
     def return_action(self):
-        """Return to the anchor if there is one, else to the snap target if a rule
-        applies, else return control by clicking and exiting."""
+        """Your own anchors win and take this outright. Otherwise the snap
+        target if a rule applies, then whatever the Return setting picks for
+        being empty handed."""
         if anchor_go():
             return
         rule = active_rule()
         if rule:
             do_snap(rule)
-        else:
-            self.click_exit()
+            return
+        if anchor_go_screen():
+            return
+        self.click_exit()
 
     def toggle_anchor(self):
         from ..ui.utility_selector import show_utility_notification
@@ -209,13 +212,13 @@ class ParrotActions:
 
     def reset_speed_level(self):
         mode = event_manager.get_mode()
-        if mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost", "scroll_tracking"):
-            if self._scroll_speed_level == 0:
+        if mode in ("canvas_stop", "canvas_move", "canvas_glide", "canvas_boost", "canvas_tracking"):
+            if self._canvas_speed_level == 0:
                 return
-            level = self._scroll_speed_level
-            self._scroll_speed_level = 0
+            level = self._canvas_speed_level
+            self._canvas_speed_level = 0
             if actions.user.mouse_rig_state_is_scrolling():
-                restore = 1.0 / (SCROLL_SLOW_MODE_MULTIPLIER ** level)
+                restore = 1.0 / (CANVAS_SLOW_MODE_MULTIPLIER ** level)
                 actions.user.mouse_rig_scroll_speed_mul(restore)
         else:
             if self._move_speed_level == 0:
@@ -233,13 +236,13 @@ class ParrotActions:
         self._is_left_click_held = False
 
     def mouse_click(self, button=0, hold=False):
-        # Never send a click with the modifier scroll key still down.
-        self._mod_scroll_release()
+        # Never send a click with the canvas scale modifier still down.
+        self._canvas_scale_release()
         current_mode = event_manager.get_mode()
 
         should_stop = hold != True and setting_get("click_freeze") == "freeze" and (
             (current_mode in CLICK_BEHAVIOR) or
-            (current_mode in ("tracking", "scroll_tracking"))
+            (current_mode in ("tracking", "canvas_tracking"))
         )
 
         if self._is_left_click_held:
@@ -253,9 +256,9 @@ class ParrotActions:
             ui_manager.hide_border()
 
         if should_stop:
-            if current_mode in ("tracking", "scroll_tracking"):
+            if current_mode in ("tracking", "canvas_tracking"):
                 self.stop_temporarily()
-            elif CLICK_BEHAVIOR.get(current_mode) in ("scroll_stop", "mod_scroll"):
+            elif CLICK_BEHAVIOR.get(current_mode) in ("canvas_stop", "canvas_scale"):
                 actions.user.mouse_rig_scroll_stop()
                 event_manager.set_mode(CLICK_BEHAVIOR[current_mode])
             else:
@@ -312,7 +315,7 @@ class ParrotActions:
             self.click_release()
 
         self.middle_drag_release()
-        self._mod_scroll_release()
+        self._canvas_scale_release()
 
         actions.mode.disable("user.parrot_rig")
         actions.mode.enable("command")
@@ -329,7 +332,7 @@ class ParrotActions:
             "click_held": self._is_left_click_held,
             "middle_drag": self._is_middle_drag,
             "click_freeze": setting_get("click_freeze"),
-            "alt_move_mode": setting_get("alt_move_mode"),
+            "canvas_mode": setting_get("canvas_mode"),
         }
 
     def parrot_mode_get_mode(self):
@@ -379,7 +382,7 @@ class ParrotActions:
 
     def _reactivate_full_mode(self):
         self._stop_time_job = None
-        if event_manager.get_mode() in ("tracking", "scroll_tracking"):
+        if event_manager.get_mode() in ("tracking", "canvas_tracking"):
             tracking.activate()
 
     def show_utility_selector(self, name: str, title: str = ""):
@@ -391,76 +394,77 @@ class ParrotActions:
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()
 
-    def alt_move_toggle(self):
-        """Enter the alternate movement mode named by the alt_move_mode setting:
-        the same directions, moving the page or the canvas instead of the cursor."""
-        mode = setting_get("alt_move_mode")
-        if mode == "middle_drag":
+    def canvas_toggle(self):
+        """Leave the cursor and act on the canvas, in whichever mode the
+        canvas_mode setting names: the same directions, aimed at the content
+        instead of the pointer."""
+        mode = setting_get("canvas_mode")
+        if mode == "drag":
             self.toggle_middle_drag()
-        elif mode == "mod_scroll":
-            self.mod_scroll_toggle()
+        elif mode == "scale":
+            self.canvas_scale_toggle()
         else:
-            self.toggle_scroll_move()
-            if event_manager.get_mode() == "scroll_stop":
-                self._alt_move_at = time.monotonic()
+            self.canvas_move_toggle()
+            if event_manager.get_mode() == "canvas_stop":
+                self._canvas_at = time.monotonic()
 
-    def _alt_move_just_activated(self) -> bool:
-        return (time.monotonic() - self._alt_move_at) * 1000 < MOD_SCROLL_CHASE_MS
+    def _canvas_just_activated(self) -> bool:
+        return (time.monotonic() - self._canvas_at) * 1000 < CANVAS_SCALE_CHASE_MS
 
-    def scroll_resume_or_mod_scroll(self):
+    def canvas_resume_or_scale(self):
         """A mode switch eats a pending combo, so the second noise of the
-        gesture lands here instead. Straight after alt move it means modifier
-        scroll; any later it is an ordinary resume."""
-        if self._alt_move_just_activated():
-            self._alt_move_at = 0.0
-            self.mod_scroll_toggle()
+        gesture lands here instead. Straight after entering canvas mode it means
+        canvas scale; any later it is an ordinary resume."""
+        if self._canvas_just_activated():
+            self._canvas_at = 0.0
+            self.canvas_scale_toggle()
         else:
-            self.scroll_resume()
+            self.canvas_resume()
 
-    def mod_scroll_toggle(self):
-        if event_manager.get_mode() in MOD_SCROLL_MODES:
-            self.mod_scroll_stop()
+    def canvas_scale_toggle(self):
+        if event_manager.get_mode() in CANVAS_SCALE_MODES:
+            self.canvas_scale_stop()
             event_manager.set_mode("default")
         else:
             actions.user.mouse_rig_move_stop()
             actions.user.mouse_rig_scroll_stop()
             tracking.freeze()
-            event_manager.set_mode("mod_scroll")
+            event_manager.set_mode("canvas_scale")
             self._emit_speed_level()
 
-    def mod_scroll_dir(self, direction: str):
-        """Scroll with the axis modifier held, so the app zooms or pans."""
-        modifier, wheel_axis = mod_scroll_axis("y" if direction in ("up", "down") else "x")
-        self._mod_scroll_hold(modifier)
-        wheel = MOD_SCROLL_WHEEL[wheel_axis][direction]
-        actions.user.mouse_rig_scroll_continuous(wheel, MOD_SCROLL_SPEED, force=True)
+    def canvas_scale_dir(self, direction: str):
+        """Scroll with the axis modifier held, so the app scales the canvas."""
+        modifier, wheel_axis = canvas_scale_axis("y" if direction in ("up", "down") else "x")
+        self._canvas_scale_hold(modifier)
+        wheel = CANVAS_SCALE_WHEEL[wheel_axis][direction]
+        actions.user.mouse_rig_scroll_continuous(wheel, CANVAS_SCALE_SPEED, force=True)
         self._scroll_direction = wheel
-        event_manager.set_mode("mod_scroll_move")
+        event_manager.set_mode("canvas_scale_move")
 
-    def mod_scroll_stop(self):
+    def canvas_scale_stop(self):
         actions.user.mouse_rig_scroll_stop()
-        self._mod_scroll_release()
-        if event_manager.get_mode() == "mod_scroll_move":
-            event_manager.set_mode("mod_scroll")
+        self._canvas_scale_release()
+        if event_manager.get_mode() == "canvas_scale_move":
+            event_manager.set_mode("canvas_scale")
 
-    def mod_scroll_plain(self, direction: str):
-        """Ordinary scroll from inside modifier scroll, no modifier held."""
-        self._mod_scroll_release()
+    def canvas_scale_plain(self, direction: str):
+        """Ordinary scroll from inside canvas scale, no modifier held."""
+        self._canvas_scale_release()
         self.scroll(direction)
 
-    def _mod_scroll_hold(self, modifier: str):
-        if self._mod_scroll_key == modifier:
+    def _canvas_scale_hold(self, modifier: str):
+        if self._canvas_scale_key == modifier:
             return
-        self._mod_scroll_release()
+        self._canvas_scale_release()
         if modifier != "none":
             actions.key(f"{modifier}:down")
-            self._mod_scroll_key = modifier
+            self._canvas_scale_key = modifier
 
-    def _mod_scroll_release(self):
-        if not self._mod_scroll_key:
+    def _canvas_scale_release(self):
+        if not self._canvas_scale_key:
             return
-        actions.key(f"{self._mod_scroll_key}:up")
-        self._mod_scroll_key = None
+        actions.key(f"{self._canvas_scale_key}:up")
+        self._canvas_scale_key = None
 
     def toggle_middle_drag(self):
         """Hold middle mouse down and keep regular movement; toggle to release."""
@@ -482,116 +486,116 @@ class ParrotActions:
         if not self._is_left_click_held:
             ui_manager.hide_border()
 
-    def toggle_scroll_move(self):
+    def canvas_move_toggle(self):
         mode = event_manager.get_mode()
         if mode == "tracking":
-            event_manager.set_mode("scroll_tracking")
-        elif mode == "scroll_tracking":
+            event_manager.set_mode("canvas_tracking")
+        elif mode == "canvas_tracking":
             event_manager.set_mode("tracking")
-        elif mode in ("scroll_stop", "scroll_move", "scroll_glide", "scroll_boost"):
+        elif mode in ("canvas_stop", "canvas_move", "canvas_glide", "canvas_boost"):
             actions.user.mouse_rig_scroll_stop()
             event_manager.set_mode("default")
         else:
             actions.user.mouse_rig_move_stop()
-            event_manager.set_mode("scroll_stop")
+            event_manager.set_mode("canvas_stop")
         self._emit_speed_level()
 
-    def scroll_move_dir(self, direction: str):
+    def canvas_move_dir(self, direction: str):
         tracking.freeze()
         actions.user.mouse_rig_move_stop()
         mode = event_manager.get_mode()
-        speed = self._get_scroll_move_speed()
+        speed = self._get_canvas_move_speed()
         rig = actions.user.mouse_rig()
         current_scroll_speed = rig.state.scroll_speed
-        if mode in ("scroll_glide", "scroll_boost") or current_scroll_speed > speed:
+        if mode in ("canvas_glide", "canvas_boost") or current_scroll_speed > speed:
             actions.user.mouse_rig_scroll_continuous_smooth(direction, speed, scale=3.0)
         else:
             actions.user.mouse_rig_scroll_continuous(direction, speed)
         self._scroll_direction = direction
         event_manager.emit("scroll_direction_changed", {"direction": direction})
-        if mode not in ("scroll_glide", "scroll_boost"):
-            event_manager.set_mode("scroll_move")
+        if mode not in ("canvas_glide", "canvas_boost"):
+            event_manager.set_mode("canvas_move")
             self._emit_speed_level()
 
-    def scroll_move_or_slow_dir(self, direction: str):
+    def canvas_move_or_slow_dir(self, direction: str):
         rig = actions.user.mouse_rig()
         cardinal = rig.state.scroll.direction_cardinal.current
         if actions.user.mouse_rig_state_is_scrolling() and cardinal == direction:
-            self._scroll_speed_level += 1
-            actions.user.mouse_rig_scroll_speed_mul(SCROLL_SLOW_MODE_MULTIPLIER)
+            self._canvas_speed_level += 1
+            actions.user.mouse_rig_scroll_speed_mul(CANVAS_SLOW_MODE_MULTIPLIER)
             self._emit_speed_level()
         else:
-            self.scroll_move_dir(direction)
+            self.canvas_move_dir(direction)
 
-    def scroll_toggle_glide(self):
+    def canvas_toggle_glide(self):
         rig = actions.user.mouse_rig()
         rig.scroll.bake()
-        if event_manager.get_mode() == "scroll_glide":
-            speed = self._get_scroll_move_speed()
-            rig.scroll.speed.to(speed).over(rate=SCROLL_GLIDE_RELEASE_RATE, easing="ease_out2")
-            event_manager.set_mode("scroll_move")
+        if event_manager.get_mode() == "canvas_glide":
+            speed = self._get_canvas_move_speed()
+            rig.scroll.speed.to(speed).over(rate=CANVAS_GLIDE_RELEASE_RATE, easing="ease_out2")
+            event_manager.set_mode("canvas_move")
         else:
-            event_manager.set_mode("scroll_glide")
+            event_manager.set_mode("canvas_glide")
 
-    def scroll_boost_long(self):
-        event_manager.set_mode("scroll_boost")
-        amount = SCROLL_BOOST_LONG_AMOUNT * boost_scale() * self._scroll_speed_scale()
+    def canvas_boost_long(self):
+        event_manager.set_mode("canvas_boost")
+        amount = CANVAS_BOOST_LONG_AMOUNT * boost_scale() * self._canvas_speed_scale()
         actions.user.mouse_rig_scroll_boost(
             amount,
-            over_ms=SCROLL_BOOST_LONG_OVER_MS,
-            release_ms=SCROLL_BOOST_LONG_RELEASE_MS
+            over_ms=CANVAS_BOOST_LONG_OVER_MS,
+            release_ms=CANVAS_BOOST_LONG_RELEASE_MS
         ).then(
             lambda: event_manager.return_to_previous_mode()
-                if event_manager.get_mode() == "scroll_boost" else None
+                if event_manager.get_mode() == "canvas_boost" else None
         )
 
-    def scroll_burst_or_brake(self):
-        if event_manager.get_mode() in ("scroll_boost", "scroll_glide"):
+    def canvas_burst_or_brake(self):
+        if event_manager.get_mode() in ("canvas_boost", "canvas_glide"):
             rig = actions.user.mouse_rig()
             rig.scroll.bake()
-            speed = self._get_scroll_move_speed()
-            rig.scroll.speed.to(speed).over(rate=SCROLL_GLIDE_RELEASE_RATE, easing="ease_out2")
-            event_manager.set_mode("scroll_move")
-            self._scroll_burst_or_brake_did_break = True
+            speed = self._get_canvas_move_speed()
+            rig.scroll.speed.to(speed).over(rate=CANVAS_GLIDE_RELEASE_RATE, easing="ease_out2")
+            event_manager.set_mode("canvas_move")
+            self._canvas_burst_or_brake_did_break = True
             return
-        self._scroll_burst_or_brake_did_break = False
+        self._canvas_burst_or_brake_did_break = False
         rig = actions.user.mouse_rig()
-        rig.layer("hiss_scroll_boost").stack(1).scroll.speed.offset.add(SCROLL_BURST_AMOUNT * boost_scale())
+        rig.layer("hiss_canvas_boost").stack(1).scroll.speed.offset.add(CANVAS_BURST_AMOUNT * boost_scale())
 
-    def scroll_burst_or_brake_stop(self):
-        if self._scroll_burst_or_brake_did_break:
-            self._scroll_burst_or_brake_did_break = False
+    def canvas_burst_or_brake_stop(self):
+        if self._canvas_burst_or_brake_did_break:
+            self._canvas_burst_or_brake_did_break = False
             return
         rig = actions.user.mouse_rig()
-        rig.layer("hiss_scroll_boost").revert(SCROLL_BRAKE_REVERT_MS, "ease_out2")
+        rig.layer("hiss_canvas_boost").revert(CANVAS_BRAKE_REVERT_MS, "ease_out2")
 
-    def scroll_stop_stay(self):
+    def canvas_stop(self):
         actions.user.mouse_rig_scroll_stop()
         tracking.freeze()
-        event_manager.set_mode("scroll_stop")
+        event_manager.set_mode("canvas_stop")
 
-    def scroll_ramp_dir(self, direction: str):
-        self.scroll_move_dir(direction)
+    def canvas_ramp_dir(self, direction: str):
+        self.canvas_move_dir(direction)
         rig = actions.user.mouse_rig()
-        amount = SCROLL_RAMP_AMOUNT * self._scroll_speed_scale()
+        amount = CANVAS_RAMP_AMOUNT * self._canvas_speed_scale()
         rig.scroll.speed.offset.add(amount).revert(
-            SCROLL_RAMP_REVERT_MS, "ease_out2"
+            CANVAS_RAMP_REVERT_MS, "ease_out2"
         )
 
-    def scroll_resume(self):
-        self.scroll_move_dir(self._scroll_direction)
+    def canvas_resume(self):
+        self.canvas_move_dir(self._scroll_direction)
 
 parrot_actions = ParrotActions()
 
 
-def _release_mod_scroll_on_exit(data):
-    """Any route out of modifier scroll drops the held key, including exit,
+def _release_canvas_scale_on_exit(data):
+    """Any route out of canvas scale drops the held key, including exit,
     stop, tracking, and the settings menus."""
-    if (data.get("previous_mode") in MOD_SCROLL_MODES
-            and data.get("current_mode") not in MOD_SCROLL_MODES):
-        parrot_actions._mod_scroll_release()
+    if (data.get("previous_mode") in CANVAS_SCALE_MODES
+            and data.get("current_mode") not in CANVAS_SCALE_MODES):
+        parrot_actions._canvas_scale_release()
 
-event_manager.subscribe("mode_changed", _release_mod_scroll_on_exit)
+event_manager.subscribe("mode_changed", _release_canvas_scale_on_exit)
 
 # Release before the jump so the jump itself isn't dragged, then re-press.
 snap_rule(

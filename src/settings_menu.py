@@ -7,7 +7,7 @@ names a base to scale, otherwise the multiplier itself. Their "custom" option
 holds a typed number instead.
 """
 
-from ..parrot_rig_settings import MOVE_SPEED, SCROLL_SPEED, SCROLL_MOVE_SPEED
+from ..parrot_rig_settings import MOVE_SPEED, SCROLL_SPEED, CANVAS_MOVE_SPEED
 
 SPEED_OPTIONS = (
     ("normal",    ("Normal",)),
@@ -23,31 +23,34 @@ setting_maps = {
         "freeze":    ("Freeze on Click",),
         "no_freeze": ("Keep Moving",),
     },
-    "alt_move_mode": {
-        "scroll":      ("Scroll Mode",),
-        "middle_drag": ("Middle Drag",),
-        "mod_scroll":  ("Modifier Scroll",),
+    # Which canvas mode "er" enters. Scroll and Drag both move the canvas, by
+    # wheel or by held middle button. Scale is canvas scale, the third mode,
+    # also reachable from anywhere with "er sh".
+    "canvas_mode": {
+        "scroll": ("Scroll",),
+        "drag":   ("Drag",),
+        "scale":  ("Scale",),
     },
-    # Modifier scroll. Each parrot axis picks a modifier and which wheel it
-    # sends. Apps mostly read the vertical wheel and tell the gestures apart by
-    # the modifier, so both axes default to it and only the modifier differs.
-    "mod_scroll_y_mod": {
+    # Canvas scale. Each parrot axis picks a modifier and which wheel it sends.
+    # Apps mostly read the vertical wheel and tell the gestures apart by the
+    # modifier, so both axes default to it and only the modifier differs.
+    "canvas_scale_y_mod": {
         "ctrl":  ("Ctrl",),
         "shift": ("Shift",),
         "alt":   ("Alt",),
         "none":  ("None",),
     },
-    "mod_scroll_y_wheel": {
+    "canvas_scale_y_wheel": {
         "vertical":   ("Wheel Up/Down",),
         "horizontal": ("Wheel Side",),
     },
-    "mod_scroll_x_mod": {
+    "canvas_scale_x_mod": {
         "shift": ("Shift",),
         "ctrl":  ("Ctrl",),
         "alt":   ("Alt",),
         "none":  ("None",),
     },
-    "mod_scroll_x_wheel": {
+    "canvas_scale_x_wheel": {
         "vertical":   ("Wheel Up/Down",),
         "horizontal": ("Wheel Side",),
     },
@@ -64,7 +67,7 @@ setting_maps = {
     },
     "move_speed": dict(SPEED_OPTIONS),
     "scroll_speed": dict(SPEED_OPTIONS),
-    "scroll_move_speed": dict(SPEED_OPTIONS),
+    "canvas_move_speed": dict(SPEED_OPTIONS),
     "boost_power": {
         "normal": ("Normal",),
         "strong": ("Strong",),
@@ -77,21 +80,29 @@ setting_maps = {
         "instant": ("Instant",),
         "clear":   ("Clear All", "parrot_rig_anchor_clear_all"),
     },
+    # What return does empty handed, with no anchors of your own and no snap
+    # rule. Click & Exit hands control back. Screen Anchors falls back to the
+    # invisible SCREEN_ANCHORS instead, so return keeps behaving like return.
+    "return_fallback": {
+        "click_exit":     ("Click & Exit",),
+        "screen_anchors": ("Screen Anchors",),
+    },
 }
 
 SETTING_TITLES = {
     "click_freeze": "Click",
-    "alt_move_mode": "Alt Move",
-    "mod_scroll_y_mod": "Y Modifier",
-    "mod_scroll_y_wheel": "Y Wheel",
-    "mod_scroll_x_mod": "X Modifier",
-    "mod_scroll_x_wheel": "X Wheel",
+    "canvas_mode": "Canvas",
+    "canvas_scale_y_mod": "Y Modifier",
+    "canvas_scale_y_wheel": "Y Wheel",
+    "canvas_scale_x_mod": "X Modifier",
+    "canvas_scale_x_wheel": "X Wheel",
     "move_mode": "Move",
     "turn_speed": "Turn",
     "anchor_move": "Anchor",
-    "move_speed": "Move Speed",
+    "return_fallback": "Return",
+    "move_speed": "Cursor Speed",
     "scroll_speed": "Scroll Speed",
-    "scroll_move_speed": "Scroll Move",
+    "canvas_move_speed": "Canvas Speed",
     "boost_power": "Boost",
 }
 
@@ -120,7 +131,7 @@ BOOST_SCALES = {
 NUMERIC_SETTINGS = {
     "move_speed":        {"base": MOVE_SPEED,        "scales": SPEED_SCALES},
     "scroll_speed":      {"base": SCROLL_SPEED,      "scales": SPEED_SCALES},
-    "scroll_move_speed": {"base": SCROLL_MOVE_SPEED, "scales": SPEED_SCALES},
+    "canvas_move_speed": {"base": CANVAS_MOVE_SPEED, "scales": SPEED_SCALES},
     "turn_speed":        {"base": None,              "scales": TURN_SCALES},
     "boost_power":       {"base": None,              "scales": BOOST_SCALES},
 }
@@ -142,9 +153,9 @@ def setting_label(name: str, value: str = None) -> str:
     return setting_maps[name][value or setting_get(name)][0]
 
 
-def mod_scroll_axis(axis: str) -> tuple:
+def canvas_scale_axis(axis: str) -> tuple:
     """(modifier, wheel) for the "y" or "x" axis. Modifier may be "none"."""
-    return setting_get(f"mod_scroll_{axis}_mod"), setting_get(f"mod_scroll_{axis}_wheel")
+    return setting_get(f"canvas_scale_{axis}_mod"), setting_get(f"canvas_scale_{axis}_wheel")
 
 
 def setting_title(name: str) -> str:

@@ -53,17 +53,17 @@ def cheatsheet_ui():
         all_noises.update(mode_config.keys())
     all_noises = sorted(list(all_noises))
 
-    # Modes that share the same input map bindings (sub-states of move/scroll_move)
+    # Modes that share the same input map bindings (sub-states of move/canvas_move)
     RELATED_MODES = {
         "move": ["move", "boost", "glide"],
-        "scroll_move": ["scroll_move", "scroll_boost", "scroll_glide"],
+        "canvas_move": ["canvas_move", "canvas_boost", "canvas_glide"],
     }
-    SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide", "scroll_tracking", "mod_scroll"}
+    CANVAS_MODES = {"canvas_stop", "canvas_move", "canvas_boost", "canvas_glide", "canvas_tracking", "canvas_scale"}
 
     def _make_icon(mode, cx):
         """Create a circle or triangle icon depending on mode type."""
         color = MODE_COLORS.get(mode, "#FF0000")
-        if mode in SCROLL_MODES:
+        if mode in CANVAS_MODES:
             return path(d=f"M {cx} 19 L {cx - 8} 5 L {cx + 8} 5 Z", fill=color)
         return circle(cx=cx, cy=12, r=7, fill=color)
 

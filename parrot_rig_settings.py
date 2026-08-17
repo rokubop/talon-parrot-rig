@@ -25,26 +25,26 @@ SCROLL_EXTREME_KEYS = {
     "down": "ctrl-end",
 }
 
-# Modifier scroll. Every wheel tick is a zoom step in most apps, so this runs
+# Canvas scale. Every wheel tick is a zoom step in most apps, so this runs
 # slower than plain scroll.
-MOD_SCROLL_SPEED = 0.015
+CANVAS_SCALE_SPEED = 0.015
 
-# How long after entering scroll mode the follow-up noise still means "modifier
-# scroll" instead of its normal action. Matches the input map combo window,
+# How long after entering canvas mode the follow-up noise still means "canvas
+# scale" instead of its normal action. Matches the input map combo window,
 # since it stands in for a combo that a mode switch would otherwise eat.
-MOD_SCROLL_CHASE_MS = 300
+CANVAS_SCALE_CHASE_MS = 300
 
-# Scroll mode
-SCROLL_MOVE_SPEED = 0.03
-SCROLL_SLOW_MODE_MULTIPLIER = 0.5
-SCROLL_BOOST_LONG_AMOUNT = 0.3
-SCROLL_BOOST_LONG_OVER_MS = 1000
-SCROLL_BOOST_LONG_RELEASE_MS = 1000
-SCROLL_BURST_AMOUNT = 0.6
-SCROLL_BRAKE_REVERT_MS = 400
-SCROLL_RAMP_AMOUNT = 0.3
-SCROLL_RAMP_REVERT_MS = 400
-SCROLL_GLIDE_RELEASE_RATE = 0.1
+# Canvas move
+CANVAS_MOVE_SPEED = 0.03
+CANVAS_SLOW_MODE_MULTIPLIER = 0.5
+CANVAS_BOOST_LONG_AMOUNT = 0.3
+CANVAS_BOOST_LONG_OVER_MS = 1000
+CANVAS_BOOST_LONG_RELEASE_MS = 1000
+CANVAS_BURST_AMOUNT = 0.6
+CANVAS_BRAKE_REVERT_MS = 400
+CANVAS_RAMP_AMOUNT = 0.3
+CANVAS_RAMP_REVERT_MS = 400
+CANVAS_GLIDE_RELEASE_RATE = 0.1
 
 # Anchor
 ANCHOR_MOVE_MS = 200
@@ -53,6 +53,23 @@ ANCHOR_MARKER_COLOR = "FFFFFF"
 # How close counts as standing on an anchor, for removing it and for skipping
 # it as a return target
 ANCHOR_HIT_RADIUS = 24
+ANCHOR_LINE_COLOR = "FFFFFF66"
+# How far inside the screen edge a screen target lands, enough to be on the
+# close button rather than the corner pixel
+SCREEN_EDGE_INSET = 24
+
+# Stand-in anchors used when the Return setting is Screen Anchors and you have
+# not dropped any of your own. Never drawn. (snap target, anchor kind), and the
+# targets come from TARGETS in src/snap.py.
+SCREEN_ANCHORS = [
+    ("top_right", "point"),      # close button
+    ("center", "point"),
+    ("bottom", "horizontal"),    # taskbar, keeping your x
+    ("left", "vertical"),        # side bar, keeping your y
+]
+# How long after dropping an anchor the follow-up noise still opens the kind
+# picker instead of doing its normal job
+ANCHOR_CHASE_MS = 300
 
 # Timing
 TRACKING_STOP_MS = 800
@@ -63,10 +80,10 @@ CLICK_BEHAVIOR = {
     "move": "stop",
     "boost": "stop",
     "glide": "stop",
-    "scroll_move": "scroll_stop",
-    "scroll_glide": "scroll_stop",
-    "scroll_boost": "scroll_stop",
-    "mod_scroll_move": "mod_scroll",
+    "canvas_move": "canvas_stop",
+    "canvas_glide": "canvas_stop",
+    "canvas_boost": "canvas_stop",
+    "canvas_scale_move": "canvas_scale",
 }
 
 # Cursor UI
@@ -79,13 +96,13 @@ MODE_COLORS = {
     "boost": "#2AE33C",
     "glide": "#578EF5",
     "tracking": "#A7D3FF",
-    "scroll_tracking": "#A7D3FF",
-    "scroll_stop": "#FF4444",
-    "scroll_move": "#FFFF44",
-    "scroll_boost": "#44E84E",
-    "scroll_glide": "#6B9EF7",
-    "mod_scroll": "#FF4444",
-    "mod_scroll_move": "#FFFF44",
+    "canvas_tracking": "#A7D3FF",
+    "canvas_stop": "#FF4444",
+    "canvas_move": "#FFFF44",
+    "canvas_boost": "#44E84E",
+    "canvas_glide": "#6B9EF7",
+    "canvas_scale": "#FF4444",
+    "canvas_scale_move": "#FFFF44",
 }
 
 # Modifier letters, shown next to the cursor in this order

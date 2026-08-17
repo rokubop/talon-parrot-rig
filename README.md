@@ -64,25 +64,43 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `hiss` | scroll / boost | Scroll down, boost in move mode |
 | `shush` | scroll / boost | Scroll up, boost in move mode |
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
-| `er` | alt move | Toggle alternate movement: scroll mode or middle drag |
+| `er` | canvas mode | Leave the cursor, aim the directions at the canvas |
 | `cluck` | exit | Exit parrot rig |
 | `palate` | utility_1 | Execute utility action |
 | `tut` | combo prefix / reset | Reset speed, prefix for combos (e.g. `tut oh` = right click) |
 
-Alt move has three modes, picked in settings under **Alt Move**:
+### The three modes
 
-| Mode | What `er` does |
-|------|----------------|
-| Scroll Mode | Directions scroll the page |
-| Middle Drag | Holds middle mouse, directions drag |
-| Modifier Scroll | Directions scroll with a modifier held, so the app zooms and pans |
+The same four direction noises drive one of three things. Which one you are in
+is the whole model:
 
-Modifier scroll holds a modifier while scrolling, because that is how apps
-expose zoom and horizontal pan. Apps mostly read the vertical wheel and tell the
-gestures apart by the modifier, so the two axes are a parrot convenience, not
-two wheel directions.
+| Mode | Directions move | Enter |
+|------|-----------------|-------|
+| **Cursor move** | The pointer | default |
+| **Canvas move** | The canvas under it | `er` |
+| **Canvas scale** | The canvas's zoom level | `er sh`, or `tut cluck` |
 
-Each axis picks a modifier and which wheel it sends, under **Mod Scroll** in
+`er` leaves the cursor and acts on the canvas. **Canvas** in settings picks how:
+
+| Canvas | What `er` does |
+|--------|----------------|
+| Scroll | Directions scroll the page |
+| Drag | Holds middle mouse, directions drag |
+| Scale | Goes straight to canvas scale |
+
+`er sh` always reaches canvas scale, whichever of the three `er` is set to — so
+you can keep Scroll as your default and still get scaling in two noises. It is
+not a combo: `er` fires immediately as always, and `sh` checks how long ago
+canvas mode started. A combo would not work here, because switching the input
+map mode clears the pending chain.
+
+### Canvas scale
+
+Canvas scale holds a modifier while scrolling, because that is how apps expose
+zoom. Apps mostly read the vertical wheel and tell the gestures apart by the
+modifier, so the two axes are a parrot convenience, not two wheel directions.
+
+Each axis picks a modifier and which wheel it sends, under **Canvas Scale** in
 settings. Defaults are what most desktop apps do:
 
 | Axis | Modifier | Wheel | Result in most apps |
@@ -90,16 +108,61 @@ settings. Defaults are what most desktop apps do:
 | up / down | `ctrl` | up/down | Zoom in and out |
 | left / right | `shift` | up/down | Pan horizontally |
 
+The x axis is pan rather than scale by default, because plain horizontal wheel —
+what Canvas Scroll sends for `ah`/`oh` — is ignored by a lot of apps, and
+`shift`+wheel is the compatible way to get it. Rebind it if your app does
+something better with the axis.
+
 Both axes take any of `ctrl`, `shift`, `alt`, or none, and either wheel. The
 same modifier on both axes with different wheels gives a real x/y. Different
 modifiers on the same wheel gives two gestures on one wheel. The cursor is a
 diamond, with the letter of each axis modifier above and beside it.
 
-Enter it with `er` then `shush`, within 300ms. This is not a combo: `er` fires
-immediately as always, and `shush` checks how long ago alt move started. A combo
-would not work here, because switching the input map mode clears the pending
-chain. `tut cluck` enters it from anywhere, and it can also be the mode `er`
-itself uses, under **Alt Move**.
+### Anchors
+
+`tut pop` drops an anchor, `pop` returns to the nearest one. Follow the drop with
+`shush` within 300ms and a picker opens:
+
+| Kind | Return lands on |
+|------|-----------------|
+| Point | The spot itself |
+| Vertical Line | That x, keeping your current y |
+| Horizontal Line | That y, keeping your current x |
+
+A line pins one coordinate and leaves the other alone, so it draws across the
+screen and `pop` goes to the closest point on it. Standing on an anchor makes
+`pop` move to the next one, lines included, so a line you are already on does not
+trap you. Removing an anchor with `tut pop` still uses the ring where it was
+dropped, not the whole line.
+
+While any anchor is set, `pop` always goes to one. It does not fall back to
+snapping or to click and exit, even standing on the only anchor you have, where
+it lands on it again and pulls you flush onto a line. Clear the anchors to get
+that behavior back.
+
+**Return** in settings picks what `pop` does empty handed, with no anchors of
+your own and no snap rule:
+
+| Return | `pop` does |
+|--------|------------|
+| Click & Exit | Clicks and hands control back |
+| Screen Anchors | Falls back to a set of invisible anchors |
+
+Screen Anchors keeps `pop` behaving like `pop`, nearest first and cycling on
+repeat:
+
+| Screen anchor | Where |
+|---------------|-------|
+| Point | Top right, on the close button |
+| Point | Screen center |
+| Horizontal line | Bottom edge, the taskbar, keeping your x |
+| Vertical line | Left edge, the side bar, keeping your y |
+
+Drop one anchor of your own and they stop being used. They are never drawn and
+never stored, and they are built from the screen the cursor is on. Edit the set
+in `SCREEN_ANCHORS` in [parrot_rig_settings.py](./parrot_rig_settings.py), where
+each entry is a target from `TARGETS` in [src/snap.py](./src/snap.py) and an
+anchor kind.
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.
 
