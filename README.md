@@ -67,7 +67,7 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `er` | canvas mode | Leave the cursor, aim the directions at the canvas |
 | `cluck` | exit | Exit parrot rig |
 | `palate` | utility_1 | Execute utility action |
-| `tut` | exit / combo prefix | Exit parrot rig, prefix for combos (e.g. `tut oh` = right click) |
+| `tut` | reset / exit / combo prefix | Clear modifiers and slow steps, exit once there is nothing to clear, prefix for combos (e.g. `tut oh` = right click) |
 
 ### The modes
 

@@ -193,7 +193,7 @@ input_map_common = {
     "er":     ("canvas mode", parrot_actions.canvas_toggle),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
-    "tut":        ("exit", actions.user.parrot_rig_exit),
+    "tut":        ("reset, else exit", parrot_actions.reset_or_exit),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
     "tut eh":     ("window mode + picker", parrot_actions.window_enter),
     "tut ee":     ("window mode, stopped", parrot_actions.window_enter_stopped),

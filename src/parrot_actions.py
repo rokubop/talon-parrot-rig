@@ -436,6 +436,16 @@ class ParrotActions:
         self._canvas_speed_level = 0
         self._emit_speed_level()
 
+    def reset_or_exit(self):
+        """Anything held or slowed gets cleared first. Exit is what tut means
+        only once there is nothing left to undo."""
+        if (event_manager.get_modifiers()
+                or self._move_speed_level
+                or self._canvas_speed_level):
+            self.full_reset()
+            return
+        self.exit()
+
     def stop_or_reset(self, stop=None):
         """Stop what is running. Standing still already, this is the reset
         instead, which is what frees the bare tut."""
