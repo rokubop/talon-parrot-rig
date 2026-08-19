@@ -67,18 +67,19 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `er` | canvas mode | Leave the cursor, aim the directions at the canvas |
 | `cluck` | exit | Exit parrot rig |
 | `palate` | utility_1 | Execute utility action |
-| `tut` | combo prefix / reset | Reset speed, prefix for combos (e.g. `tut oh` = right click) |
+| `tut` | exit / combo prefix | Exit parrot rig, prefix for combos (e.g. `tut oh` = right click) |
 
-### The three modes
+### The modes
 
-The same four direction noises drive one of three things. Which one you are in
-is the whole model:
+The same four direction noises drive one of these. Which one you are in is
+the whole model:
 
 | Mode | Enter |
 |------|-------|
 | **Cursor move** | default |
 | **Canvas move** | `er` |
 | **Canvas scale** | `er sh` |
+| **Window** | `tut eh` |
 
 `er` leaves the cursor and acts on the canvas. **Canvas** in settings picks how:
 
@@ -96,27 +97,37 @@ map mode clears the pending chain.
 
 ### Canvas scale
 
-Canvas scale holds a modifier while scrolling, because that is how apps expose
-zoom. Apps mostly read the vertical wheel and tell the gestures apart by the
-modifier, so the two axes are a parrot convenience, not two wheel directions.
+Three pairs of noises, one modifier each, both ways on the vertical wheel. No
+axis to pick, because that is the only wheel apps read for these gestures.
 
-Each axis picks a modifier and which wheel it sends, under **Canvas Scale** in
-settings. Defaults are what most desktop apps do:
+| Noise | Sends |
+|-------|-------|
+| `oh` / `ah` | `alt` + wheel up / down |
+| `t` / `guh` | `ctrl` + wheel up / down |
+| `eh` / `er` | `shift` + wheel up / down |
 
-| Axis | Modifier | Wheel | Result in most apps |
-|------|----------|-------|---------------------|
-| up / down | `ctrl` | up/down | Zoom in and out |
-| left / right | `shift` | up/down | Pan horizontally |
+`shush` boosts while scaling, and scales up with the last modifier when
+stopped. `hiss` is burst or brake, and scales down when stopped. `tut` leaves.
 
-The x axis is pan rather than scale by default, because plain horizontal wheel —
-what Canvas Scroll sends for `ah`/`oh` — is ignored by a lot of apps, and
-`shift`+wheel is the compatible way to get it. Rebind it if your app does
-something better with the axis.
+### Window mode
 
-Both axes take any of `ctrl`, `shift`, `alt`, or none, and either wheel. The
-same modifier on both axes with different wheels gives a real x/y. Different
-modifiers on the same wheel gives two gestures on one wheel. The cursor is a
-diamond, with the letter of each axis modifier above and beside it.
+`tut eh` arranges windows. Tracking stays live, because switching brings up a
+picker you aim at and click.
+
+| Noise | Does |
+|-------|------|
+| `ah` / `oh` | Window left / right |
+| `t` / `guh` | Window up / down |
+| `tut ah` / `tut oh` | Move to the screen left / right |
+| `eh` | Switch window |
+| `pop` | Alt tab |
+| `shush` / `hiss` | Next / previous tab |
+| `ee` | Escape |
+| `palate` | Repeat the last action |
+| `tut` | Leave, stopped |
+
+Keys are in `WINDOW_KEYS` in [parrot_rig_settings.py](./parrot_rig_settings.py),
+since window managers differ.
 
 ### Anchors
 
