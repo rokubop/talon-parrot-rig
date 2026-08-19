@@ -65,6 +65,8 @@ class ParrotActions:
         self._canvas_scale_last = "ctrl"
         self._canvas_scale_did_start = False
         self._window_super_held = False
+        self._burst_gliding = False
+        self._burst_glide_job = None
         self._canvas_at = 0.0
 
     def _get_move_speed(self):
@@ -99,7 +101,7 @@ class ParrotActions:
         speed = self._get_move_speed()
         current_speed = actions.user.mouse_rig_state_speed()
         always_glide = setting_get("move_mode") == "always_glide"
-        if always_glide or mode in ("glide", "boost") or current_speed > speed:
+        if always_glide or self._burst_gliding or mode in ("glide", "boost") or current_speed > speed:
             actions.user.mouse_rig_move_continuous_smooth(direction, speed, scale=turn_scale())
         else:
             actions.user.mouse_rig_move_continuous(direction, speed)
@@ -141,6 +143,17 @@ class ParrotActions:
             lambda: event_manager.return_to_previous_mode()
                 if event_manager.get_mode() == "boost" else None)
 
+    def _burst_glide(self, on: bool, ms: int = 0):
+        """Turns stay smooth through a burst and its settle. A flag, not the
+        glide mode, because burst_or_brake reads that mode as "brake" and a
+        chained hiss would stop bursting."""
+        if self._burst_glide_job:
+            cron.cancel(self._burst_glide_job)
+            self._burst_glide_job = None
+        self._burst_gliding = on
+        if on and ms:
+            self._burst_glide_job = cron.after(f"{ms}ms", lambda: self._burst_glide(False))
+
     def _burst_settle(self):
         """Ease under normal speed for a moment, so the click after a burst is
         easier. Off the configured speed, not the live one, which still has the
@@ -150,6 +163,10 @@ class ParrotActions:
             .over(BURST_SETTLE_OVER_MS) \
             .hold(BURST_SETTLE_HOLD_MS) \
             .revert(BURST_SETTLE_REVERT_MS)
+        self._burst_glide(
+            True,
+            BURST_SETTLE_OVER_MS + BURST_SETTLE_HOLD_MS + BURST_SETTLE_REVERT_MS,
+        )
 
     def mouse_burst_or_brake(self):
         actions.user.mouse_rig().layer("burst_settle").revert(0)
@@ -163,6 +180,7 @@ class ParrotActions:
             self._burst_settle()
             return
         self._burst_or_brake_did_break = False
+        self._burst_glide(True)
         rig = actions.user.mouse_rig()
         rig.layer("hiss_boost").stack(1).speed.offset.add(BURST_AMOUNT * boost_scale())
 
@@ -462,6 +480,7 @@ class ParrotActions:
         (stop or self.stopper)()
 
     def stopper(self, stop_tracking=True, stop_moving=True, stop_scrolling=True, reset_mode=True):
+        self._burst_glide(False)
         if stop_moving:
             actions.user.mouse_rig_stop()
         if stop_scrolling:
