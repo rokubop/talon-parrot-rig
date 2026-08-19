@@ -210,26 +210,6 @@ class ParrotActions:
     def reverse_phrase(self):
         reverse_phrase()
 
-    def reset_speed_level(self):
-        mode = event_manager.get_mode()
-        if mode in ("canvas_stop", "canvas_move", "canvas_glide", "canvas_boost", "canvas_tracking"):
-            if self._canvas_speed_level == 0:
-                return
-            level = self._canvas_speed_level
-            self._canvas_speed_level = 0
-            if actions.user.mouse_rig_state_is_scrolling():
-                restore = 1.0 / (CANVAS_SLOW_MODE_MULTIPLIER ** level)
-                actions.user.mouse_rig_scroll_speed_mul(restore)
-        else:
-            if self._move_speed_level == 0:
-                return
-            level = self._move_speed_level
-            self._move_speed_level = 0
-            if actions.user.mouse_rig_state_is_moving():
-                restore = 1.0 / (SLOW_MODE_MULTIPLIER ** level)
-                actions.user.mouse_rig_speed_mul(restore)
-        self._emit_speed_level()
-
     def click_release(self, button=0):
         ctrl.mouse_click(button=button, up=True)
         ui_manager.hide_border()
@@ -430,10 +410,20 @@ class ParrotActions:
         )
 
     def full_reset(self):
+        """Zeroing the counters is not enough while something is running: the
+        slow steps are already multiplied into the rig, so undo them there too."""
         self.disable_modifiers()
         self._canvas_scale_release()
-        self._move_speed_level = 0
-        self._canvas_speed_level = 0
+        if self._move_speed_level:
+            level = self._move_speed_level
+            self._move_speed_level = 0
+            if actions.user.mouse_rig_state_is_moving():
+                actions.user.mouse_rig_speed_mul(1.0 / (SLOW_MODE_MULTIPLIER ** level))
+        if self._canvas_speed_level:
+            level = self._canvas_speed_level
+            self._canvas_speed_level = 0
+            if actions.user.mouse_rig_state_is_scrolling():
+                actions.user.mouse_rig_scroll_speed_mul(1.0 / (CANVAS_SLOW_MODE_MULTIPLIER ** level))
         self._emit_speed_level()
 
     def reset_or_exit(self):
