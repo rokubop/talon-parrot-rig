@@ -14,6 +14,10 @@ from ..parrot_rig_settings import (
     BOOST_LONG_MAX,
     BURST_AMOUNT,
     BRAKE_REVERT_MS,
+    BURST_SETTLE_SCALE,
+    BURST_SETTLE_OVER_MS,
+    BURST_SETTLE_HOLD_MS,
+    BURST_SETTLE_REVERT_MS,
     GLIDE_RELEASE_RATE,
     SCROLL_EXTREME_KEYS,
     WINDOW_KEYS,
@@ -137,7 +141,18 @@ class ParrotActions:
             lambda: event_manager.return_to_previous_mode()
                 if event_manager.get_mode() == "boost" else None)
 
+    def _burst_settle(self):
+        """Ease under normal speed for a moment, so the click after a burst is
+        easier. Off the configured speed, not the live one, which still has the
+        burst in it. Another hiss clears it and runs at full speed."""
+        settle = -self._get_move_speed() * (1 - BURST_SETTLE_SCALE)
+        actions.user.mouse_rig().layer("burst_settle").speed.offset.add(settle) \
+            .over(BURST_SETTLE_OVER_MS) \
+            .hold(BURST_SETTLE_HOLD_MS) \
+            .revert(BURST_SETTLE_REVERT_MS)
+
     def mouse_burst_or_brake(self):
+        actions.user.mouse_rig().layer("burst_settle").revert(0)
         if event_manager.get_mode() in ("boost", "glide"):
             rig = actions.user.mouse_rig()
             rig.bake()
@@ -145,6 +160,7 @@ class ParrotActions:
             rig.speed.to(speed)
             event_manager.set_mode("move")
             self._burst_or_brake_did_break = True
+            self._burst_settle()
             return
         self._burst_or_brake_did_break = False
         rig = actions.user.mouse_rig()
@@ -156,6 +172,7 @@ class ParrotActions:
             return
         rig = actions.user.mouse_rig()
         rig.layer("hiss_boost").revert(BRAKE_REVERT_MS, "ease_out2")
+        self._burst_settle()
 
     def tracking_activate(self):
         actions.user.mouse_rig_stop()

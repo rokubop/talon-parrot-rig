@@ -13,6 +13,13 @@ BOOST_LONG_RELEASE_MS = 1000
 BOOST_LONG_MAX = 15
 BURST_AMOUNT = 4.5
 BRAKE_REVERT_MS = 0
+# A burst is usually a hop to something nearby, so the cursor eases down after
+# one to make the click easier. Another hiss inside the window clears it and
+# bursts at full speed, so chaining still covers distance.
+BURST_SETTLE_SCALE = 0.5
+BURST_SETTLE_OVER_MS = 400
+BURST_SETTLE_HOLD_MS = 700
+BURST_SETTLE_REVERT_MS = 500
 GLIDE_RELEASE_RATE = 5
 
 # Scroll
