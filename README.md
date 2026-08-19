@@ -120,7 +120,7 @@ because the picker is an overlay you aim at and click.
 | `t` / `guh` | Window up / down |
 | `tut ah` / `tut oh` | Move to the screen left / right |
 | `tut t` | Close tab |
-| `tut cluck` | Close window |
+| `cluck` | Close window |
 | `eh` | App picker |
 | `pop` | Alt tab |
 | `shush` / `hiss` | Next / previous tab |

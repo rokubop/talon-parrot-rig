@@ -275,6 +275,7 @@ input_map_window = {
     "t":      ("window up", lambda: parrot_actions.window_move("up")),
     "guh":    ("window down", lambda: parrot_actions.window_move("down")),
     "eh":     ("app picker", lambda: parrot_actions.window_key("picker")),
+    "cluck":  ("close window", lambda: parrot_actions.window_key("close")),
     "pop":    ("alt tab", parrot_actions.window_alt_tab),
     "ee":     ("release super, escape", parrot_actions.window_escape),
     "palate": ("repeat last", lambda: _repeat_last()),
@@ -282,7 +283,6 @@ input_map_window = {
     "hiss:th_90":  ("previous tab", lambda: parrot_actions.window_key("tab_prev")),
     "tut":       ("exit window mode", parrot_actions.window_exit),
     "tut t":     ("close tab", lambda: parrot_actions.window_key("tab_close")),
-    "tut cluck": ("close window", lambda: parrot_actions.window_key("close")),
     "tut ah":    ("screen left", lambda: parrot_actions.window_move("screen_left")),
     "tut oh":    ("screen right", lambda: parrot_actions.window_move("screen_right")),
 }
