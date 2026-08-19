@@ -1,8 +1,7 @@
 from talon import actions
 from ..parrot_rig_settings import MODE_COLORS, MODIFIER_LETTERS
+from ..parrot_rig_settings import CANVAS_MODES, CANVAS_SCALE_MODES, WINDOW_MODES
 from ..parrot_rig_settings import CURSOR_UI_ENABLED
-
-CANVAS_MODES = {"canvas_stop", "canvas_move", "canvas_boost", "canvas_glide", "canvas_tracking"}
 
 TRIANGLE_PATHS = {
     "down":  "M 12 19 L 4 5 L 20 5 Z",
@@ -32,8 +31,6 @@ TRIANGLE_BORDER_INNER = {
     "right": "M 21 12 L 4 3 L 4 21 Z",
 }
 
-CANVAS_SCALE_MODES = {"canvas_scale", "canvas_scale_move"}
-WINDOW_MODES = {"window", "window_move", "window_stop"}
 
 DIAMOND_PATH = "M 12 4 L 20 12 L 12 20 L 4 12 Z"
 

@@ -383,6 +383,8 @@ input_map = {
     "canvas_tracking": input_map_canvas_tracking,
     "canvas_scale": input_map_canvas_scale,
     "window": input_map_window,
+    "window_stop": input_map_window,
+    "window_move": input_map_window,
     "hub_select": _menu_list_input_map(HUB_MENUS, "close"),
     "speeds_select": _menu_list_input_map(SPEED_MENUS),
     "anchor_kind_select": _anchor_kind_input_map(),
@@ -404,17 +406,32 @@ input_map = {
     ),
 }
 
+def _listen():
+    """Reloading leaves the previous module's listener on the channel, and the
+    _last_input it fills is the one this module can no longer see."""
+    actions.user.input_map_channel_event_unregister(CHANNEL, _on_input)
+    actions.user.input_map_channel_event_register(CHANNEL, _on_input)
+
 def channel_init():
     """Register the parrot_rig channel if not already registered."""
     if CHANNEL not in actions.user.input_map_channel_list():
         actions.user.input_map_channel_register(CHANNEL, input_map)
-    actions.user.input_map_channel_event_unregister(CHANNEL, _on_input)
-    actions.user.input_map_channel_event_register(CHANNEL, _on_input)
+    _listen()
 
 def channel_reset():
     """Unregister and re-register the channel with fresh data."""
     actions.user.input_map_channel_unregister(CHANNEL)
     actions.user.input_map_channel_register(CHANNEL, input_map)
+    _listen()
+
+# Talon reloads this module on save, and the channel outlives that, so relisten
+# here rather than waiting for the next enable.
+try:
+    if CHANNEL in actions.user.input_map_channel_list():
+        _listen()
+except Exception:
+    pass
+
 
 @mod.action_class
 class Actions:

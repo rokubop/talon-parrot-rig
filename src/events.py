@@ -36,7 +36,7 @@ class ParrotEventManager:
 
     def set_mode(self, mode: str, update_ui: bool = True):
         if mode != self._current_mode:
-            has_input_map = not mode in ["boost", "glide", "canvas_glide", "canvas_boost", "canvas_scale_move", "window_move", "window_stop"]
+            has_input_map = not mode in ["boost", "glide", "canvas_glide", "canvas_boost", "canvas_scale_move"]
             self._previous_mode = self._current_mode
             self._current_mode = mode
 

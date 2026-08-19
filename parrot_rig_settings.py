@@ -119,7 +119,13 @@ CLICK_BEHAVIOR = {
 # Cursor UI
 CURSOR_UI_ENABLED = True
 
-# Mode colors
+# Mode families. Colors below, and the cursor draws one shape per family:
+# circle for cursor move, triangle for canvas, diamond for canvas scale,
+# square for window.
+CANVAS_MODES = ("canvas_stop", "canvas_move", "canvas_boost", "canvas_glide", "canvas_tracking")
+CANVAS_SCALE_MODES = ("canvas_scale", "canvas_scale_move")
+WINDOW_MODES = ("window", "window_stop", "window_move")
+
 MODE_COLORS = {
     "default": "#FF0000",
     "move": "#FFFF00",

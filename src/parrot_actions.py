@@ -35,6 +35,7 @@ from ..parrot_rig_settings import (
     CANVAS_SCALE_CHASE_MS,
     TRACKING_STOP_MS,
     CLICK_BEHAVIOR,
+    CANVAS_SCALE_MODES,
 )
 from .utils import reload_files
 from .settings_menu import (
@@ -44,9 +45,6 @@ from .settings_menu import (
 from .menu import menu_reset
 from .anchor import anchor_go, anchor_go_screen, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
-
-# Stopped and scaling, so the cursor color reads like the other families
-CANVAS_SCALE_MODES = ("canvas_scale", "canvas_scale_move")
 
 class ParrotActions:
     def __init__(self):
@@ -284,14 +282,11 @@ class ParrotActions:
         self.window_picker()
 
     def window_enter_stopped(self):
-        """Window mode with nothing else: no picker, no tracking. Through
-        "window" first, since the stopped state only carries the colour and
-        leans on the bindings that mode switched in."""
+        """Window mode with nothing else: no picker, no tracking."""
         self._canvas_scale_release()
         actions.user.mouse_rig_stop()
         actions.user.mouse_rig_scroll_stop()
         tracking.freeze()
-        event_manager.set_mode("window")
         event_manager.set_mode("window_stop")
 
     def window_picker(self):
