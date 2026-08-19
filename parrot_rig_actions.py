@@ -182,12 +182,8 @@ input_map_common = {
     "tut pop":    ("anchor set / clear", parrot_actions.toggle_anchor),
     "tut hiss":   ("scroll bottom", lambda: parrot_actions.scroll_extreme("down")),
     "tut shush":  ("scroll top", lambda: parrot_actions.scroll_extreme("up")),
-    "tut mm":     ("click settings", lambda: menu_open("click_freeze")),
-    "tut er":     ("canvas settings", lambda: menu_open("canvas_mode")),
-    "tut eh":     ("move settings", lambda: menu_open("move_mode")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("settings", _settings_menu),
-    "tut cluck":  ("canvas scale", parrot_actions.canvas_scale_toggle),
 }
 
 input_map_default = {

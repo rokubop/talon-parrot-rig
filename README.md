@@ -74,11 +74,11 @@ Use this table to understand what role each noise plays, then decide which of yo
 The same four direction noises drive one of three things. Which one you are in
 is the whole model:
 
-| Mode | Directions move | Enter |
-|------|-----------------|-------|
-| **Cursor move** | The pointer | default |
-| **Canvas move** | The canvas under it | `er` |
-| **Canvas scale** | The canvas's zoom level | `er sh`, or `tut cluck` |
+| Mode | Enter |
+|------|-------|
+| **Cursor move** | default |
+| **Canvas move** | `er` |
+| **Canvas scale** | `er sh` |
 
 `er` leaves the cursor and acts on the canvas. **Canvas** in settings picks how:
 
