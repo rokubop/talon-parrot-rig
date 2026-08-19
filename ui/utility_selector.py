@@ -22,8 +22,6 @@ def _make_selector(name: str, util_map: dict, get_current):
         current_mode = get_current()
         keys = list(util_map.keys())
 
-        noise_list = list(legend.keys())
-
         numeric = is_numeric(name)
 
         header_row = tr()[
@@ -39,12 +37,14 @@ def _make_selector(name: str, util_map: dict, get_current):
         ]
 
         cancel_noises = [k for k, v in legend.items() if v == "back"]
-        selector_noises = [k for k, v in legend.items() if v != "back"]
+        # By label, not position: a pinned option sits wherever it was pinned,
+        # so the legend no longer runs in the same order as the map
+        noise_by_label = {v: k for k, v in legend.items() if v != "back"}
 
         rows = []
         for i, key in enumerate(keys):
             label = util_map[key][0]
-            noise = selector_noises[i] if i < len(selector_noises) else ""
+            noise = noise_by_label.get(label, "")
             is_selected = key == current_mode
             bg = UI_SELECTED_COLOR if is_selected else None
 
