@@ -27,19 +27,30 @@ SCROLL_EXTREME_KEYS = {
 
 # Window mode. Whatever your window manager uses.
 WINDOW_KEYS = {
-    "switch":       "alt-`",
-    "left":         "super-left",
-    "right":        "super-right",
-    "up":           "super-up",
-    "down":         "super-down",
-    "screen_left":  "super-shift-left",
-    "screen_right": "super-shift-right",
-    "tab_next":     "ctrl-tab",
-    "tab_prev":     "ctrl-shift-tab",
+    "picker":   "alt-`",
+    "tab_next": "ctrl-tab",
+    "tab_prev": "ctrl-shift-tab",
+    "tab_close": "ctrl-w",
+    "close":    "alt-f4",
+}
+
+# Sent while super is held, so a run of these keeps working. Letting super go
+# between them is what makes Windows offer to fill the other half of the screen,
+# and win+arrow stops working until you dismiss it.
+WINDOW_SUPER_KEYS = {
+    "left":         "left",
+    "right":        "right",
+    "up":           "up",
+    "down":         "down",
+    "screen_left":  "shift-left",
+    "screen_right": "shift-right",
 }
 
 # How long alt is held either side of the tab, so the switcher registers
 WINDOW_ALT_TAB_HOLD_MS = 60
+
+# Gap between letting super go and the escape that dismisses snap assist
+WINDOW_SNAP_ASSIST_MS = 80
 
 # Canvas scale. Every wheel tick is a zoom step in most apps, so this runs
 # slower than plain scroll. Boost and burst keep the same ratio to it that the
@@ -116,6 +127,7 @@ MODE_COLORS = {
     "glide": "#578EF5",
     "tracking": "#A7D3FF",
     "window": "#A7D3FF",
+    "window_move": "#FFFF00",
     "canvas_tracking": "#A7D3FF",
     "canvas_stop": "#FF4444",
     "canvas_move": "#FFFF44",

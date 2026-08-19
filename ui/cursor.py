@@ -33,6 +33,7 @@ TRIANGLE_BORDER_INNER = {
 }
 
 CANVAS_SCALE_MODES = {"canvas_scale", "canvas_scale_move"}
+WINDOW_MODES = {"window", "window_move"}
 
 DIAMOND_PATH = "M 12 4 L 20 12 L 12 20 L 4 12 Z"
 
@@ -117,7 +118,7 @@ def cursor_ui():
     mode = state.get("mode")
     is_canvas = mode in CANVAS_MODES
 
-    if mode == "window":
+    if mode in WINDOW_MODES:
         cursor_shape = svg(position="absolute", left=10, top=10)[
             path(d=SQUARE_PATH, fill=cursor_color)
         ]

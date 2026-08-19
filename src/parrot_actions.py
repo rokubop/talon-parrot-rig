@@ -17,6 +17,8 @@ from ..parrot_rig_settings import (
     GLIDE_RELEASE_RATE,
     SCROLL_EXTREME_KEYS,
     WINDOW_KEYS,
+    WINDOW_SUPER_KEYS,
+    WINDOW_SNAP_ASSIST_MS,
     WINDOW_ALT_TAB_HOLD_MS,
     CANVAS_SLOW_MODE_MULTIPLIER,
     CANVAS_BOOST_LONG_AMOUNT,
@@ -60,6 +62,7 @@ class ParrotActions:
         self._canvas_scale_key = None
         self._canvas_scale_last = "ctrl"
         self._canvas_scale_did_start = False
+        self._window_super_held = False
         self._canvas_at = 0.0
 
     def _get_move_speed(self):
@@ -275,18 +278,45 @@ class ParrotActions:
         actions.key(SCROLL_EXTREME_KEYS[direction])
 
     def window_enter(self):
-        """Tracking stays live: the app picker is something you aim at and click."""
+        """Opens the picker on the way in. Tracking stays live because that
+        picker is something you aim at and click."""
         self._canvas_scale_release()
         actions.user.mouse_rig_stop()
         actions.user.mouse_rig_scroll_stop()
         tracking.activate()
         event_manager.set_mode("window")
+        self.window_key("picker")
 
     def window_exit(self):
+        self._window_super_release()
         self.stopper()
 
     def window_key(self, name: str):
+        self._window_super_release()
         actions.key(WINDOW_KEYS[name])
+
+    def window_move(self, name: str):
+        """Super stays down across a run of these, so the next one still lands."""
+        if not self._window_super_held:
+            actions.key("super:down")
+            self._window_super_held = True
+            event_manager.set_mode("window_move")
+        actions.key(WINDOW_SUPER_KEYS[name])
+
+    def _window_super_release(self) -> bool:
+        if not self._window_super_held:
+            return False
+        actions.key("super:up")
+        self._window_super_held = False
+        if event_manager.get_mode() == "window_move":
+            event_manager.set_mode("window")
+        return True
+
+    def window_escape(self):
+        """Letting super go is what raises snap assist, so escape follows it."""
+        if self._window_super_release():
+            actions.sleep(f"{WINDOW_SNAP_ASSIST_MS}ms")
+        actions.key("escape")
 
     def window_alt_tab(self):
         """Alt has to be down before and after the tab or the switcher never
@@ -338,6 +368,7 @@ class ParrotActions:
 
         self.middle_drag_release()
         self._canvas_scale_release()
+        self._window_super_release()
 
         actions.mode.disable("user.parrot_rig")
         actions.mode.enable("command")

@@ -195,7 +195,7 @@ input_map_common = {
     "cluck":  ("exit", actions.user.parrot_rig_exit),
     "tut":        ("exit", actions.user.parrot_rig_exit),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
-    "tut eh":     ("window mode", parrot_actions.window_enter),
+    "tut eh":     ("window mode + picker", parrot_actions.window_enter),
     "tut ah":     ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
     "tut t":      ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
     "tut guh":    ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
@@ -267,22 +267,24 @@ input_map_canvas_move = {
     "hiss_stop:db_50": ("", parrot_actions.canvas_burst_or_brake_stop),
 }
 
-# Tracking stays live here, because switch brings up a picker you aim at.
+# Tracking stays live here, because the app picker is an overlay you aim at.
 input_map_window = {
     **input_map_common,
-    "ah":     ("window left", lambda: parrot_actions.window_key("left")),
-    "oh":     ("window right", lambda: parrot_actions.window_key("right")),
-    "t":      ("window up", lambda: parrot_actions.window_key("up")),
-    "guh":    ("window down", lambda: parrot_actions.window_key("down")),
-    "eh":     ("switch window", lambda: parrot_actions.window_key("switch")),
+    "ah":     ("window left", lambda: parrot_actions.window_move("left")),
+    "oh":     ("window right", lambda: parrot_actions.window_move("right")),
+    "t":      ("window up", lambda: parrot_actions.window_move("up")),
+    "guh":    ("window down", lambda: parrot_actions.window_move("down")),
+    "eh":     ("app picker", lambda: parrot_actions.window_key("picker")),
     "pop":    ("alt tab", parrot_actions.window_alt_tab),
-    "ee":     ("escape", lambda: actions.key("escape")),
+    "ee":     ("release super, escape", parrot_actions.window_escape),
     "palate": ("repeat last", lambda: _repeat_last()),
     "shush:th_90": ("next tab", lambda: parrot_actions.window_key("tab_next")),
     "hiss:th_90":  ("previous tab", lambda: parrot_actions.window_key("tab_prev")),
     "tut":       ("exit window mode", parrot_actions.window_exit),
-    "tut ah":    ("screen left", lambda: parrot_actions.window_key("screen_left")),
-    "tut oh":    ("screen right", lambda: parrot_actions.window_key("screen_right")),
+    "tut t":     ("close tab", lambda: parrot_actions.window_key("tab_close")),
+    "tut cluck": ("close window", lambda: parrot_actions.window_key("close")),
+    "tut ah":    ("screen left", lambda: parrot_actions.window_move("screen_left")),
+    "tut oh":    ("screen right", lambda: parrot_actions.window_move("screen_right")),
 }
 
 # Three pairs, one modifier each, both ways on the vertical wheel. No axis to
