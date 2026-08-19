@@ -1,6 +1,6 @@
 from talon import actions
 from ..src.anchor import anchors
-from ..src.menu import menu_register
+from ..src.menu import menu_back, menu_register
 from ..src.profiles import (
     PROFILE_SLOTS, profile_active, profile_is_locked, profile_names,
 )
@@ -240,7 +240,8 @@ def profile_name_ui(props):
     form, input_text, button = actions.user.ui_elements(["form", "input_text", "button"])
 
     def on_submit(event):
-        actions.user.parrot_rig_profile_name_submit(event.data.get("profile_name", ""))
+        from ..parrot_rig_actions import _profile_name_submit
+        _profile_name_submit(event.data.get("profile_name", ""))
 
     return screen(justify_content="center", align_items="center")[
         window(id="profile_name", title="Save profile", padding=0)[
@@ -250,7 +251,7 @@ def profile_name_ui(props):
                     input_text(id="profile_name", autofocus=True),
                     div(flex_direction="row", gap=8, justify_content="flex_end")[
                         button("Save", type="submit"),
-                        button("Cancel", on_click=lambda e: actions.user.parrot_rig_menu_back()),
+                        button("Cancel", on_click=lambda e: menu_back()),
                     ],
                 ]
             ]
@@ -268,7 +269,8 @@ def setting_custom_ui(props):
     current = setting_number_text(name) if name else ""
 
     def on_submit(event):
-        actions.user.parrot_rig_setting_custom_submit(event.data.get("setting_custom", ""))
+        from ..parrot_rig_actions import _setting_custom_submit
+        _setting_custom_submit(event.data.get("setting_custom", ""))
 
     return screen(justify_content="center", align_items="center")[
         window(id="setting_custom", title=f"{title} custom", padding=0)[
@@ -278,7 +280,7 @@ def setting_custom_ui(props):
                     input_text(id="setting_custom", autofocus=True),
                     div(flex_direction="row", gap=8, justify_content="flex_end")[
                         button("Set", type="submit"),
-                        button("Cancel", on_click=lambda e: actions.user.parrot_rig_menu_back()),
+                        button("Cancel", on_click=lambda e: menu_back()),
                     ],
                 ]
             ]

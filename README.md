@@ -1,6 +1,6 @@
 # Parrot Rig
 
-![Version](https://img.shields.io/badge/version-1.5.0-blue)
+![Version](https://img.shields.io/badge/version-2.0.0-blue)
 ![Status](https://img.shields.io/badge/status-experimental-orange)
 ![License](https://img.shields.io/badge/license-Unlicense-green)
 
@@ -178,9 +178,9 @@ You'll edit 3 files. In each file, replace every occurrence of the old noise nam
 
 ```python
 # before
-"pop":    ("click exit", actions.user.parrot_rig_click_exit),
+"pop":    ("click exit", parrot_actions.click_exit),
 # after
-"alveolar_click":  ("click exit", actions.user.parrot_rig_click_exit),
+"alveolar_click":  ("click exit", parrot_actions.click_exit),
 ```
 
 Replace all instances of that noise throughout the file (it appears in multiple mode maps).
@@ -233,7 +233,7 @@ To assign a utility to a noise, add two entries in `parrot_rig_actions.py` in `i
 
 ```python
 "palate":     ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),              # fires the active action
-"tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1", "palate")),  # opens the picker
+"tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1")),  # opens the picker
 ```
 
 To use it, just make the noise - it fires the currently selected action. To change which action is selected, use the selector combo to open a picker, then make one of the selector noises to choose an option. The first key in each map is the default on startup.

@@ -74,11 +74,12 @@ setting_maps = {
         "gentle": ("Gentle",),
         "custom": ("Custom",),
     },
-    # A second tuple entry names an action to run instead of setting the value
+    # A second tuple entry names a SETTING_ACTIONS entry to run instead of
+    # setting the value
     "anchor_move": {
         "smooth":  ("Over Time",),
         "instant": ("Instant",),
-        "clear":   ("Clear All", "parrot_rig_anchor_clear_all"),
+        "clear":   ("Clear All", "anchor_clear_all"),
     },
     # What return does empty handed, with no anchors of your own and no snap
     # rule. Click & Exit hands control back. Screen Anchors falls back to the

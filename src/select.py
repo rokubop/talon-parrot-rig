@@ -24,14 +24,12 @@ def utility_input_maps(maps: dict, ui_selectors: list, ui_cancel: list,
     ui_selectors: noises mapped to slots in order
     ui_cancel: noises that close the selector
     select: (name, slot) -> None, defaults to picking a utility action
-    close: (name) -> None, defaults to closing a utility selector
+    close: (name) -> None, required
 
     Returns a dict with "{mode_name}_select" keys to spread into the main input_map.
     """
     if select is None:
         select = lambda n, i: actions.user.parrot_rig_utility_select(n, i)
-    if close is None:
-        close = lambda n: actions.user.parrot_rig_utility_select_close(n)
 
     result = {}
     for name, util_map in maps.items():
