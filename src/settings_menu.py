@@ -31,29 +31,6 @@ setting_maps = {
         "drag":   ("Drag",),
         "scale":  ("Scale",),
     },
-    # Canvas scale. Each parrot axis picks a modifier and which wheel it sends.
-    # Apps mostly read the vertical wheel and tell the gestures apart by the
-    # modifier, so both axes default to it and only the modifier differs.
-    "canvas_scale_y_mod": {
-        "ctrl":  ("Ctrl",),
-        "shift": ("Shift",),
-        "alt":   ("Alt",),
-        "none":  ("None",),
-    },
-    "canvas_scale_y_wheel": {
-        "vertical":   ("Wheel Up/Down",),
-        "horizontal": ("Wheel Side",),
-    },
-    "canvas_scale_x_mod": {
-        "shift": ("Shift",),
-        "ctrl":  ("Ctrl",),
-        "alt":   ("Alt",),
-        "none":  ("None",),
-    },
-    "canvas_scale_x_wheel": {
-        "vertical":   ("Wheel Up/Down",),
-        "horizontal": ("Wheel Side",),
-    },
     "move_mode": {
         "orthogonal":   ("Orthogonal",),
         "always_glide": ("Always Glide",),
@@ -93,10 +70,6 @@ setting_maps = {
 SETTING_TITLES = {
     "click_freeze": "Click",
     "canvas_mode": "Canvas",
-    "canvas_scale_y_mod": "Y Modifier",
-    "canvas_scale_y_wheel": "Y Wheel",
-    "canvas_scale_x_mod": "X Modifier",
-    "canvas_scale_x_wheel": "X Wheel",
     "move_mode": "Move",
     "turn_speed": "Turn",
     "anchor_move": "Anchor",
@@ -152,11 +125,6 @@ def setting_set(name: str, value: str):
 def setting_label(name: str, value: str = None) -> str:
     """Display label for a setting value (defaults to the current one)."""
     return setting_maps[name][value or setting_get(name)][0]
-
-
-def canvas_scale_axis(axis: str) -> tuple:
-    """(modifier, wheel) for the "y" or "x" axis. Modifier may be "none"."""
-    return setting_get(f"canvas_scale_{axis}_mod"), setting_get(f"canvas_scale_{axis}_wheel")
 
 
 def setting_title(name: str) -> str:

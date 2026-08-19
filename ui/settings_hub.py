@@ -43,7 +43,7 @@ def menu_value(name: str) -> str:
         return setting_label(name)
     if name == "profiles":
         return profile_active()
-    if name in ("speeds", "canvas_scale"):
+    if name == "speeds":
         return ""
     from ..parrot_rig_actions import utility_maps
     util_map = utility_maps.get(name)
@@ -134,14 +134,8 @@ def _speed_menus():
     return SPEED_MENUS
 
 
-def _canvas_scale_menus():
-    from ..parrot_rig_actions import CANVAS_SCALE_MENUS
-    return CANVAS_SCALE_MENUS
-
-
 hub_ui = _make_menu_list("settings_hub", "Settings (tut palate)", _hub_menus, "Close")
 speeds_ui = _make_menu_list("speeds_menu", "Speeds", _speed_menus, "Back")
-canvas_scale_ui = _make_menu_list("canvas_scale_menu", "Canvas Scale", _canvas_scale_menus, "Back")
 
 
 def profiles_ui(props):
@@ -336,17 +330,8 @@ def hide_anchor_kind():
     actions.user.ui_elements_hide(anchor_kind_ui)
 
 
-def show_canvas_scale():
-    actions.user.ui_elements_show(canvas_scale_ui, show_hints=False)
-
-
-def hide_canvas_scale():
-    actions.user.ui_elements_hide(canvas_scale_ui)
-
-
 menu_register("hub", show_hub, hide_hub)
 menu_register("speeds", show_speeds, hide_speeds)
-menu_register("canvas_scale", show_canvas_scale, hide_canvas_scale)
 menu_register("anchor_kind", show_anchor_kind, hide_anchor_kind)
 menu_register("profiles", show_profiles, hide_profiles)
 menu_register("profile_name", show_profile_name, hide_profile_name)

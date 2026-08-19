@@ -29,13 +29,11 @@ CHANNEL = "parrot_rig"
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
 
 HUB_MENUS = [
-    "click_freeze", "speeds", "move_mode", "canvas_mode", "canvas_scale",
+    "click_freeze", "speeds", "move_mode", "canvas_mode",
     "anchor_move", "return_fallback", "utility_1", "profiles",
 ]
 
 SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "canvas_move_speed", "boost_power"]
-
-CANVAS_SCALE_MENUS = ["canvas_scale_y_mod", "canvas_scale_y_wheel", "canvas_scale_x_mod", "canvas_scale_x_wheel"]
 
 # A line anchor pins one coordinate and leaves the other alone, so return lands
 # on the closest point of the line rather than one spot.
@@ -50,7 +48,6 @@ MENU_TITLES = {
     "utility_1": "Palate",
     "profiles": "Profiles",
     "speeds": "Speeds",
-    "canvas_scale": "Canvas Scale",
 }
 
 # Wiring the input map and the UI call directly. The public surface is the
@@ -161,8 +158,31 @@ def _anchor_chase(action):
     return lambda: None if _anchor_chase_open() else action()
 
 
+# Last input that fired. Input map announces every one, so repeating is
+# looking that key back up and calling what it holds.
+_last_input = None
+
+
+def _on_input(event):
+    global _last_input
+    if event.type != "input" or event.label in ("", "repeat last"):
+        return
+    _last_input = (event.mode, event.input)
+
+
+def _repeat_last():
+    if not _last_input:
+        return
+    mode, key = _last_input
+    entries = input_map.get(mode) or {}
+    # Keys carry their throttle and debounce suffixes, the event does not
+    entry = next((v for k, v in entries.items() if k.split(":")[0] == key), None)
+    if entry:
+        entry[1]()
+
+
 input_map_common = {
-    "ee":     ("stop", actions.user.parrot_rig_stop),
+    "ee":     ("stop, or reset when already stopped", parrot_actions.stop_or_reset),
     "mm":     ("click", actions.user.parrot_rig_click),
     "pop":    ("anchor / snap / click exit", parrot_actions.return_action),
     "ah":     ("move left", lambda: actions.user.parrot_rig_move("left")),
@@ -173,9 +193,9 @@ input_map_common = {
     "er":     ("canvas mode", parrot_actions.canvas_toggle),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     "cluck":  ("exit", actions.user.parrot_rig_exit),
-    "tut":        ("reset slow", parrot_actions.reset_speed_level),
+    "tut":        ("exit", actions.user.parrot_rig_exit),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
-    "tut ee":     ("disable modifiers", parrot_actions.disable_modifiers),
+    "tut eh":     ("window mode", parrot_actions.window_enter),
     "tut ah":     ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
     "tut t":      ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
     "tut guh":    ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
@@ -238,7 +258,8 @@ input_map_canvas_move = {
     "t":          ("canvas up or slow", lambda: parrot_actions.canvas_move_or_slow_dir("up")),
     "guh":        ("canvas down or slow", lambda: parrot_actions.canvas_move_or_slow_dir("down")),
     "eh":         ("toggle canvas glide", parrot_actions.canvas_toggle_glide),
-    "ee":         ("canvas stop", parrot_actions.canvas_stop),
+    "ee":         ("canvas stop, or reset when already stopped",
+                   lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_stop)),
     "mm":         ("click", actions.user.parrot_rig_click),
     "shush":      ("canvas boost long", _anchor_chase(parrot_actions.canvas_boost_long)),
     "shush_stop": ("", lambda: None),
@@ -246,23 +267,47 @@ input_map_canvas_move = {
     "hiss_stop:db_50": ("", parrot_actions.canvas_burst_or_brake_stop),
 }
 
+# Tracking stays live here, because switch brings up a picker you aim at.
+input_map_window = {
+    **input_map_common,
+    "ah":     ("window left", lambda: parrot_actions.window_key("left")),
+    "oh":     ("window right", lambda: parrot_actions.window_key("right")),
+    "t":      ("window up", lambda: parrot_actions.window_key("up")),
+    "guh":    ("window down", lambda: parrot_actions.window_key("down")),
+    "eh":     ("switch window", lambda: parrot_actions.window_key("switch")),
+    "pop":    ("alt tab", parrot_actions.window_alt_tab),
+    "ee":     ("escape", lambda: actions.key("escape")),
+    "palate": ("repeat last", lambda: _repeat_last()),
+    "shush:th_90": ("next tab", lambda: parrot_actions.window_key("tab_next")),
+    "hiss:th_90":  ("previous tab", lambda: parrot_actions.window_key("tab_prev")),
+    "tut":       ("exit window mode", parrot_actions.window_exit),
+    "tut ah":    ("screen left", lambda: parrot_actions.window_key("screen_left")),
+    "tut oh":    ("screen right", lambda: parrot_actions.window_key("screen_right")),
+}
+
+# Three pairs, one modifier each, both ways on the vertical wheel. No axis to
+# choose, because that is the only wheel apps read for these gestures.
 input_map_canvas_scale = {
     **input_map_common,
-    "ah":     ("scale x left", lambda: parrot_actions.canvas_scale_dir("left")),
-    "oh":     ("scale x right", lambda: parrot_actions.canvas_scale_dir("right")),
-    "t":      ("scale y up", lambda: parrot_actions.canvas_scale_dir("up")),
-    "guh":    ("scale y down", lambda: parrot_actions.canvas_scale_dir("down")),
-    "ee":     ("stop, stay in canvas scale", parrot_actions.canvas_scale_stop),
-    "er":     ("exit canvas scale", parrot_actions.canvas_scale_toggle),
-    "hiss":              ("plain scroll down", lambda: parrot_actions.canvas_scale_plain("down")),
-    "hiss_stop:db_170":  ("", parrot_actions.scroll_stop),
-    "shush":             ("plain scroll up", _anchor_chase(lambda: parrot_actions.canvas_scale_plain("up"))),
-    "shush_stop:db_170": ("", parrot_actions.scroll_stop),
+    "oh":     ("alt up", lambda: parrot_actions.canvas_scale_dir("alt", "up")),
+    "ah":     ("alt down", lambda: parrot_actions.canvas_scale_dir("alt", "down")),
+    "t":      ("ctrl up", lambda: parrot_actions.canvas_scale_dir("ctrl", "up")),
+    "guh":    ("ctrl down", lambda: parrot_actions.canvas_scale_dir("ctrl", "down")),
+    "eh":     ("shift up", lambda: parrot_actions.canvas_scale_dir("shift", "up")),
+    "er":     ("shift down", lambda: parrot_actions.canvas_scale_dir("shift", "down")),
+    "ee":     ("stop, stay in canvas scale",
+               lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_scale_stop)),
+    "tut":    ("exit canvas scale", parrot_actions.canvas_scale_toggle),
+    "shush":             ("boost, else scale up", _anchor_chase(parrot_actions.canvas_scale_boost)),
+    "shush_stop":        ("", lambda: None),
+    "hiss":              ("burst or brake, else scale down", parrot_actions.canvas_scale_burst_or_brake),
+    "hiss_stop:db_50":   ("", parrot_actions.canvas_scale_burst_or_brake_stop),
 }
 
 input_map_canvas_tracking = {
     **input_map_canvas_stop,
-    "ee":         ("canvas stop", parrot_actions.canvas_stop),
+    "ee":         ("canvas stop, or reset when already stopped",
+                   lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_stop)),
     "mm":         ("click (pause track)", actions.user.parrot_rig_click),
     "er":         ("exit canvas mode", parrot_actions.canvas_move_toggle),
 }
@@ -334,9 +379,9 @@ input_map = {
     "canvas_move": input_map_canvas_move,
     "canvas_tracking": input_map_canvas_tracking,
     "canvas_scale": input_map_canvas_scale,
+    "window": input_map_window,
     "hub_select": _menu_list_input_map(HUB_MENUS, "close"),
     "speeds_select": _menu_list_input_map(SPEED_MENUS),
-    "canvas_scale_select": _menu_list_input_map(CANVAS_SCALE_MENUS),
     "anchor_kind_select": _anchor_kind_input_map(),
     "profiles_select": _profiles_input_map(),
     "profile_name_select": _typing_input_map(),
@@ -360,6 +405,8 @@ def channel_init():
     """Register the parrot_rig channel if not already registered."""
     if CHANNEL not in actions.user.input_map_channel_list():
         actions.user.input_map_channel_register(CHANNEL, input_map)
+    actions.user.input_map_channel_event_unregister(CHANNEL, _on_input)
+    actions.user.input_map_channel_event_register(CHANNEL, _on_input)
 
 def channel_reset():
     """Unregister and re-register the channel with fresh data."""

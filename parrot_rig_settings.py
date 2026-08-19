@@ -25,9 +25,28 @@ SCROLL_EXTREME_KEYS = {
     "down": "ctrl-end",
 }
 
+# Window mode. Whatever your window manager uses.
+WINDOW_KEYS = {
+    "switch":       "alt-`",
+    "left":         "super-left",
+    "right":        "super-right",
+    "up":           "super-up",
+    "down":         "super-down",
+    "screen_left":  "super-shift-left",
+    "screen_right": "super-shift-right",
+    "tab_next":     "ctrl-tab",
+    "tab_prev":     "ctrl-shift-tab",
+}
+
+# How long alt is held either side of the tab, so the switcher registers
+WINDOW_ALT_TAB_HOLD_MS = 60
+
 # Canvas scale. Every wheel tick is a zoom step in most apps, so this runs
-# slower than plain scroll.
+# slower than plain scroll. Boost and burst keep the same ratio to it that the
+# canvas move ones keep to canvas speed.
 CANVAS_SCALE_SPEED = 0.015
+CANVAS_SCALE_BOOST_AMOUNT = 0.15
+CANVAS_SCALE_BURST_AMOUNT = 0.3
 
 # How long after entering canvas mode the follow-up noise still means "canvas
 # scale" instead of its normal action. Matches the input map combo window,
@@ -96,6 +115,7 @@ MODE_COLORS = {
     "boost": "#2AE33C",
     "glide": "#578EF5",
     "tracking": "#A7D3FF",
+    "window": "#A7D3FF",
     "canvas_tracking": "#A7D3FF",
     "canvas_stop": "#FF4444",
     "canvas_move": "#FFFF44",

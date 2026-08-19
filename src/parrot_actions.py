@@ -16,6 +16,8 @@ from ..parrot_rig_settings import (
     BRAKE_REVERT_MS,
     GLIDE_RELEASE_RATE,
     SCROLL_EXTREME_KEYS,
+    WINDOW_KEYS,
+    WINDOW_ALT_TAB_HOLD_MS,
     CANVAS_SLOW_MODE_MULTIPLIER,
     CANVAS_BOOST_LONG_AMOUNT,
     CANVAS_BOOST_LONG_OVER_MS,
@@ -26,6 +28,8 @@ from ..parrot_rig_settings import (
     CANVAS_RAMP_REVERT_MS,
     CANVAS_GLIDE_RELEASE_RATE,
     CANVAS_SCALE_SPEED,
+    CANVAS_SCALE_BOOST_AMOUNT,
+    CANVAS_SCALE_BURST_AMOUNT,
     CANVAS_SCALE_CHASE_MS,
     TRACKING_STOP_MS,
     CLICK_BEHAVIOR,
@@ -33,18 +37,11 @@ from ..parrot_rig_settings import (
 from .utils import reload_files
 from .settings_menu import (
     setting_get, setting_set, setting_label, setting_title,
-    setting_number, turn_scale, boost_scale, canvas_scale_axis,
+    setting_number, turn_scale, boost_scale,
 )
 from .menu import menu_reset
 from .anchor import anchor_go, anchor_go_screen, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
-
-# Which wheel event a parrot direction sends, per the axis wheel setting. Apps
-# mostly read the vertical wheel, so a sideways parrot direction still sends it.
-CANVAS_SCALE_WHEEL = {
-    "vertical":   {"up": "up", "down": "down", "left": "up", "right": "down"},
-    "horizontal": {"up": "left", "down": "right", "left": "left", "right": "right"},
-}
 
 # Stopped and scaling, so the cursor color reads like the other families
 CANVAS_SCALE_MODES = ("canvas_scale", "canvas_scale_move")
@@ -61,6 +58,8 @@ class ParrotActions:
         self._burst_or_brake_did_break = False
         self._canvas_burst_or_brake_did_break = False
         self._canvas_scale_key = None
+        self._canvas_scale_last = "ctrl"
+        self._canvas_scale_did_start = False
         self._canvas_at = 0.0
 
     def _get_move_speed(self):
@@ -275,6 +274,29 @@ class ParrotActions:
         actions.user.mouse_rig_scroll_stop()
         actions.key(SCROLL_EXTREME_KEYS[direction])
 
+    def window_enter(self):
+        """Tracking stays live: the app picker is something you aim at and click."""
+        self._canvas_scale_release()
+        actions.user.mouse_rig_stop()
+        actions.user.mouse_rig_scroll_stop()
+        tracking.activate()
+        event_manager.set_mode("window")
+
+    def window_exit(self):
+        self.stopper()
+
+    def window_key(self, name: str):
+        actions.key(WINDOW_KEYS[name])
+
+    def window_alt_tab(self):
+        """Alt has to be down before and after the tab or the switcher never
+        comes up, so this is held rather than sent as one chord."""
+        actions.key("alt:down")
+        actions.sleep(f"{WINDOW_ALT_TAB_HOLD_MS}ms")
+        actions.key("tab")
+        actions.sleep(f"{WINDOW_ALT_TAB_HOLD_MS}ms")
+        actions.key("alt:up")
+
     def scroll_stop_temp(self):
         actions.user.mouse_rig_scroll_stop()
         self.stop_temporarily()
@@ -357,6 +379,28 @@ class ParrotActions:
         keys.clear_modifiers()
         event_manager.clear_modifiers()
 
+    def is_idle(self) -> bool:
+        return not (
+            actions.user.mouse_rig_state_is_moving()
+            or actions.user.mouse_rig_state_is_scrolling()
+            or tracking.is_tracking
+        )
+
+    def full_reset(self):
+        self.disable_modifiers()
+        self._canvas_scale_release()
+        self._move_speed_level = 0
+        self._canvas_speed_level = 0
+        self._emit_speed_level()
+
+    def stop_or_reset(self, stop=None):
+        """Stop what is running. Standing still already, this is the reset
+        instead, which is what frees the bare tut."""
+        if self.is_idle():
+            self.full_reset()
+            return
+        (stop or self.stopper)()
+
     def stopper(self, stop_tracking=True, stop_moving=True, stop_scrolling=True, reset_mode=True):
         if stop_moving:
             actions.user.mouse_rig_stop()
@@ -432,25 +476,53 @@ class ParrotActions:
             event_manager.set_mode("canvas_scale")
             self._emit_speed_level()
 
-    def canvas_scale_dir(self, direction: str):
-        """Scroll with the axis modifier held, so the app scales the canvas."""
-        modifier, wheel_axis = canvas_scale_axis("y" if direction in ("up", "down") else "x")
+    def canvas_scale_dir(self, modifier: str, wheel: str):
+        """Scroll with a modifier held, so the app scales the canvas. Each pair
+        of noises owns one modifier and sends the vertical wheel both ways,
+        which is the gesture apps actually listen for."""
         self._canvas_scale_hold(modifier)
-        wheel = CANVAS_SCALE_WHEEL[wheel_axis][direction]
+        self._canvas_scale_last = modifier
         actions.user.mouse_rig_scroll_continuous(wheel, CANVAS_SCALE_SPEED, force=True)
         self._scroll_direction = wheel
         event_manager.set_mode("canvas_scale_move")
+        event_manager.emit("scale_modifier_changed", {"modifier": modifier})
+
+    def canvas_scale_boost(self):
+        """Boost while scaling, else scale up with the last modifier."""
+        if event_manager.get_mode() != "canvas_scale_move":
+            self.canvas_scale_dir(self._canvas_scale_last, "up")
+            return
+        amount = CANVAS_SCALE_BOOST_AMOUNT * boost_scale()
+        actions.user.mouse_rig_scroll_boost(
+            amount,
+            over_ms=CANVAS_BOOST_LONG_OVER_MS,
+            release_ms=CANVAS_BOOST_LONG_RELEASE_MS,
+        )
+
+    def canvas_scale_burst_or_brake(self):
+        """Burst while scaling, else scale down with the last modifier."""
+        if event_manager.get_mode() != "canvas_scale_move":
+            self.canvas_scale_dir(self._canvas_scale_last, "down")
+            self._canvas_scale_did_start = True
+            return
+        self._canvas_scale_did_start = False
+        rig = actions.user.mouse_rig()
+        rig.layer("hiss_canvas_scale").stack(1).scroll.speed.offset.add(
+            CANVAS_SCALE_BURST_AMOUNT * boost_scale()
+        )
+
+    def canvas_scale_burst_or_brake_stop(self):
+        if self._canvas_scale_did_start:
+            self._canvas_scale_did_start = False
+            return
+        rig = actions.user.mouse_rig()
+        rig.layer("hiss_canvas_scale").revert(CANVAS_BRAKE_REVERT_MS, "ease_out2")
 
     def canvas_scale_stop(self):
         actions.user.mouse_rig_scroll_stop()
         self._canvas_scale_release()
         if event_manager.get_mode() == "canvas_scale_move":
             event_manager.set_mode("canvas_scale")
-
-    def canvas_scale_plain(self, direction: str):
-        """Ordinary scroll from inside canvas scale, no modifier held."""
-        self._canvas_scale_release()
-        self.scroll(direction)
 
     def _canvas_scale_hold(self, modifier: str):
         if self._canvas_scale_key == modifier:
