@@ -33,7 +33,7 @@ TRIANGLE_BORDER_INNER = {
 }
 
 CANVAS_SCALE_MODES = {"canvas_scale", "canvas_scale_move"}
-WINDOW_MODES = {"window", "window_move"}
+WINDOW_MODES = {"window", "window_move", "window_stop"}
 
 DIAMOND_PATH = "M 12 4 L 20 12 L 12 20 L 4 12 Z"
 

@@ -278,14 +278,28 @@ class ParrotActions:
         actions.key(SCROLL_EXTREME_KEYS[direction])
 
     def window_enter(self):
-        """Opens the picker on the way in. Tracking stays live because that
-        picker is something you aim at and click."""
         self._canvas_scale_release()
         actions.user.mouse_rig_stop()
         actions.user.mouse_rig_scroll_stop()
+        self.window_picker()
+
+    def window_enter_stopped(self):
+        """Window mode with nothing else: no picker, no tracking. Through
+        "window" first, since the stopped state only carries the colour and
+        leans on the bindings that mode switched in."""
+        self._canvas_scale_release()
+        actions.user.mouse_rig_stop()
+        actions.user.mouse_rig_scroll_stop()
+        tracking.freeze()
+        event_manager.set_mode("window")
+        event_manager.set_mode("window_stop")
+
+    def window_picker(self):
+        """The picker is an overlay you aim at, so this tracks."""
+        self._window_super_release()
         tracking.activate()
         event_manager.set_mode("window")
-        self.window_key("picker")
+        actions.key(WINDOW_KEYS["picker"])
 
     def window_exit(self):
         self._window_super_release()
@@ -317,6 +331,9 @@ class ParrotActions:
         if self._window_super_release():
             actions.sleep(f"{WINDOW_SNAP_ASSIST_MS}ms")
         actions.key("escape")
+        actions.user.mouse_rig_stop()
+        tracking.freeze()
+        event_manager.set_mode("window_stop")
 
     def window_alt_tab(self):
         """Alt has to be down before and after the tab or the switcher never

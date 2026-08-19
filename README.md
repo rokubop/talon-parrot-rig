@@ -111,8 +111,9 @@ stopped. `hiss` is burst or brake, and scales down when stopped. `tut` leaves.
 
 ### Window mode
 
-`tut eh` opens the app picker and stays in window mode. Tracking stays live,
-because the picker is an overlay you aim at and click.
+`tut eh` opens the app picker and stays in window mode, tracking, because the
+picker is an overlay you aim at and click. `tut ee` enters cold instead: no
+picker, no tracking.
 
 | Noise | Does |
 |-------|------|
@@ -121,17 +122,17 @@ because the picker is an overlay you aim at and click.
 | `tut ah` / `tut oh` | Move to the screen left / right |
 | `tut t` | Close tab |
 | `cluck` | Close window |
-| `eh` | App picker |
+| `eh` | App picker, tracking |
 | `pop` | Alt tab |
 | `shush` / `hiss` | Next / previous tab |
-| `ee` | Let super go, then escape |
+| `ee` | Let super go, escape, stop |
 | `palate` | Repeat the last action |
 | `tut` | Leave, stopped |
 
-A window move holds super down and keeps it there, so a run of them keeps
-working. The cursor turns yellow while it is held. Letting go is what makes
-Windows offer to fill the other half of the screen, so `ee` releases it and
-sends escape to dismiss that.
+The cursor follows the usual colours: light blue tracking, red stopped, yellow
+while a window move holds super down. Super stays down across a run of moves,
+because letting go is what makes Windows offer to fill the other half of the
+screen, and `ee` releases it and sends escape to dismiss that.
 
 Keys are in `WINDOW_KEYS` in [parrot_rig_settings.py](./parrot_rig_settings.py),
 since window managers differ.

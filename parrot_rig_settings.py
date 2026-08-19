@@ -128,6 +128,7 @@ MODE_COLORS = {
     "tracking": "#A7D3FF",
     "window": "#A7D3FF",
     "window_move": "#FFFF00",
+    "window_stop": "#FF0000",
     "canvas_tracking": "#A7D3FF",
     "canvas_stop": "#FF4444",
     "canvas_move": "#FFFF44",
