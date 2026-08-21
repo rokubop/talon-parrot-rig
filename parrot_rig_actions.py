@@ -184,9 +184,9 @@ def _repeat_last():
 
 
 input_map_common = {
-    "ee":     ("stop, or reset when already stopped", parrot_actions.stop_or_reset),
+    "ee":     ("stop / reset", parrot_actions.stop_or_reset),
     "mm":     ("click", actions.user.parrot_rig_click),
-    "pop":    ("anchor / snap / click exit", parrot_actions.return_action),
+    "pop":    ("return", parrot_actions.return_action),
     "ah":     ("move left", lambda: actions.user.parrot_rig_move("left")),
     "oh":     ("move right", lambda: actions.user.parrot_rig_move("right")),
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
@@ -195,7 +195,7 @@ input_map_common = {
     "er":     ("mode swap", parrot_actions.alt_mode_toggle),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     EXIT_NOISE: ("exit", actions.user.parrot_rig_exit),
-    "tut":        ("cancel, else exit", parrot_actions.cancel),
+    "tut":        ("cancel / exit", parrot_actions.cancel),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
     "tut eh":     ("window pick", lambda: parrot_actions.alt_mode_open("window_pick")),
     "tut ee":     ("window control", lambda: parrot_actions.alt_mode_open("window_control")),
@@ -220,24 +220,24 @@ input_map_default = {
 
 input_map_move = {
     **input_map_common,
-    "ah":         ("move left or slow", lambda: parrot_actions.mouse_move_or_slow_dir("left")),
-    "oh":         ("move right or slow", lambda: parrot_actions.mouse_move_or_slow_dir("right")),
-    "t":          ("move up or slow", lambda: parrot_actions.mouse_move_or_slow_dir("up")),
-    "guh":        ("move down or slow", lambda: parrot_actions.mouse_move_or_slow_dir("down")),
-    "eh":         ("toggle glide / lock turn", parrot_actions.mouse_toggle_glide),
+    "ah":         ("move left / slow", lambda: parrot_actions.mouse_move_or_slow_dir("left")),
+    "oh":         ("move right / slow", lambda: parrot_actions.mouse_move_or_slow_dir("right")),
+    "t":          ("move up / slow", lambda: parrot_actions.mouse_move_or_slow_dir("up")),
+    "guh":        ("move down / slow", lambda: parrot_actions.mouse_move_or_slow_dir("down")),
+    "eh":         ("glide / lock turn", parrot_actions.mouse_toggle_glide),
     "mm":         ("click", actions.user.parrot_rig_click),
-    "shush":      ("boost long", _anchor_chase(parrot_actions.mouse_boost_long)),
+    "shush":      ("boost", _anchor_chase(parrot_actions.mouse_boost_long)),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("burst or brake", parrot_actions.mouse_burst_or_brake),
+    "hiss":            ("burst / brake", parrot_actions.mouse_burst_or_brake),
     "hiss_stop:db_50": ("", parrot_actions.mouse_burst_or_brake_stop),
 }
 
 input_map_tracking = {
     **input_map_common,
-    "mm":                ("click (pause track)", actions.user.parrot_rig_click),
-    "hiss":              ("scroll down (pause track)", lambda: parrot_actions.scroll("down")),
+    "mm":                ("click (pause)", actions.user.parrot_rig_click),
+    "hiss":              ("scroll down (pause)", lambda: parrot_actions.scroll("down")),
     "hiss_stop:db_170":  ("", parrot_actions.scroll_stop_temp),
-    "shush":             ("scroll up (pause track)", _anchor_chase(lambda: parrot_actions.scroll("up"))),
+    "shush":             ("scroll up (pause)", _anchor_chase(lambda: parrot_actions.scroll("up"))),
     "shush_stop:db_170": ("", parrot_actions.scroll_stop_temp),
 }
 
@@ -256,17 +256,17 @@ input_map_canvas_stop = {
 
 input_map_canvas_move = {
     **input_map_common,
-    "ah":         ("canvas left or slow", lambda: parrot_actions.canvas_move_or_slow_dir("left")),
-    "oh":         ("canvas right or slow", lambda: parrot_actions.canvas_move_or_slow_dir("right")),
-    "t":          ("canvas up or slow", lambda: parrot_actions.canvas_move_or_slow_dir("up")),
-    "guh":        ("canvas down or slow", lambda: parrot_actions.canvas_move_or_slow_dir("down")),
-    "eh":         ("toggle canvas glide", parrot_actions.canvas_toggle_glide),
-    "ee":         ("canvas stop, or reset when already stopped",
+    "ah":         ("canvas left / slow", lambda: parrot_actions.canvas_move_or_slow_dir("left")),
+    "oh":         ("canvas right / slow", lambda: parrot_actions.canvas_move_or_slow_dir("right")),
+    "t":          ("canvas up / slow", lambda: parrot_actions.canvas_move_or_slow_dir("up")),
+    "guh":        ("canvas down / slow", lambda: parrot_actions.canvas_move_or_slow_dir("down")),
+    "eh":         ("canvas glide", parrot_actions.canvas_toggle_glide),
+    "ee":         ("canvas stop / reset",
                    lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_stop)),
     "mm":         ("click", actions.user.parrot_rig_click),
-    "shush":      ("canvas boost long", _anchor_chase(parrot_actions.canvas_boost_long)),
+    "shush":      ("canvas boost", _anchor_chase(parrot_actions.canvas_boost_long)),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("canvas burst or brake", parrot_actions.canvas_burst_or_brake),
+    "hiss":            ("canvas burst / brake", parrot_actions.canvas_burst_or_brake),
     "hiss_stop:db_50": ("", parrot_actions.canvas_burst_or_brake_stop),
 }
 
@@ -279,7 +279,7 @@ input_map_window = {
     "guh":    ("window down", lambda: parrot_actions.window_move("down")),
     "eh":     ("app picker", parrot_actions.window_picker),
     "pop":    ("alt tab", parrot_actions.window_alt_tab),
-    "ee":     ("release super, escape", parrot_actions.window_escape),
+    "ee":     ("escape", parrot_actions.window_escape),
     "palate": ("repeat last", lambda: _repeat_last()),
     "shush:th_90": ("next tab", lambda: parrot_actions.window_key("tab_next")),
     "hiss:th_90":  ("previous tab", lambda: parrot_actions.window_key("tab_prev")),
@@ -300,19 +300,19 @@ input_map_canvas_scale = {
     "guh":    ("ctrl down", lambda: parrot_actions.canvas_scale_dir("ctrl", "down")),
     "pop":    ("shift up", lambda: parrot_actions.canvas_scale_dir("shift", "up")),
     "palate": ("shift down", lambda: parrot_actions.canvas_scale_dir("shift", "down")),
-    "ee":     ("stop, stay in canvas scale",
+    "ee":     ("stop",
                lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_scale_stop)),
-    "shush":             ("boost, else scale up", _anchor_chase(parrot_actions.canvas_scale_boost)),
+    "shush":             ("boost / scale up", _anchor_chase(parrot_actions.canvas_scale_boost)),
     "shush_stop":        ("", lambda: None),
-    "hiss":              ("burst or brake, else scale down", parrot_actions.canvas_scale_burst_or_brake),
+    "hiss":              ("burst / scale down", parrot_actions.canvas_scale_burst_or_brake),
     "hiss_stop:db_50":   ("", parrot_actions.canvas_scale_burst_or_brake_stop),
 }
 
 input_map_canvas_tracking = {
     **input_map_canvas_stop,
-    "ee":         ("canvas stop, or reset when already stopped",
+    "ee":         ("canvas stop / reset",
                    lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_stop)),
-    "mm":         ("click (pause track)", actions.user.parrot_rig_click),
+    "mm":         ("click (pause)", actions.user.parrot_rig_click),
 }
 
 utility_maps = {
