@@ -26,8 +26,7 @@ def _make_mode(name, util_map, ui_selectors, ui_cancel, select, close, ui_exit):
     for noise in ui_cancel:
         mode[noise] = ("back", lambda n=name: close(n))
 
-    # Except exit, which outranks back because it means the same thing in every
-    # mode, menus included
+    # Exit outranks back: same meaning in every mode, menus included
     for noise in ui_exit or []:
         mode[noise] = ("exit", lambda: actions.user.parrot_rig_exit())
 

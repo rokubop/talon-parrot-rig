@@ -23,9 +23,7 @@ setting_maps = {
         "freeze":    ("Freeze on Click",),
         "no_freeze": ("Keep Moving",),
     },
-    # Which mode "er" opens before anything has been opened this session.
-    # After that "er" swaps between main and whichever of these you used last,
-    # however you got into it.
+    # Seeds the alt mode swap, until one of these has been opened.
     "alt_mode": {
         "canvas_scroll":  ("Canvas Scroll",),
         "canvas_scale":   ("Canvas Scale",),

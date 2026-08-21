@@ -25,9 +25,8 @@ def setting_summary(name: str) -> str:
 
 CHANNEL = "parrot_rig"
 
-# Noises that pick slot 1, 2, 3... in any selector menu
-# "cluck" is missing on purpose: it exits from every mode, menus included, so it
-# never doubles as a selector.
+# Noises that pick slot 1, 2, 3... in any selector menu. The exit noise is
+# absent on purpose, so it never doubles as a selector.
 EXIT_NOISE = "cluck"
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "hiss", "shush"]
 
@@ -291,8 +290,8 @@ input_map_window = {
 }
 
 # Three pairs, one modifier each, both ways on the vertical wheel. No axis to
-# choose, because that is the only wheel apps read for these gestures. The third
-# pair sits on pop and palate so eh keeps tracking, which aims the zoom.
+# choose, because that is the only wheel apps read for these gestures. Tracking
+# keeps its own noise here, since it aims the zoom.
 input_map_canvas_scale = {
     **input_map_common,
     "oh":     ("alt up", lambda: parrot_actions.canvas_scale_dir("alt", "up")),
@@ -430,10 +429,8 @@ def channel_reset():
     actions.user.input_map_channel_register(CHANNEL, input_map)
     _listen()
 
-# Talon reloads this module on save, and the channel keeps the map it was
-# registered with, so re-register rather than only relistening. Without this the
-# channel goes on calling the previous module's actions, against the previous
-# module's state, and edits only land on a Talon restart.
+# The channel keeps the map it was registered with, so a reload has to
+# re-register. Without this the previous module stays live, with its own state.
 try:
     if CHANNEL in actions.user.input_map_channel_list():
         channel_reset()

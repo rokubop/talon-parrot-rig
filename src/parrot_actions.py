@@ -48,9 +48,7 @@ from .menu import menu_reset
 from .anchor import anchor_go, anchor_go_screen, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
 
-# "er" swaps between main and one alt mode. These are the targets and the modes
-# each one covers. Canvas drag is not here because it has no mode of its own: it
-# is a held middle button riding on move.
+# Canvas drag is absent: a held middle button, not a mode of its own.
 ALT_MODE_MODES = {
     "canvas_scroll":  ("canvas_stop", "canvas_move", "canvas_glide",
                        "canvas_boost", "canvas_tracking"),
@@ -256,8 +254,7 @@ class ParrotActions:
         reverse_phrase()
 
     def click_release(self, button=None):
-        """Whatever went down comes back up, which is not always the button
-        that asked for the release."""
+        """Releases the button that went down, not the one asking."""
         ctrl.mouse_click(button=self._held_button if button is None else button, up=True)
         ui_manager.hide_border()
         self._is_left_click_held = False
@@ -472,9 +469,7 @@ class ParrotActions:
         self._emit_speed_level()
 
     def cancel(self):
-        """One ladder for tut, the same one in every mode: undo the smallest
-        thing still standing, and exit only once nothing is. Menus sit above
-        this, with their own tut for back.
+        """Undo the smallest thing standing, exit once nothing is.
 
         held button -> modifiers and slow steps -> alt mode -> exit
         """
@@ -549,10 +544,8 @@ class ParrotActions:
         return next((n for n, modes in ALT_MODE_MODES.items() if mode in modes), None)
 
     def alt_mode_open(self, name: str):
-        """Opening one alt mode from another leaves the first properly, rather
-        than stacking a held super or a held middle button under the new one.
-        Opening the one already open is nothing, so naming a mode is safe to
-        repeat."""
+        """Leaves the current alt mode first, so a held super or middle button
+        never stacks. Reopening the open one does nothing."""
         current = self.alt_mode_current()
         if current == name:
             return
@@ -579,17 +572,15 @@ class ParrotActions:
             self.window_exit()
         else:
             self.canvas_move_toggle()
-        # Coming back always lands stopped, never with the canvas still rolling.
-        # Tracking is the exception, because that is the mode it came back to.
+        # Tracking is the exception: it is the mode this came back to.
         self.stopper(
             stop_tracking=event_manager.get_mode() != "tracking",
             reset_mode=False,
         )
 
     def alt_mode_toggle(self):
-        """Leave the cursor for one alt mode, or come back from it. Which one is
-        whichever you opened last, and the alt_mode setting seeds that until you
-        have opened something."""
+        """Open the last alt mode used, or come back from it. The alt_mode
+        setting seeds it until one has been opened."""
         current = self.alt_mode_current()
         if current:
             self.alt_mode_close(current)
@@ -802,8 +793,7 @@ event_manager.subscribe("mode_changed", _release_canvas_scale_on_exit)
 
 
 def _remember_alt_mode(data):
-    """"er" follows the last alt mode you opened, and tut eh or a menu opens one
-    just as much as "er" does."""
+    """Any route into an alt mode counts, not just the swap."""
     name = parrot_actions.alt_mode_current()
     if name:
         parrot_actions._last_alt_mode = name
