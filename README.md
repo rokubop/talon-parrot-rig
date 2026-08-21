@@ -64,10 +64,25 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `hiss` | scroll / boost | Scroll down, boost in move mode |
 | `shush` | scroll / boost | Scroll up, boost in move mode |
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
-| `er` | canvas mode | Leave the cursor, aim the directions at the canvas |
-| `cluck` | exit | Exit parrot rig |
+| `er` | alt mode / back | Open the last alt mode you used, or come back from it |
+| `cluck` | exit | Exit parrot rig, from any mode or menu |
 | `palate` | utility_1 | Execute utility action |
-| `tut` | reset / exit / combo prefix | Clear modifiers and slow steps, exit once there is nothing to clear, prefix for combos (e.g. `tut oh` = right click) |
+| `tut` | cancel / combo prefix | Undo the smallest thing standing, exit once nothing is, prefix for combos (e.g. `tut oh` = right click) |
+
+### Cancel
+
+`tut` is one ladder, the same in every mode. Each one undoes the smallest thing
+still standing:
+
+| Standing | `tut` does |
+|----------|------------|
+| A menu is open | Back |
+| A button is held down | Release it |
+| Modifiers or slow steps set | Clear them |
+| You are in an alt mode | Back to main |
+| Nothing | Exit parrot rig |
+
+`tut tut` skips the ladder and exits outright, and so does `cluck`.
 
 ### The modes
 
@@ -76,24 +91,24 @@ the whole model:
 
 | Mode | Enter |
 |------|-------|
-| **Cursor move** | default |
-| **Canvas move** | `er` |
-| **Canvas scale** | `er sh` |
-| **Window** | `tut eh` |
+| **Cursor move** | main, the one you come back to |
+| **Canvas scroll** | `tut shush` |
+| **Canvas scale** | `tut hiss` |
+| **Canvas drag** | `tut mm` |
+| **Window pick** | `tut eh` |
+| **Window control** | `tut ee` |
 
-`er` leaves the cursor and acts on the canvas. **Canvas** in settings picks how:
+Any of them is also `er`, once it is the one you used last.
 
-| Canvas | What `er` does |
-|--------|----------------|
-| Scroll | Directions scroll the page |
-| Drag | Holds middle mouse, directions drag |
-| Scale | Goes straight to canvas scale |
+`er` is the swap: main to an alt mode, and back again. Which alt mode is
+whichever one you opened last, however you opened it — enter window with
+`tut eh` and `er` swaps main and window from then on. **Alt Mode** in settings
+only seeds that, for before you have opened anything. Naming a mode with its
+`tut` combo leaves the one you were in first, so nothing stacks.
 
-`er sh` always reaches canvas scale, whichever of the three `er` is set to — so
-you can keep Scroll as your default and still get scaling in two noises. It is
-not a combo: `er` fires immediately as always, and `sh` checks how long ago
-canvas mode started. A combo would not work here, because switching the input
-map mode clears the pending chain.
+`er` means the same thing in every mode, including inside canvas scale and
+window, so coming back is always the same noise. Coming back stops whatever was
+running, and keeps tracking only when tracking is what it came back to.
 
 ### Canvas scale
 
@@ -104,10 +119,11 @@ axis to pick, because that is the only wheel apps read for these gestures.
 |-------|-------|
 | `oh` / `ah` | `alt` + wheel up / down |
 | `t` / `guh` | `ctrl` + wheel up / down |
-| `eh` / `er` | `shift` + wheel up / down |
+| `pop` / `palate` | `shift` + wheel up / down |
 
 `shush` boosts while scaling, and scales up with the last modifier when
-stopped. `hiss` is burst or brake, and scales down when stopped. `tut` leaves.
+stopped. `hiss` is burst or brake, and scales down when stopped. `tut` leaves,
+and so does `er`. `eh` keeps tracking here, which is what aims the zoom.
 
 ### Window mode
 
@@ -121,7 +137,7 @@ picker, no tracking.
 | `t` / `guh` | Window up / down |
 | `tut ah` / `tut oh` | Move to the screen left / right |
 | `tut t` | Close tab |
-| `cluck` | Close window |
+| `tut pop` | Close window |
 | `eh` | App picker, tracking |
 | `pop` | Alt tab |
 | `shush` / `hiss` | Next / previous tab |

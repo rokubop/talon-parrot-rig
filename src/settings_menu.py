@@ -23,13 +23,15 @@ setting_maps = {
         "freeze":    ("Freeze on Click",),
         "no_freeze": ("Keep Moving",),
     },
-    # Which canvas mode "er" enters. Scroll and Drag both move the canvas, by
-    # wheel or by held middle button. Scale is canvas scale, the third mode,
-    # also reachable from anywhere with "er sh".
-    "canvas_mode": {
-        "scroll": ("Scroll",),
-        "drag":   ("Drag",),
-        "scale":  ("Scale",),
+    # Which mode "er" opens before anything has been opened this session.
+    # After that "er" swaps between main and whichever of these you used last,
+    # however you got into it.
+    "alt_mode": {
+        "canvas_scroll":  ("Canvas Scroll",),
+        "canvas_scale":   ("Canvas Scale",),
+        "canvas_drag":    ("Canvas Drag",),
+        "window_pick":    ("Window Pick",),
+        "window_control": ("Window Control",),
     },
     "move_mode": {
         "orthogonal":   ("Orthogonal",),
@@ -69,7 +71,7 @@ setting_maps = {
 
 SETTING_TITLES = {
     "click_freeze": "Click",
-    "canvas_mode": "Canvas",
+    "alt_mode": "Alt Mode",
     "move_mode": "Move",
     "turn_speed": "Turn",
     "anchor_move": "Anchor",

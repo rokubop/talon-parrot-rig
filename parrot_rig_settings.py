@@ -25,13 +25,6 @@ GLIDE_RELEASE_RATE = 5
 # Scroll
 SCROLL_SPEED = 0.4
 
-# Jump keys for tut hiss / tut shush. Plain home/end if you want page top
-# and bottom rather than document ends.
-SCROLL_EXTREME_KEYS = {
-    "up": "ctrl-home",
-    "down": "ctrl-end",
-}
-
 # Window mode. Whatever your window manager uses.
 WINDOW_KEYS = {
     "picker":   "alt-`",
@@ -65,11 +58,6 @@ WINDOW_SNAP_ASSIST_MS = 80
 CANVAS_SCALE_SPEED = 0.015
 CANVAS_SCALE_BOOST_AMOUNT = 0.15
 CANVAS_SCALE_BURST_AMOUNT = 0.3
-
-# How long after entering canvas mode the follow-up noise still means "canvas
-# scale" instead of its normal action. Matches the input map combo window,
-# since it stands in for a combo that a mode switch would otherwise eat.
-CANVAS_SCALE_CHASE_MS = 300
 
 # Canvas move
 CANVAS_MOVE_SPEED = 0.03

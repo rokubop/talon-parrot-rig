@@ -19,7 +19,6 @@ from ..parrot_rig_settings import (
     BURST_SETTLE_HOLD_MS,
     BURST_SETTLE_REVERT_MS,
     GLIDE_RELEASE_RATE,
-    SCROLL_EXTREME_KEYS,
     WINDOW_KEYS,
     WINDOW_SUPER_KEYS,
     WINDOW_SNAP_ASSIST_MS,
@@ -36,7 +35,6 @@ from ..parrot_rig_settings import (
     CANVAS_SCALE_SPEED,
     CANVAS_SCALE_BOOST_AMOUNT,
     CANVAS_SCALE_BURST_AMOUNT,
-    CANVAS_SCALE_CHASE_MS,
     TRACKING_STOP_MS,
     CLICK_BEHAVIOR,
     CANVAS_SCALE_MODES,
@@ -50,9 +48,21 @@ from .menu import menu_reset
 from .anchor import anchor_go, anchor_go_screen, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
 
+# "er" swaps between main and one alt mode. These are the targets and the modes
+# each one covers. Canvas drag is not here because it has no mode of its own: it
+# is a held middle button riding on move.
+ALT_MODE_MODES = {
+    "canvas_scroll":  ("canvas_stop", "canvas_move", "canvas_glide",
+                       "canvas_boost", "canvas_tracking"),
+    "canvas_scale":   ("canvas_scale", "canvas_scale_move"),
+    "window_pick":    ("window",),
+    "window_control": ("window_stop", "window_move"),
+}
+
 class ParrotActions:
     def __init__(self):
         self._is_left_click_held = False
+        self._held_button = 0
         self._is_middle_drag = False
         self._parrot_mode_enabled = False
         self._stop_time_job = None
@@ -67,7 +77,7 @@ class ParrotActions:
         self._window_super_held = False
         self._burst_gliding = False
         self._burst_glide_job = None
-        self._canvas_at = 0.0
+        self._last_alt_mode = None
 
     def _get_move_speed(self):
         return setting_number("move_speed") * (SLOW_MODE_MULTIPLIER ** self._move_speed_level)
@@ -245,10 +255,13 @@ class ParrotActions:
     def reverse_phrase(self):
         reverse_phrase()
 
-    def click_release(self, button=0):
-        ctrl.mouse_click(button=button, up=True)
+    def click_release(self, button=None):
+        """Whatever went down comes back up, which is not always the button
+        that asked for the release."""
+        ctrl.mouse_click(button=self._held_button if button is None else button, up=True)
         ui_manager.hide_border()
         self._is_left_click_held = False
+        self._held_button = 0
 
     def mouse_click(self, button=0, hold=False):
         # Never send a click with the canvas scale modifier still down.
@@ -261,11 +274,12 @@ class ParrotActions:
         )
 
         if self._is_left_click_held:
-            self.click_release(button)
+            self.click_release()
         elif hold:
             ctrl.mouse_click(button=button, down=True)
             ui_manager.show_border()
             self._is_left_click_held = True
+            self._held_button = button
         else:
             ctrl.mouse_click(button=button, hold=CLICK_HOLD_MS)
             ui_manager.hide_border()
@@ -284,11 +298,6 @@ class ParrotActions:
 
     def scroll_stop(self):
         actions.user.mouse_rig_scroll_stop()
-
-    def scroll_extreme(self, direction: str):
-        """Jump to the end instead of scrolling there. Stops the scroll first so they don't fight."""
-        actions.user.mouse_rig_scroll_stop()
-        actions.key(SCROLL_EXTREME_KEYS[direction])
 
     def window_enter(self):
         self._canvas_scale_release()
@@ -412,7 +421,8 @@ class ParrotActions:
             "click_held": self._is_left_click_held,
             "middle_drag": self._is_middle_drag,
             "click_freeze": setting_get("click_freeze"),
-            "canvas_mode": setting_get("canvas_mode"),
+            "alt_mode": setting_get("alt_mode"),
+            "last_alt_mode": self._last_alt_mode,
         }
 
     def parrot_mode_get_mode(self):
@@ -461,13 +471,27 @@ class ParrotActions:
                 actions.user.mouse_rig_scroll_speed_mul(1.0 / (CANVAS_SLOW_MODE_MULTIPLIER ** level))
         self._emit_speed_level()
 
-    def reset_or_exit(self):
-        """Anything held or slowed gets cleared first. Exit is what tut means
-        only once there is nothing left to undo."""
+    def cancel(self):
+        """One ladder for tut, the same one in every mode: undo the smallest
+        thing still standing, and exit only once nothing is. Menus sit above
+        this, with their own tut for back.
+
+        held button -> modifiers and slow steps -> alt mode -> exit
+        """
+        if self._is_middle_drag:
+            self.alt_mode_close("canvas_drag")
+            return
+        if self._is_left_click_held:
+            self.click_release()
+            return
         if (event_manager.get_modifiers()
                 or self._move_speed_level
                 or self._canvas_speed_level):
             self.full_reset()
+            return
+        name = self.alt_mode_current()
+        if name:
+            self.alt_mode_close(name)
             return
         self.exit()
 
@@ -517,32 +541,60 @@ class ParrotActions:
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()
 
-    def canvas_toggle(self):
-        """Leave the cursor and act on the canvas, in whichever mode the
-        canvas_mode setting names: the same directions, aimed at the content
-        instead of the pointer."""
-        mode = setting_get("canvas_mode")
-        if mode == "drag":
-            self.toggle_middle_drag()
-        elif mode == "scale":
+    def alt_mode_current(self):
+        """Which alt mode is open, or None when this is main."""
+        if self._is_middle_drag:
+            return "canvas_drag"
+        mode = event_manager.get_mode()
+        return next((n for n, modes in ALT_MODE_MODES.items() if mode in modes), None)
+
+    def alt_mode_open(self, name: str):
+        """Opening one alt mode from another leaves the first properly, rather
+        than stacking a held super or a held middle button under the new one.
+        Opening the one already open is nothing, so naming a mode is safe to
+        repeat."""
+        current = self.alt_mode_current()
+        if current == name:
+            return
+        if current:
+            self.alt_mode_close(current)
+        self._last_alt_mode = name
+        if name == "canvas_scale":
             self.canvas_scale_toggle()
+        elif name == "canvas_drag":
+            self.toggle_middle_drag()
+        elif name == "window_pick":
+            self.window_enter()
+        elif name == "window_control":
+            self.window_enter_stopped()
         else:
             self.canvas_move_toggle()
-            if event_manager.get_mode() == "canvas_stop":
-                self._canvas_at = time.monotonic()
 
-    def _canvas_just_activated(self) -> bool:
-        return (time.monotonic() - self._canvas_at) * 1000 < CANVAS_SCALE_CHASE_MS
-
-    def canvas_resume_or_scale(self):
-        """A mode switch eats a pending combo, so the second noise of the
-        gesture lands here instead. Straight after entering canvas mode it means
-        canvas scale; any later it is an ordinary resume."""
-        if self._canvas_just_activated():
-            self._canvas_at = 0.0
+    def alt_mode_close(self, name: str):
+        if name == "canvas_scale":
             self.canvas_scale_toggle()
+        elif name == "canvas_drag":
+            self.toggle_middle_drag()
+        elif name in ("window_pick", "window_control"):
+            self.window_exit()
         else:
-            self.canvas_resume()
+            self.canvas_move_toggle()
+        # Coming back always lands stopped, never with the canvas still rolling.
+        # Tracking is the exception, because that is the mode it came back to.
+        self.stopper(
+            stop_tracking=event_manager.get_mode() != "tracking",
+            reset_mode=False,
+        )
+
+    def alt_mode_toggle(self):
+        """Leave the cursor for one alt mode, or come back from it. Which one is
+        whichever you opened last, and the alt_mode setting seeds that until you
+        have opened something."""
+        current = self.alt_mode_current()
+        if current:
+            self.alt_mode_close(current)
+        else:
+            self.alt_mode_open(self._last_alt_mode or setting_get("alt_mode"))
 
     def canvas_scale_toggle(self):
         if event_manager.get_mode() in CANVAS_SCALE_MODES:
@@ -747,6 +799,16 @@ def _release_canvas_scale_on_exit(data):
         parrot_actions._canvas_scale_release()
 
 event_manager.subscribe("mode_changed", _release_canvas_scale_on_exit)
+
+
+def _remember_alt_mode(data):
+    """"er" follows the last alt mode you opened, and tut eh or a menu opens one
+    just as much as "er" does."""
+    name = parrot_actions.alt_mode_current()
+    if name:
+        parrot_actions._last_alt_mode = name
+
+event_manager.subscribe("mode_changed", _remember_alt_mode)
 
 # Release before the jump so the jump itself isn't dragged, then re-press.
 snap_rule(

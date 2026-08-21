@@ -26,10 +26,13 @@ def setting_summary(name: str) -> str:
 CHANNEL = "parrot_rig"
 
 # Noises that pick slot 1, 2, 3... in any selector menu
-SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "cluck", "hiss", "shush"]
+# "cluck" is missing on purpose: it exits from every mode, menus included, so it
+# never doubles as a selector.
+EXIT_NOISE = "cluck"
+SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "hiss", "shush"]
 
 HUB_MENUS = [
-    "click_freeze", "speeds", "move_mode", "canvas_mode",
+    "click_freeze", "speeds", "move_mode", "alt_mode",
     "anchor_move", "return_fallback", "utility_1", "profiles",
 ]
 
@@ -190,19 +193,20 @@ input_map_common = {
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", parrot_actions.tracking_activate),
-    "er":     ("canvas mode", parrot_actions.canvas_toggle),
+    "er":     ("alt mode / back", parrot_actions.alt_mode_toggle),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
-    "cluck":  ("exit", actions.user.parrot_rig_exit),
-    "tut":        ("reset, else exit", parrot_actions.reset_or_exit),
+    EXIT_NOISE: ("exit", actions.user.parrot_rig_exit),
+    "tut":        ("cancel, else exit", parrot_actions.cancel),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
-    "tut eh":     ("window mode + picker", parrot_actions.window_enter),
-    "tut ee":     ("window mode, stopped", parrot_actions.window_enter_stopped),
+    "tut eh":     ("window pick", lambda: parrot_actions.alt_mode_open("window_pick")),
+    "tut ee":     ("window control", lambda: parrot_actions.alt_mode_open("window_control")),
     "tut ah":     ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
     "tut t":      ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
     "tut guh":    ("toggle control", lambda: parrot_actions.toggle_modifier("ctrl")),
     "tut pop":    ("anchor set / clear", parrot_actions.toggle_anchor),
-    "tut hiss":   ("scroll bottom", lambda: parrot_actions.scroll_extreme("down")),
-    "tut shush":  ("scroll top", lambda: parrot_actions.scroll_extreme("up")),
+    "tut shush":  ("canvas scroll", lambda: parrot_actions.alt_mode_open("canvas_scroll")),
+    "tut hiss":   ("canvas scale", lambda: parrot_actions.alt_mode_open("canvas_scale")),
+    "tut mm":     ("canvas drag", lambda: parrot_actions.alt_mode_open("canvas_drag")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("settings", _settings_menu),
 }
@@ -245,11 +249,10 @@ input_map_canvas_stop = {
     "t":      ("canvas up", lambda: parrot_actions.canvas_move_dir("up")),
     "guh":    ("canvas down", lambda: parrot_actions.canvas_move_dir("down")),
     "eh":     ("canvas track", parrot_actions.canvas_tracking_activate),
-    "shush":      ("canvas scale, or resume", _anchor_chase(parrot_actions.canvas_resume_or_scale)),
+    "shush":      ("canvas resume", _anchor_chase(parrot_actions.canvas_resume)),
     "shush_stop": ("", lambda: None),
     "hiss":       ("canvas resume", parrot_actions.canvas_resume),
     "hiss_stop":  ("", lambda: None),
-    "er":     ("exit canvas mode", actions.user.parrot_rig_stop),
 }
 
 input_map_canvas_move = {
@@ -276,31 +279,30 @@ input_map_window = {
     "t":      ("window up", lambda: parrot_actions.window_move("up")),
     "guh":    ("window down", lambda: parrot_actions.window_move("down")),
     "eh":     ("app picker", parrot_actions.window_picker),
-    "cluck":  ("close window", lambda: parrot_actions.window_key("close")),
     "pop":    ("alt tab", parrot_actions.window_alt_tab),
     "ee":     ("release super, escape", parrot_actions.window_escape),
     "palate": ("repeat last", lambda: _repeat_last()),
     "shush:th_90": ("next tab", lambda: parrot_actions.window_key("tab_next")),
     "hiss:th_90":  ("previous tab", lambda: parrot_actions.window_key("tab_prev")),
-    "tut":       ("exit window mode", parrot_actions.window_exit),
+    "tut pop":   ("close window", lambda: parrot_actions.window_key("close")),
     "tut t":     ("close tab", lambda: parrot_actions.window_key("tab_close")),
     "tut ah":    ("screen left", lambda: parrot_actions.window_move("screen_left")),
     "tut oh":    ("screen right", lambda: parrot_actions.window_move("screen_right")),
 }
 
 # Three pairs, one modifier each, both ways on the vertical wheel. No axis to
-# choose, because that is the only wheel apps read for these gestures.
+# choose, because that is the only wheel apps read for these gestures. The third
+# pair sits on pop and palate so eh keeps tracking, which aims the zoom.
 input_map_canvas_scale = {
     **input_map_common,
     "oh":     ("alt up", lambda: parrot_actions.canvas_scale_dir("alt", "up")),
     "ah":     ("alt down", lambda: parrot_actions.canvas_scale_dir("alt", "down")),
     "t":      ("ctrl up", lambda: parrot_actions.canvas_scale_dir("ctrl", "up")),
     "guh":    ("ctrl down", lambda: parrot_actions.canvas_scale_dir("ctrl", "down")),
-    "eh":     ("shift up", lambda: parrot_actions.canvas_scale_dir("shift", "up")),
-    "er":     ("shift down", lambda: parrot_actions.canvas_scale_dir("shift", "down")),
+    "pop":    ("shift up", lambda: parrot_actions.canvas_scale_dir("shift", "up")),
+    "palate": ("shift down", lambda: parrot_actions.canvas_scale_dir("shift", "down")),
     "ee":     ("stop, stay in canvas scale",
                lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_scale_stop)),
-    "tut":    ("exit canvas scale", parrot_actions.canvas_scale_toggle),
     "shush":             ("boost, else scale up", _anchor_chase(parrot_actions.canvas_scale_boost)),
     "shush_stop":        ("", lambda: None),
     "hiss":              ("burst or brake, else scale down", parrot_actions.canvas_scale_burst_or_brake),
@@ -312,7 +314,6 @@ input_map_canvas_tracking = {
     "ee":         ("canvas stop, or reset when already stopped",
                    lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_stop)),
     "mm":         ("click (pause track)", actions.user.parrot_rig_click),
-    "er":         ("exit canvas mode", parrot_actions.canvas_move_toggle),
 }
 
 utility_maps = {
@@ -338,6 +339,7 @@ def _menu_list_input_map(names, back_label="back"):
                 lambda n=name: menu_open(n),
             )
     mode["tut"] = (back_label, menu_back)
+    mode[EXIT_NOISE] = ("exit", actions.user.parrot_rig_exit)
     return mode
 
 
@@ -350,6 +352,7 @@ def _profiles_input_map():
         )
     mode["palate"] = ("overwrite active", _profile_save_current)
     mode["tut"] = ("back", menu_back)
+    mode[EXIT_NOISE] = ("exit", actions.user.parrot_rig_exit)
     return mode
 
 
@@ -362,6 +365,7 @@ def _anchor_kind_input_map():
                 lambda k=kind: _anchor_kind(k),
             )
     mode["tut"] = ("keep point", menu_back)
+    mode[EXIT_NOISE] = ("exit", actions.user.parrot_rig_exit)
     return mode
 
 
@@ -395,12 +399,14 @@ input_map = {
         maps=utility_maps,
         ui_selectors=SELECT_NOISES,
         ui_cancel=["tut"],
+        ui_exit=[EXIT_NOISE],
         close=lambda n: menu_back(),
     ),
     **utility_input_maps(
         maps=setting_maps,
         ui_selectors=SELECT_NOISES,
         ui_cancel=["tut"],
+        ui_exit=[EXIT_NOISE],
         select=lambda n, i: actions.user.parrot_rig_setting_select(n, i),
         close=lambda n: menu_back(),
     ),
@@ -424,11 +430,13 @@ def channel_reset():
     actions.user.input_map_channel_register(CHANNEL, input_map)
     _listen()
 
-# Talon reloads this module on save, and the channel outlives that, so relisten
-# here rather than waiting for the next enable.
+# Talon reloads this module on save, and the channel keeps the map it was
+# registered with, so re-register rather than only relistening. Without this the
+# channel goes on calling the previous module's actions, against the previous
+# module's state, and edits only land on a Talon restart.
 try:
     if CHANNEL in actions.user.input_map_channel_list():
-        _listen()
+        channel_reset()
 except Exception:
     pass
 
