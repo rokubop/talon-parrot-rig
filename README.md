@@ -133,81 +133,21 @@ CLICK_HOLD_MS = 16000
 
 ### Modes
 
-| Mode | Enter |
-|------|-------|
-| Enter parrot mode | `cluck` |
-| Exit parrot mode | `cluck` |
-| Stopped | - |
-| Cursor move | use a direction noise `ah`, `oh`, `t`, `guh` |
-| Canvas scroll | `tut shush` |
-| Canvas scale | `tut hiss` |
-| Canvas drag | `tut mm` |
-| Window control + pick (using [BentoPick](https://github.com/rokubop/bentopick)) | `tut eh` |
-| Window control | `tut ee` |
-| Exit mode | `tut` or `er` |
-| Most recent mode | `er` |
+| Mode | Enter | Details |
+|------|-------|---------|
+| Enter parrot mode | `cluck` | |
+| Exit parrot mode | `cluck` | |
+| Stopped | - | |
+| Cursor move | use a direction noise `ah`, `oh`, `t`, `guh` | |
+| Canvas scroll | `tut shush` | Like moving 2 fingers on a trackpad |
+| Canvas scale | `tut hiss` | 6 noises to account for [ctrl, alt, shift] + [scroll up/down] |
+| Canvas drag | `tut mm` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
+| Window control + pick (using [BentoPick](https://github.com/rokubop/bentopick)) | `tut eh` | Easy to click app launcher |
+| Window control | `tut ee` | Move windows around easily, close windows, alt+tab |
+| Exit mode | `tut` or `er` | |
+| Most recent mode | `er` | |
 
-Say **"parrot help"** for every noise in every mode.
-
-### Canvas scale
-
-Three pairs, one modifier each, both ways on the vertical wheel. No axis to
-pick, because that is the only wheel apps read for these gestures.
-
-### Window mode
-
-Super stays down across a run of moves, because letting go is what makes Windows
-offer to fill the other half of the screen, and `ee` releases it and sends
-escape.
-
-Keys are in `WINDOW_KEYS` in [parrot_rig_settings.py](./parrot_rig_settings.py),
-since window managers differ.
-
-### Anchors
-
-`tut pop` drops an anchor, `pop` returns to the nearest one. Follow the drop with
-`shush` within 300ms and a picker opens:
-
-| Kind | Return lands on |
-|------|-----------------|
-| Point | The spot itself |
-| Vertical Line | That x, keeping your current y |
-| Horizontal Line | That y, keeping your current x |
-
-A line pins one coordinate and leaves the other alone, so it draws across the
-screen and `pop` goes to the closest point on it. Standing on an anchor makes
-`pop` move to the next one, lines included, so a line you are already on does not
-trap you. Removing an anchor with `tut pop` still uses the ring where it was
-dropped, not the whole line.
-
-While any anchor is set, `pop` always goes to one. It does not fall back to
-snapping or to click and exit, even standing on the only anchor you have, where
-it lands on it again and pulls you flush onto a line. Clear the anchors to get
-that behavior back.
-
-**Return** in settings picks what `pop` does empty handed, with no anchors of
-your own and no snap rule:
-
-| Return | `pop` does |
-|--------|------------|
-| Click & Exit | Clicks and hands control back |
-| Screen Anchors | Falls back to a set of invisible anchors |
-
-Screen Anchors keeps `pop` behaving like `pop`, nearest first and cycling on
-repeat:
-
-| Screen anchor | Where |
-|---------------|-------|
-| Point | Top right, on the close button |
-| Point | Screen center |
-| Horizontal line | Bottom edge, the taskbar, keeping your x |
-| Vertical line | Left edge, the side bar, keeping your y |
-
-Drop one anchor of your own and they stop being used. They are never drawn and
-never stored, and they are built from the screen the cursor is on. Edit the set
-in `SCREEN_ANCHORS` in [parrot_rig_settings.py](./parrot_rig_settings.py), where
-each entry is a target from `TARGETS` in [src/snap.py](./src/snap.py) and an
-anchor kind.
+Say **"parrot help"** for mapping overlay.
 
 ## More Talon packages
 Check out my other Talon packages for UI, mouse control, input mapping, and more at [talon-hub-roku](https://github.com/rokubop/talon-hub-roku).
