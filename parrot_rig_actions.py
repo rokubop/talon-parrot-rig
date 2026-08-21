@@ -192,7 +192,7 @@ input_map_common = {
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", parrot_actions.tracking_activate),
-    "er":     ("alt mode / back", parrot_actions.alt_mode_toggle),
+    "er":     ("mode swap", parrot_actions.alt_mode_toggle),
     "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
     EXIT_NOISE: ("exit", actions.user.parrot_rig_exit),
     "tut":        ("cancel, else exit", parrot_actions.cancel),

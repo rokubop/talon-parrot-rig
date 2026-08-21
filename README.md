@@ -51,22 +51,22 @@ This repo ships with my personal noise assignments. Your trained noises will be 
 
 Use this table to understand what role each noise plays, then decide which of your noises best fits each slot. Listed in priority order, starting from the top.
 
-| Noise | Role | What it does |
+| Noise | Role | General behavior |
 |-------|------|-------------|
-| `ah` | direction | Move left |
-| `oh` | direction | Move right |
-| `t` | direction | Move up |
-| `guh` | direction | Move down |
-| `ee` | stop | Stop all movement and scrolling |
-| `pop` | return | Return to anchor, else snap target, else click and exit |
+| `ah` | direction | left |
+| `oh` | direction | right |
+| `t` | direction | up |
+| `guh` | direction | down |
+| `ee` | stop | Stop movement, scrolling |
+| `pop` | return | Either click and exit, or return to an anchor position |
 | `mm` | click | Click (stay in mode) |
 | `hiss` | scroll / boost | Scroll down, boost in move mode |
 | `shush` | scroll / boost | Scroll up, boost in move mode |
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
 | `er` | mode swap | Swap to the most recent mode, or back |
-| `cluck` | exit | Exit parrot rig, from any mode or menu |
+| `cluck` | Start or exit parrot mode | any context |
 | `palate` | utility_1 | Execute utility action |
-| `tut` | progressive cancel / combo prefix | Cancel modifiers, cancel mode, exit, or used as prefix for combos. |
+| `tut` | cancel / combo prefix | General cancel action (after 300ms) or prefix for combos. |
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.
 
@@ -129,106 +129,36 @@ TRACKING_STOP_MS = 800
 CLICK_HOLD_MS = 16000
 ```
 
-### Optional: Utilities
-
-Utilities let you bind extra actions to a single noise. Each utility slot holds one active action at a time. By default, `utility_1` is assigned to `palate`.
-
-To assign a utility to a noise, add two entries in `parrot_rig_actions.py` in `input_map_common`:
-
-```python
-"palate":     ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),              # fires the active action
-"tut palate": ("utility_1 selector", lambda: actions.user.parrot_rig_show_utility_selector("utility_1")),  # opens the picker
-```
-
-To use it, just make the noise - it fires the currently selected action. To change which action is selected, use the selector combo to open a picker, then make one of the selector noises to choose an option. The first key in each map is the default on startup.
-
-To add more utility slots, add a new entry to `utility_maps` and wire it to a noise the same way.
-
-Add, remove, or reorder options:
-
-```python
-utility_maps = {
-    "utility_1": {
-        "hold_click":  ("Hold Click",  lambda: actions.user.parrot_rig_click(0, True)),
-        "click":       ("Click",       lambda: actions.user.parrot_rig_click(0)),
-        "right_click": ("Right Click", lambda: actions.user.parrot_rig_click(1)),
-        ...
-    },
-}
-```
-
 ## Reference
-
-### Progressive cancel
-
-`tut` cancels one step at a time, the same in every mode:
-
-| Standing | `tut` does |
-|----------|------------|
-| A menu is open | Back |
-| A button is held down | Release it |
-| Modifiers or slow steps set | Clear them |
-| In another mode | Back to cursor move |
-| Nothing | Exit parrot rig |
-
-`cluck` and `tut tut` exit outright.
 
 ### Modes
 
 | Mode | Enter |
 |------|-------|
-| Cursor move | `tut` out of any mode |
+| Enter parrot mode | `cluck` |
+| Exit parrot mode | `cluck` |
+| Stopped | - |
+| Cursor move | use a direction noise `ah`, `oh`, `t`, `guh` |
 | Canvas scroll | `tut shush` |
 | Canvas scale | `tut hiss` |
 | Canvas drag | `tut mm` |
-| Window pick | `tut eh` |
+| Window control + pick (using [BentoPick](https://github.com/rokubop/bentopick)) | `tut eh` |
 | Window control | `tut ee` |
+| Exit mode | `tut` or `er` |
+| Most recent mode | `er` |
 
-`er` swaps to the most recent mode, or back. **Alt Mode** in settings picks the
-first one, until you have used one.
-
-Entering a mode leaves the current one, so nothing stacks. Leaving stops
-whatever was running, and keeps tracking if tracking is what it returned to.
+Say **"parrot help"** for every noise in every mode.
 
 ### Canvas scale
 
-Three pairs of noises, one modifier each, both ways on the vertical wheel. No
-axis to pick, because that is the only wheel apps read for these gestures.
-
-| Noise | Sends |
-|-------|-------|
-| `oh` / `ah` | `alt` + wheel up / down |
-| `t` / `guh` | `ctrl` + wheel up / down |
-| `pop` / `palate` | `shift` + wheel up / down |
-
-`shush` boosts while scaling, and scales up with the last modifier when
-stopped. `hiss` is burst or brake, and scales down when stopped. `tut` leaves,
-and so does `er`. `eh` keeps tracking here, which is what aims the zoom.
+Three pairs, one modifier each, both ways on the vertical wheel. No axis to
+pick, because that is the only wheel apps read for these gestures.
 
 ### Window mode
 
-`tut eh` opens the app picker and stays in window mode, tracking, because the
-picker is an overlay you aim at and click. `tut ee` enters cold instead: no
-picker, no tracking.
-
-| Noise | Does |
-|-------|------|
-| `ah` / `oh` | Window left / right |
-| `t` / `guh` | Window up / down |
-| `tut ah` / `tut oh` | Move to the screen left / right |
-| `tut t` | Close tab |
-| `tut pop` | Close window |
-| `eh` | App picker, tracking |
-| `pop` | Alt tab |
-| `shush` / `hiss` | Next / previous tab |
-| `ee` | Let super go, escape, stop |
-| `palate` | Repeat the last action |
-| `tut` | Leave, stopped |
-
-The cursor follows the usual colours: light blue tracking, red stopped, yellow
-while a window move holds super down. Super stays down across a run of moves,
-because letting go is what makes Windows offer to fill the other half of the
-screen, and `ee` releases it and sends escape to dismiss that.
+Super stays down across a run of moves, because letting go is what makes Windows
+offer to fill the other half of the screen, and `ee` releases it and sends
+escape.
 
 Keys are in `WINDOW_KEYS` in [parrot_rig_settings.py](./parrot_rig_settings.py),
 since window managers differ.
