@@ -64,51 +64,41 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `hiss` | scroll / boost | Scroll down, boost in move mode |
 | `shush` | scroll / boost | Scroll up, boost in move mode |
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
-| `er` | alt mode / back | Open the last alt mode you used, or come back from it |
+| `er` | mode swap | Swap to the most recent mode, or back |
 | `cluck` | exit | Exit parrot rig, from any mode or menu |
 | `palate` | utility_1 | Execute utility action |
-| `tut` | cancel / combo prefix | Undo the smallest thing standing, exit once nothing is, prefix for combos (e.g. `tut oh` = right click) |
+| `tut` | progressive cancel / combo prefix | Cancel one step at a time, exit at the end, prefix for combos (e.g. `tut oh` = right click) |
 
-### Cancel
+### Progressive cancel
 
-`tut` is one ladder, the same in every mode. Each one undoes the smallest thing
-still standing:
+`tut` cancels one step at a time, the same in every mode:
 
 | Standing | `tut` does |
 |----------|------------|
 | A menu is open | Back |
 | A button is held down | Release it |
 | Modifiers or slow steps set | Clear them |
-| You are in an alt mode | Back to main |
+| In another mode | Back to cursor move |
 | Nothing | Exit parrot rig |
 
-`tut tut` skips the ladder and exits outright, and so does `cluck`.
+`cluck` and `tut tut` exit outright.
 
-### The modes
-
-The same four direction noises drive one of these. Which one you are in is
-the whole model:
+### Modes
 
 | Mode | Enter |
 |------|-------|
-| **Cursor move** | main, the one you come back to |
-| **Canvas scroll** | `tut shush` |
-| **Canvas scale** | `tut hiss` |
-| **Canvas drag** | `tut mm` |
-| **Window pick** | `tut eh` |
-| **Window control** | `tut ee` |
+| Cursor move | `tut` out of any mode |
+| Canvas scroll | `tut shush` |
+| Canvas scale | `tut hiss` |
+| Canvas drag | `tut mm` |
+| Window pick | `tut eh` |
+| Window control | `tut ee` |
 
-Any of them is also `er`, once it is the one you used last.
+`er` swaps to the most recent mode, or back. **Alt Mode** in settings picks the
+first one, until you have used one.
 
-`er` is the swap: main to an alt mode, and back again. Which alt mode is
-whichever one you opened last, however you opened it — enter window with
-`tut eh` and `er` swaps main and window from then on. **Alt Mode** in settings
-only seeds that, for before you have opened anything. Naming a mode with its
-`tut` combo leaves the one you were in first, so nothing stacks.
-
-`er` means the same thing in every mode, including inside canvas scale and
-window, so coming back is always the same noise. Coming back stops whatever was
-running, and keeps tracking only when tracking is what it came back to.
+Entering a mode leaves the current one, so nothing stacks. Leaving stops
+whatever was running, and keeps tracking if tracking is what it returned to.
 
 ### Canvas scale
 

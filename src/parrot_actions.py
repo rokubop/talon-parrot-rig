@@ -469,9 +469,8 @@ class ParrotActions:
         self._emit_speed_level()
 
     def cancel(self):
-        """Undo the smallest thing standing, exit once nothing is.
-
-        held button -> modifiers and slow steps -> alt mode -> exit
+        """Progressive cancel, one step at a time:
+        held button -> modifiers and slow steps -> mode -> exit
         """
         if self._is_middle_drag:
             self.alt_mode_close("canvas_drag")
@@ -537,14 +536,14 @@ class ParrotActions:
         ui_manager.show_cheatsheet()
 
     def alt_mode_current(self):
-        """Which alt mode is open, or None when this is main."""
+        """The open mode, or None for cursor move."""
         if self._is_middle_drag:
             return "canvas_drag"
         mode = event_manager.get_mode()
         return next((n for n, modes in ALT_MODE_MODES.items() if mode in modes), None)
 
     def alt_mode_open(self, name: str):
-        """Leaves the current alt mode first, so a held super or middle button
+        """Leaves the current mode first, so a held super or middle button
         never stacks. Reopening the open one does nothing."""
         current = self.alt_mode_current()
         if current == name:
@@ -579,8 +578,8 @@ class ParrotActions:
         )
 
     def alt_mode_toggle(self):
-        """Open the last alt mode used, or come back from it. The alt_mode
-        setting seeds it until one has been opened."""
+        """Swap to the most recent mode, or back. The alt_mode setting picks
+        the first one."""
         current = self.alt_mode_current()
         if current:
             self.alt_mode_close(current)
@@ -793,7 +792,7 @@ event_manager.subscribe("mode_changed", _release_canvas_scale_on_exit)
 
 
 def _remember_alt_mode(data):
-    """Any route into an alt mode counts, not just the swap."""
+    """Any route into a mode counts, not just the swap."""
     name = parrot_actions.alt_mode_current()
     if name:
         parrot_actions._last_alt_mode = name

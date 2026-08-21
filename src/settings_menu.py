@@ -23,7 +23,7 @@ setting_maps = {
         "freeze":    ("Freeze on Click",),
         "no_freeze": ("Keep Moving",),
     },
-    # Seeds the alt mode swap, until one of these has been opened.
+    # Which mode the swap picks first, until one of these has been used.
     "alt_mode": {
         "canvas_scroll":  ("Canvas Scroll",),
         "canvas_scale":   ("Canvas Scale",),
