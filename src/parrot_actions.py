@@ -71,6 +71,7 @@ class ParrotActions:
         self._canvas_burst_or_brake_did_break = False
         self._canvas_scale_key = None
         self._canvas_scale_last = "ctrl"
+        self._canvas_scale_dir = "up"
         self._canvas_scale_did_start = False
         self._window_super_held = False
         self._burst_gliding = False
@@ -603,10 +604,18 @@ class ParrotActions:
         which is the gesture apps actually listen for."""
         self._canvas_scale_hold(modifier)
         self._canvas_scale_last = modifier
+        self._canvas_scale_dir = wheel
         actions.user.mouse_rig_scroll_continuous(wheel, CANVAS_SCALE_SPEED, force=True)
         self._scroll_direction = wheel
         event_manager.set_mode("canvas_scale_move")
         event_manager.emit("scale_modifier_changed", {"modifier": modifier})
+
+    def canvas_scale_step(self):
+        """One tick, on the modifier and direction the last scale used."""
+        if event_manager.get_mode() == "canvas_scale_move":
+            self.canvas_scale_stop()
+        self._canvas_scale_hold(self._canvas_scale_last)
+        actions.user.mouse_rig_scroll_delta(self._canvas_scale_dir)
 
     def canvas_scale_boost(self):
         """Boost while scaling, else scale up with the last modifier."""

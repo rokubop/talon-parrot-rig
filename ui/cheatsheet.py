@@ -51,6 +51,16 @@ COLUMNS = [
 ]
 
 
+# Labels that switch modes rather than act, so the cell can wear the mode's mark
+MODE_LABELS = {
+    "canvas scroll":  ("triangle", "canvas_stop"),
+    "canvas scale":   ("diamond",  "canvas_scale"),
+    "canvas drag":    ("circle",   "move"),
+    "window pick":    ("square",   "window"),
+    "window control": ("square",   "window_stop"),
+}
+
+
 def cheatsheet_ui():
     """Create cheatsheet UI"""
     screen, window, div, text = actions.user.ui_elements(["screen", "window", "div", "text"])
@@ -111,8 +121,16 @@ def cheatsheet_ui():
             label = labels[idx]
             is_same_as_prev = idx > 0 and label == labels[idx - 1]
             color = DIM_COLOR if is_same_as_prev else UI_TEXT_COLOR
+            mark = None if is_same_as_prev else MODE_LABELS.get(label)
+            body = text(label, color=color)
+            if mark:
+                shape, mode = mark
+                body = div(flex_direction="row", align_items="center", gap=6)[
+                    svg(width=24)[_icon(mode, shape, 12)],
+                    text(label, color=color),
+                ]
             return td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-                text(label, color=color)
+                body
             ]
 
         return tr()[
