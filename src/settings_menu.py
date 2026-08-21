@@ -7,7 +7,7 @@ names a base to scale, otherwise the multiplier itself. Their "custom" option
 holds a typed number instead.
 """
 
-from ..parrot_rig_settings import MOVE_SPEED, SCROLL_SPEED, CANVAS_MOVE_SPEED
+from ..parrot_rig_settings import MOVE_SPEED, SCROLL_SPEED, CANVAS_MOVE_SPEED, CANVAS_SCALE_SPEED
 
 SPEED_OPTIONS = (
     ("normal",    ("Normal",)),
@@ -45,6 +45,7 @@ setting_maps = {
     "move_speed": dict(SPEED_OPTIONS),
     "scroll_speed": dict(SPEED_OPTIONS),
     "canvas_move_speed": dict(SPEED_OPTIONS),
+    "canvas_scale_speed": dict(SPEED_OPTIONS),
     "boost_power": {
         "normal": ("Normal",),
         "strong": ("Strong",),
@@ -77,6 +78,7 @@ SETTING_TITLES = {
     "move_speed": "Cursor Speed",
     "scroll_speed": "Scroll Speed",
     "canvas_move_speed": "Canvas Speed",
+    "canvas_scale_speed": "Canvas Scale Speed",
     "boost_power": "Boost",
 }
 
@@ -106,6 +108,7 @@ NUMERIC_SETTINGS = {
     "move_speed":        {"base": MOVE_SPEED,        "scales": SPEED_SCALES},
     "scroll_speed":      {"base": SCROLL_SPEED,      "scales": SPEED_SCALES},
     "canvas_move_speed": {"base": CANVAS_MOVE_SPEED, "scales": SPEED_SCALES},
+    "canvas_scale_speed": {"base": CANVAS_SCALE_SPEED, "scales": SPEED_SCALES},
     "turn_speed":        {"base": None,              "scales": TURN_SCALES},
     "boost_power":       {"base": None,              "scales": BOOST_SCALES},
 }

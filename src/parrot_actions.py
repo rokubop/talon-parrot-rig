@@ -32,7 +32,6 @@ from ..parrot_rig_settings import (
     CANVAS_RAMP_AMOUNT,
     CANVAS_RAMP_REVERT_MS,
     CANVAS_GLIDE_RELEASE_RATE,
-    CANVAS_SCALE_SPEED,
     CANVAS_SCALE_BOOST_AMOUNT,
     CANVAS_SCALE_BURST_AMOUNT,
     TRACKING_STOP_MS,
@@ -605,7 +604,8 @@ class ParrotActions:
         self._canvas_scale_hold(modifier)
         self._canvas_scale_last = modifier
         self._canvas_scale_dir = wheel
-        actions.user.mouse_rig_scroll_continuous(wheel, CANVAS_SCALE_SPEED, force=True)
+        actions.user.mouse_rig_scroll_continuous(
+            wheel, setting_number("canvas_scale_speed"), force=True)
         self._scroll_direction = wheel
         event_manager.set_mode("canvas_scale_move")
         event_manager.emit("scale_modifier_changed", {"modifier": modifier})

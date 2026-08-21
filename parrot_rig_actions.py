@@ -35,7 +35,8 @@ HUB_MENUS = [
     "anchor_move", "return_fallback", "utility_1", "profiles",
 ]
 
-SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "canvas_move_speed", "boost_power"]
+SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "canvas_move_speed",
+               "canvas_scale_speed", "boost_power"]
 
 # A line anchor pins one coordinate and leaves the other alone, so return lands
 # on the closest point of the line rather than one spot.
