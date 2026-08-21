@@ -31,6 +31,14 @@ setting_maps = {
         "window_pick":    ("Window Pick",),
         "window_control": ("Window Control",),
     },
+    # What canvas drag holds down while you move. Space is what pans in a lot of
+    # canvas apps, and it is a key, not a button.
+    "drag_hold": {
+        "middle": ("Hold Middle",),
+        "left":   ("Hold Left",),
+        "right":  ("Hold Right",),
+        "space":  ("Hold Space",),
+    },
     "move_mode": {
         "orthogonal":   ("Orthogonal",),
         "always_glide": ("Always Glide",),
@@ -78,6 +86,7 @@ setting_maps = {
 SETTING_TITLES = {
     "click_freeze": "Click",
     "alt_mode": "Alt Mode",
+    "drag_hold": "Drag",
     "move_mode": "Move",
     "turn_speed": "Turn",
     "anchor_move": "Anchor",

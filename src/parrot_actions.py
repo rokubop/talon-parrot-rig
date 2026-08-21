@@ -45,7 +45,9 @@ from .menu import menu_reset
 from .anchor import anchor_go, anchor_go_screen, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
 
-# Canvas drag is absent: a held middle button, not a mode of its own.
+DRAG_BUTTONS = {"middle": 2, "left": 0, "right": 1}
+
+# Canvas drag is absent: a held button or key, not a mode of its own.
 ALT_MODE_MODES = {
     "canvas_scroll":  ("canvas_stop", "canvas_move", "canvas_glide",
                        "canvas_boost", "canvas_tracking"),
@@ -58,7 +60,8 @@ class ParrotActions:
     def __init__(self):
         self._is_left_click_held = False
         self._held_button = 0
-        self._is_middle_drag = False
+        self._is_drag = False
+        self._drag_hold = "middle"
         self._parrot_mode_enabled = False
         self._stop_time_job = None
         self._move_speed_level = 0
@@ -396,7 +399,7 @@ class ParrotActions:
         if self._is_left_click_held:
             self.click_release()
 
-        self.middle_drag_release()
+        self.drag_release()
         self._canvas_scale_release()
         self._window_super_release()
 
@@ -413,7 +416,8 @@ class ParrotActions:
             "mode": event_manager.get_mode(),
             "modifiers": event_manager.get_modifiers(),
             "click_held": self._is_left_click_held,
-            "middle_drag": self._is_middle_drag,
+            "drag": self._is_drag,
+            "drag_hold": self._drag_hold,
             "click_freeze": setting_get("click_freeze"),
             "alt_mode": setting_get("alt_mode"),
             "last_alt_mode": self._last_alt_mode,
@@ -469,7 +473,7 @@ class ParrotActions:
         """Progressive cancel, one step at a time:
         held button -> modifiers and slow steps -> mode -> exit
         """
-        if self._is_middle_drag:
+        if self._is_drag:
             self.alt_mode_close("canvas_drag")
             return
         if self._is_left_click_held:
@@ -534,7 +538,7 @@ class ParrotActions:
 
     def alt_mode_current(self):
         """The open mode, or None for cursor move."""
-        if self._is_middle_drag:
+        if self._is_drag:
             return "canvas_drag"
         mode = event_manager.get_mode()
         return next((n for n, modes in ALT_MODE_MODES.items() if mode in modes), None)
@@ -551,7 +555,7 @@ class ParrotActions:
         if name == "canvas_scale":
             self.canvas_scale_toggle()
         elif name == "canvas_drag":
-            self.toggle_middle_drag()
+            self.toggle_drag()
         elif name == "window_pick":
             self.window_enter()
         elif name == "window_control":
@@ -563,7 +567,7 @@ class ParrotActions:
         if name == "canvas_scale":
             self.canvas_scale_toggle()
         elif name == "canvas_drag":
-            self.toggle_middle_drag()
+            self.toggle_drag()
         elif name in ("window_pick", "window_control"):
             self.window_exit()
         else:
@@ -644,23 +648,38 @@ class ParrotActions:
         actions.key(f"{self._canvas_scale_key}:up")
         self._canvas_scale_key = None
 
-    def toggle_middle_drag(self):
-        """Hold middle mouse down and keep regular movement; toggle to release."""
-        if self._is_middle_drag:
-            self.middle_drag_release()
+    def drag_press(self):
+        """Remembers what went down, so changing the setting mid-drag cannot
+        strand a held button."""
+        self._drag_hold = setting_get("drag_hold")
+        if self._drag_hold == "space":
+            actions.key("space:down")
+        else:
+            ctrl.mouse_click(button=DRAG_BUTTONS[self._drag_hold], down=True)
+
+    def drag_lift(self):
+        if self._drag_hold == "space":
+            actions.key("space:up")
+        else:
+            ctrl.mouse_click(button=DRAG_BUTTONS[self._drag_hold], up=True)
+
+    def toggle_drag(self):
+        """Hold something down and keep moving; toggle to release."""
+        if self._is_drag:
+            self.drag_release()
             self.stopper()
         else:
-            ctrl.mouse_click(button=2, down=True)
-            self._is_middle_drag = True
+            self.drag_press()
+            self._is_drag = True
             ui_manager.show_border()
             # default mode maps hiss/shush to scroll, move mode gives boost/burst
             event_manager.set_mode("move")
 
-    def middle_drag_release(self):
-        if not self._is_middle_drag:
+    def drag_release(self):
+        if not self._is_drag:
             return
-        ctrl.mouse_click(button=2, up=True)
-        self._is_middle_drag = False
+        self.drag_lift()
+        self._is_drag = False
         if not self._is_left_click_held:
             ui_manager.hide_border()
 
@@ -786,9 +805,9 @@ event_manager.subscribe("mode_changed", _remember_alt_mode)
 
 # Release before the jump so the jump itself isn't dragged, then re-press.
 snap_rule(
-    "middle_drag",
-    when=lambda: parrot_actions._is_middle_drag,
+    "drag",
+    when=lambda: parrot_actions._is_drag,
     target="center",
-    before=lambda: ctrl.mouse_click(button=2, up=True),
-    after=lambda: ctrl.mouse_click(button=2, down=True),
+    before=lambda: parrot_actions.drag_lift(),
+    after=lambda: parrot_actions.drag_press(),
 )

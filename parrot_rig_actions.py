@@ -31,7 +31,7 @@ EXIT_NOISE = "cluck"
 SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "hiss", "shush"]
 
 HUB_MENUS = [
-    "click_freeze", "speeds", "move_mode", "alt_mode",
+    "click_freeze", "speeds", "move_mode", "alt_mode", "drag_hold",
     "anchor_move", "return_fallback", "utility_1", "profiles",
 ]
 
