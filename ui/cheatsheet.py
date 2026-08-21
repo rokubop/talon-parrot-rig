@@ -38,44 +38,45 @@ def only_current_mode_table():
         ] for noise in mode_config.keys()]
     ]
 
+# One column per input map, wearing the shape and every colour the cursor uses
+# for it.
+COLUMNS = [
+    ("default",      "default",      "circle",   ["default"]),
+    ("move",         "move",         "circle",   ["move", "boost", "glide"]),
+    ("tracking",     "tracking",     "circle",   ["tracking"]),
+    ("canvas",       "canvas_stop",  "triangle", ["canvas_stop", "canvas_tracking"]),
+    ("canvas move",  "canvas_move",  "triangle", ["canvas_move", "canvas_boost", "canvas_glide"]),
+    ("canvas scale", "canvas_scale", "diamond",  ["canvas_scale", "canvas_scale_move"]),
+    ("window",       "window",       "square",   ["window_stop", "window", "window_move"]),
+]
+
+
 def cheatsheet_ui():
     """Create cheatsheet UI"""
     screen, window, div, text = actions.user.ui_elements(["screen", "window", "div", "text"])
     table, tr, td, th = actions.user.ui_elements(["table", "tr", "td", "th"])
     state, button, svg, circle, path = actions.user.ui_elements(["state", "button", "svg", "circle", "path"])
 
-    all_modes_config = {k: v for k, v in parrot_input_map.items() if not k.endswith("_select")}
     current_mode, set_current_mode = state.use("mode", "default")
 
-    # Get all unique noises across all modes
-    all_noises = set()
-    for mode_config in all_modes_config.values():
-        all_noises.update(mode_config.keys())
-    all_noises = sorted(list(all_noises))
+    columns = [(title, parrot_input_map.get(mode, {}), shape, states)
+               for title, mode, shape, states in COLUMNS]
 
-    # Modes that share the same input map bindings (sub-states of move/canvas_move)
-    RELATED_MODES = {
-        "move": ["move", "boost", "glide"],
-        "canvas_move": ["canvas_move", "canvas_boost", "canvas_glide"],
-    }
-    CANVAS_MODES = {"canvas_stop", "canvas_move", "canvas_boost", "canvas_glide", "canvas_tracking", "canvas_scale"}
+    all_noises = sorted({n for _, config, _, _ in columns for n in config})
 
-    def _make_icon(mode, cx):
-        """Create a circle or triangle icon depending on mode type."""
+    def _icon(mode, shape, cx):
         color = MODE_COLORS.get(mode, "#FF0000")
-        if mode in CANVAS_MODES:
+        if shape == "triangle":
             return path(d=f"M {cx} 19 L {cx - 8} 5 L {cx + 8} 5 Z", fill=color)
+        if shape == "diamond":
+            return path(d=f"M {cx} 4 L {cx + 8} 12 L {cx} 20 L {cx - 8} 12 Z", fill=color)
+        if shape == "square":
+            return path(d=f"M {cx - 6} 6 H {cx + 6} V 18 H {cx - 6} Z", fill=color)
         return circle(cx=cx, cy=12, r=7, fill=color)
 
-    # Create header row with mode names and colored icons
-    def create_mode_header(mode_name: str):
-        related = RELATED_MODES.get(mode_name)
-        if related:
-            icons = [_make_icon(m, 12 + i * 18) for i, m in enumerate(related)]
-        else:
-            icons = [_make_icon(mode_name, 12)]
-
-        svg_width = 24 + (len(icons) - 1) * 18 if len(icons) > 1 else 24
+    def create_mode_header(title, shape, states):
+        icons = [_icon(m, shape, 12 + i * 18) for i, m in enumerate(states)]
+        svg_width = 24 + (len(icons) - 1) * 18
 
         return th(padding=0, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR)[
             div(
@@ -85,7 +86,7 @@ def cheatsheet_ui():
                 padding_left=6,
             )[
                 svg(width=svg_width)[*icons],
-                text(mode_name.upper(), color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
+                text(title.upper(), color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
             ]
         ]
 
@@ -98,22 +99,17 @@ def cheatsheet_ui():
                 ],
             ]
         ],
-        *[create_mode_header(mode_name) for mode_name in all_modes_config.keys()]
+        *[create_mode_header(title, shape, states) for title, _, shape, states in columns]
     ]
 
-    # Create rows for each noise
-    default_config = all_modes_config.get("default", {})
     DIM_COLOR = "#666666"
 
-    mode_names = list(all_modes_config.keys())
-
     def create_noise_row(noise: str):
-        labels = [config.get(noise, ("",))[0] for config in all_modes_config.values()]
+        labels = [config.get(noise, ("",))[0] for _, config, _, _ in columns]
 
         def cell_for_mode(idx):
             label = labels[idx]
-            is_first = idx == 0
-            is_same_as_prev = not is_first and label == labels[idx - 1]
+            is_same_as_prev = idx > 0 and label == labels[idx - 1]
             color = DIM_COLOR if is_same_as_prev else UI_TEXT_COLOR
             return td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
                 text(label, color=color)
@@ -123,13 +119,12 @@ def cheatsheet_ui():
             td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
                 text(noise, color=UI_TEXT_COLOR, font_family="monospace")
             ],
-            *[cell_for_mode(i) for i in range(len(mode_names))]
+            *[cell_for_mode(i) for i in range(len(columns))]
         ]
 
-    # Filter out noises that have no labels in any mode
     visible_noises = [
         noise for noise in all_noises
-        if any(mode_config.get(noise, ("",))[0] for mode_config in all_modes_config.values())
+        if any(config.get(noise, ("",))[0] for _, config, _, _ in columns)
     ]
     noise_rows = [create_noise_row(noise) for noise in visible_noises]
 

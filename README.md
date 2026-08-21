@@ -66,7 +66,7 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `er` | mode swap | Swap to the most recent mode, or back |
 | `cluck` | exit | Exit parrot rig, from any mode or menu |
 | `palate` | utility_1 | Execute utility action |
-| `tut` | progressive cancel / combo prefix | Cancel one step at a time, exit at the end, prefix for combos (e.g. `tut oh` = right click) |
+| `tut` | progressive cancel / combo prefix | Cancel modifiers, cancel mode, exit, or used as prefix for combos. |
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.
 
