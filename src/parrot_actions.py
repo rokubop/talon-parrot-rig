@@ -32,8 +32,6 @@ from ..parrot_rig_settings import (
     CANVAS_RAMP_AMOUNT,
     CANVAS_RAMP_REVERT_MS,
     CANVAS_GLIDE_RELEASE_RATE,
-    CANVAS_SCALE_BOOST_AMOUNT,
-    CANVAS_SCALE_BURST_AMOUNT,
     TRACKING_STOP_MS,
     CLICK_BEHAVIOR,
     CANVAS_SCALE_MODES,
@@ -41,7 +39,7 @@ from ..parrot_rig_settings import (
 from .utils import reload_files
 from .settings_menu import (
     setting_get, setting_set, setting_label, setting_title,
-    setting_number, turn_scale, boost_scale,
+    setting_number, setting_step, turn_scale, boost_scale,
 )
 from .menu import menu_reset
 from .anchor import anchor_go, anchor_go_screen, anchor_toggle, anchors
@@ -71,7 +69,6 @@ class ParrotActions:
         self._canvas_scale_key = None
         self._canvas_scale_last = "ctrl"
         self._canvas_scale_dir = "up"
-        self._canvas_scale_did_start = False
         self._window_super_held = False
         self._burst_gliding = False
         self._burst_glide_job = None
@@ -617,36 +614,15 @@ class ParrotActions:
         self._canvas_scale_hold(self._canvas_scale_last)
         actions.user.mouse_rig_scroll_delta(self._canvas_scale_dir)
 
-    def canvas_scale_boost(self):
-        """Boost while scaling, else scale up with the last modifier."""
-        if event_manager.get_mode() != "canvas_scale_move":
-            self.canvas_scale_dir(self._canvas_scale_last, "up")
-            return
-        amount = CANVAS_SCALE_BOOST_AMOUNT * boost_scale()
-        actions.user.mouse_rig_scroll_boost(
-            amount,
-            over_ms=CANVAS_BOOST_LONG_OVER_MS,
-            release_ms=CANVAS_BOOST_LONG_RELEASE_MS,
-        )
-
-    def canvas_scale_burst_or_brake(self):
-        """Burst while scaling, else scale down with the last modifier."""
-        if event_manager.get_mode() != "canvas_scale_move":
-            self.canvas_scale_dir(self._canvas_scale_last, "down")
-            self._canvas_scale_did_start = True
-            return
-        self._canvas_scale_did_start = False
-        rig = actions.user.mouse_rig()
-        rig.layer("hiss_canvas_scale").stack(1).scroll.speed.offset.add(
-            CANVAS_SCALE_BURST_AMOUNT * boost_scale()
-        )
-
-    def canvas_scale_burst_or_brake_stop(self):
-        if self._canvas_scale_did_start:
-            self._canvas_scale_did_start = False
-            return
-        rig = actions.user.mouse_rig()
-        rig.layer("hiss_canvas_scale").revert(CANVAS_BRAKE_REVERT_MS, "ease_out2")
+    def canvas_scale_speed_step(self, delta: int):
+        """Some apps zoom a whole level per tick, so the range has to reach very
+        low. Takes effect mid-scale, not just on the next one."""
+        from ..ui.utility_selector import show_utility_notification
+        label = setting_step("canvas_scale_speed", delta)
+        show_utility_notification(setting_title("canvas_scale_speed"), label)
+        if event_manager.get_mode() == "canvas_scale_move":
+            actions.user.mouse_rig_scroll_continuous(
+                self._canvas_scale_dir, setting_number("canvas_scale_speed"), force=True)
 
     def canvas_scale_stop(self):
         actions.user.mouse_rig_scroll_stop()

@@ -304,10 +304,10 @@ input_map_canvas_scale = {
     "palate": ("scale step", parrot_actions.canvas_scale_step),
     "ee":     ("stop",
                lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_scale_stop)),
-    "shush":             ("boost / scale up", _anchor_chase(parrot_actions.canvas_scale_boost)),
-    "shush_stop":        ("", lambda: None),
-    "hiss":              ("burst / scale down", parrot_actions.canvas_scale_burst_or_brake),
-    "hiss_stop:db_50":   ("", parrot_actions.canvas_scale_burst_or_brake_stop),
+    "shush":      ("speed up", _anchor_chase(lambda: parrot_actions.canvas_scale_speed_step(1))),
+    "shush_stop": ("", lambda: None),
+    "hiss":       ("speed down", lambda: parrot_actions.canvas_scale_speed_step(-1)),
+    "hiss_stop":  ("", lambda: None),
 }
 
 input_map_canvas_tracking = {

@@ -56,8 +56,6 @@ WINDOW_SNAP_ASSIST_MS = 80
 # slower than plain scroll. Boost and burst keep the same ratio to it that the
 # canvas move ones keep to canvas speed.
 CANVAS_SCALE_SPEED = 0.015
-CANVAS_SCALE_BOOST_AMOUNT = 0.15
-CANVAS_SCALE_BURST_AMOUNT = 0.3
 
 # Canvas move
 CANVAS_MOVE_SPEED = 0.03

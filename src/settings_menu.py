@@ -45,7 +45,14 @@ setting_maps = {
     "move_speed": dict(SPEED_OPTIONS),
     "scroll_speed": dict(SPEED_OPTIONS),
     "canvas_move_speed": dict(SPEED_OPTIONS),
-    "canvas_scale_speed": dict(SPEED_OPTIONS),
+    "canvas_scale_speed": {
+        "normal":    ("Normal",),
+        "fast":      ("Fast",),
+        "slow":      ("Slow",),
+        "very_slow": ("Very Slow",),
+        "crawl":     ("Crawl",),
+        "custom":    ("Custom",),
+    },
     "boost_power": {
         "normal": ("Normal",),
         "strong": ("Strong",),
@@ -97,6 +104,16 @@ SPEED_SCALES = {
     "very_slow": 0.5,
 }
 
+# Apps differ wildly in how much one wheel tick zooms, so this reaches lower
+# than the shared speeds do
+CANVAS_SCALE_SCALES = {
+    "normal":    1.0,
+    "fast":      1.5,
+    "slow":      0.5,
+    "very_slow": 0.25,
+    "crawl":     0.1,
+}
+
 BOOST_SCALES = {
     "normal": 1.0,
     "strong": 1.5,
@@ -108,7 +125,7 @@ NUMERIC_SETTINGS = {
     "move_speed":        {"base": MOVE_SPEED,        "scales": SPEED_SCALES},
     "scroll_speed":      {"base": SCROLL_SPEED,      "scales": SPEED_SCALES},
     "canvas_move_speed": {"base": CANVAS_MOVE_SPEED, "scales": SPEED_SCALES},
-    "canvas_scale_speed": {"base": CANVAS_SCALE_SPEED, "scales": SPEED_SCALES},
+    "canvas_scale_speed": {"base": CANVAS_SCALE_SPEED, "scales": CANVAS_SCALE_SCALES},
     "turn_speed":        {"base": None,              "scales": TURN_SCALES},
     "boost_power":       {"base": None,              "scales": BOOST_SCALES},
 }
@@ -167,6 +184,20 @@ def setting_customs() -> dict:
 def setting_apply_customs(customs: dict):
     _customs.clear()
     _customs.update({k: v for k, v in (customs or {}).items() if k in NUMERIC_SETTINGS})
+
+
+def setting_step(name: str, delta: int) -> str:
+    """Move a numeric setting one option along its scale, slowest to fastest.
+    A custom value steps from whichever option it sits nearest."""
+    spec = NUMERIC_SETTINGS[name]
+    order = sorted(spec["scales"], key=lambda k: spec["scales"][k])
+    current = setting_get(name)
+    if current not in order:
+        number = setting_number(name)
+        current = min(order, key=lambda k: abs(setting_number(name, k) - number))
+    index = min(max(order.index(current) + delta, 0), len(order) - 1)
+    setting_set(name, order[index])
+    return setting_label(name)
 
 
 def turn_scale() -> float:
