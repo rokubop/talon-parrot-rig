@@ -1,7 +1,8 @@
 from talon import actions
 from .picker import footer, now_line, panel, section, tile
 from ..src.anchor import anchors
-from ..src.menu import menu_back, menu_register
+from ..src.events import event_manager
+from ..src.menu import menu_back, menu_open, menu_register
 from ..src.profiles import (
     PROFILE_SLOTS, profile_active, profile_is_locked, profile_names,
 )
@@ -25,32 +26,9 @@ def custom_pending():
     return _pending_custom
 
 
-def _noises():
-    from ..parrot_rig_actions import SELECT_NOISES
-    return SELECT_NOISES
-
-
 def _titles():
     from ..parrot_rig_actions import MENU_TITLES
     return MENU_TITLES
-
-
-def _legend(mode: str) -> dict:
-    """Noise per label, straight from the input map, so a remapped noise shows
-    up here without this file knowing any noise names."""
-    try:
-        legend = actions.user.input_map_channel_get_legend("parrot_rig", mode=mode)
-    except Exception:
-        return {}
-    return {label: noise for noise, label in legend.items()}
-
-
-def _back_noise(mode: str) -> str:
-    try:
-        legend = actions.user.input_map_channel_get_legend("parrot_rig", mode=mode)
-    except Exception:
-        return ""
-    return ", ".join(noise for noise, label in legend.items() if label == "back")
 
 
 def menu_value(name: str) -> str:
@@ -69,26 +47,26 @@ def menu_value(name: str) -> str:
     return ""
 
 
-def _make_menu_list(window_id: str, menu: str, title: str, menus_fn, back_label: str):
+def _back_tile(label="Back"):
+    from ..parrot_rig_actions import CANCEL_NOISE
+    return tile(label, noise=CANCEL_NOISE, exit=True,
+                on_click=lambda _e: menu_back())
+
+
+def _make_menu_list(window_id: str, title: str, menus_fn, back_label: str):
     """A menu whose tiles open other menus."""
     def menu_list_ui(props):
-        from ..parrot_rig_actions import menu_opener
-        noises, titles = _noises(), _titles()
+        titles = _titles()
 
         tiles = [
-            tile(
-                titles.get(name, name),
-                noise=noises[i] if i < len(noises) else "",
-                value=menu_value(name),
-                on_click=lambda _e, n=name: menu_opener(n)(),
-            )
-            for i, name in enumerate(menus_fn())
+            tile(titles.get(name, name), value=menu_value(name),
+                 on_click=lambda _e, n=name: menu_open(n))
+            for name in menus_fn()
         ]
 
         return panel(window_id, title, [
             section(None, tiles),
-            footer([tile(back_label, noise=_back_noise(f"{menu}_select"),
-                         exit=True, on_click=lambda _e: menu_back())]),
+            footer([_back_tile(back_label)]),
         ])
 
     menu_list_ui.__qualname__ = f"{window_id}_ui"
@@ -106,20 +84,18 @@ def _speed_menus():
     return SPEED_MENUS
 
 
-hub_ui = _make_menu_list("settings_hub", "hub", "Settings", _hub_menus, "Close")
-speeds_ui = _make_menu_list("speeds_menu", "speeds", "Speeds", _speed_menus, "Back")
+hub_ui = _make_menu_list("settings_hub", "Settings", _hub_menus, "Close")
+speeds_ui = _make_menu_list("speeds_menu", "Speeds", _speed_menus, "Back")
 
 
 def profiles_ui(props):
     from ..parrot_rig_actions import _profile_slot, _profile_save_current
-    noises = _noises()
     saved = profile_names()
     current = profile_active()
 
     tiles = [
         tile(
             name,
-            noise=noises[i] if i < len(noises) else "",
             value="locked" if profile_is_locked(name) else None,
             selected=name == current,
             on_click=lambda _e, i=i: _profile_slot(i),
@@ -128,38 +104,33 @@ def profiles_ui(props):
     ]
 
     next_free = len(saved)
-    if next_free < min(PROFILE_SLOTS, len(noises)):
-        tiles.append(tile("Save here", noise=noises[next_free], value="new",
+    if next_free < PROFILE_SLOTS:
+        tiles.append(tile("Save here", value="new",
                           on_click=lambda _e, i=next_free: _profile_slot(i)))
 
     overwrite = []
     if not profile_is_locked(current):
         overwrite = [tile(f"Overwrite {current}",
-                          noise=_legend("profiles_select").get("overwrite active", ""),
                           on_click=lambda _e: _profile_save_current())]
 
     return panel("profiles_menu", "Profiles", [
         now_line(current, "Active"),
         section(None, tiles),
-        footer(overwrite + [tile("Back", noise=_back_noise("profiles_select"),
-                                 exit=True, on_click=lambda _e: menu_back())]),
+        footer(overwrite + [_back_tile()]),
     ])
 
 
 def anchor_kind_ui(props):
     from ..parrot_rig_actions import ANCHOR_KINDS, _anchor_kind
-    noises = _noises()
 
     tiles = [
-        tile(label, noise=noises[i] if i < len(noises) else "",
-             on_click=lambda _e, k=kind: _anchor_kind(k))
-        for i, (kind, label) in enumerate(ANCHOR_KINDS)
+        tile(label, on_click=lambda _e, k=kind: _anchor_kind(k))
+        for kind, label in ANCHOR_KINDS
     ]
 
     return panel("anchor_kind", "Anchor", [
         section(None, tiles),
-        footer([tile("Keep point", noise=_back_noise("anchor_kind_select"),
-                     exit=True, on_click=lambda _e: menu_back())]),
+        footer([_back_tile("Keep point")]),
     ])
 
 
@@ -214,20 +185,43 @@ def setting_custom_ui(props):
                        "setting_custom", on_submit)
 
 
+# The only menus that still touch the input mode. A field wants the keyboard,
+# and a noise fired mid sentence would move the mouse out from under it, so
+# these two suppress every noise but a double tut while they are open.
+_typing_return = None
+
+
+def _typing_enter(mode: str):
+    global _typing_return
+    _typing_return = event_manager.get_mode()
+    event_manager.set_mode(mode)
+
+
+def _typing_leave():
+    global _typing_return
+    if _typing_return is not None:
+        event_manager.set_mode(_typing_return)
+        _typing_return = None
+
+
 def show_setting_custom():
+    _typing_enter("setting_custom_select")
     actions.user.ui_elements_show(setting_custom_ui, show_hints=False)
 
 
 def hide_setting_custom():
     actions.user.ui_elements_hide(setting_custom_ui)
+    _typing_leave()
 
 
 def show_profile_name():
+    _typing_enter("profile_name_select")
     actions.user.ui_elements_show(profile_name_ui, show_hints=False)
 
 
 def hide_profile_name():
     actions.user.ui_elements_hide(profile_name_ui)
+    _typing_leave()
 
 
 def show_hub():

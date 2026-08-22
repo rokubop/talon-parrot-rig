@@ -162,12 +162,12 @@ Three sources, all on one screen:
 - **Last voice commands** - your last 5 commands, bound as a `mimic`
 - **Last parrot rig actions** - your last 5 rig actions, bound as the action itself
 
-Built for an eye tracker. Big tiles, no hints, nothing on a noise. Opening it
-takes no mode and no noise: move the cursor onto a tile and click it the way you
-click anything. Only `tut` is borrowed, to close.
+Built for an eye tracker. Big tiles, no hints, nothing on a noise.
 
-Every other menu wears the same tiles, and every tile takes a click as well as
-the noise printed on it. Pick with your voice or your eyes.
+Every menu works this way. Opening one takes no mode and no noise, so the rig
+keeps running underneath and you move the cursor onto a tile the way you move
+it anywhere else. `tut` is the only noise a menu takes, and it always means
+back.
 
 Commands, not phrases. Talon keeps recognising while the rig runs, and
 `^<phrase>$: skip()` swallows it so talking cannot fire noises. Those

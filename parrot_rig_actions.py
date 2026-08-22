@@ -1,18 +1,15 @@
 from talon import Module, actions, ctrl
 from .src.parrot_actions import parrot_actions
-from .src.events import event_manager
 from .parrot_rig_settings import CLICK_HOLD_MS
-from .src.select import utility_input_maps
 from .src.settings_menu import (
     setting_maps, setting_set, setting_label, setting_title, SETTING_TITLES,
     setting_set_custom, setting_number_text, is_numeric,
 )
 from .src.history import parrot_history_record
-from .src.menu import menu_open, menu_back, menu_close
+from .src.menu import menu_open, menu_back, menu_current
 from .src.utility import utility_run
 from .src.profiles import (
-    PROFILE_SLOTS, profile_active, profile_delete, profile_load,
-    profile_names, profile_save,
+    profile_active, profile_load, profile_names, profile_save,
 )
 
 mod = Module()
@@ -27,10 +24,10 @@ def setting_summary(name: str) -> str:
 
 CHANNEL = "parrot_rig"
 
-# Noises that pick slot 1, 2, 3... in any selector menu. The exit noise is
-# absent on purpose, so it never doubles as a selector.
 EXIT_NOISE = "cluck"
-SELECT_NOISES = ["ah", "oh", "t", "guh", "eh", "mm", "pop", "ee", "hiss", "shush"]
+# Menus are aimed at, not spoken to. Nothing in one sits on a noise, so this is
+# the only noise a menu takes, and it means the same everywhere.
+CANCEL_NOISE = "tut"
 
 HUB_MENUS = [
     "click_freeze", "speeds", "move_mode", "alt_mode", "drag_hold",
@@ -64,13 +61,12 @@ def _settings_menu():
 
 
 def _utility_picker():
-    """Not a menu: it takes no mode and no noise, so the stack is closed
-    rather than pushed onto. tut closes it, handled in parrot_actions.cancel."""
-    from .ui.utility_picker import utility_picker_toggle
-    from .src.menu import menu_current
-    if menu_current():
-        menu_close()
-    utility_picker_toggle()
+    """Same combo opens and closes it. From the hub it stacks, so tut goes back
+    there rather than all the way out."""
+    if menu_current() == "utility_1":
+        menu_back()
+    else:
+        menu_open("utility_1")
 
 
 def _anchor_chase_open() -> bool:
@@ -95,6 +91,24 @@ def _anchor_clear_all():
     from .ui.setting_picker import show_notification
     anchor_clear_all()
     show_notification("Anchor", "cleared all")
+
+
+def setting_select(name: str, slot: int):
+    """Pick a setting value, or run its action if the row has one."""
+    from .ui.setting_picker import show_notification
+    entries = list(setting_maps[name].items())
+    if slot < len(entries):
+        key, entry = entries[slot]
+        if key == "custom":
+            _setting_custom_prompt(name)
+            return
+        if len(entry) > 1:
+            menu_back()
+            SETTING_ACTIONS[entry[1]]()
+            return
+        setting_set(name, key)
+        show_notification(setting_title(name), setting_summary(name))
+    menu_back()
 
 
 def _setting_custom_prompt(name: str):
@@ -345,51 +359,6 @@ utility_presets = {
     },
 }
 
-def menu_opener(name: str):
-    """What a hub row does, picked by noise or clicked."""
-    if name == "utility_1":
-        return _utility_picker
-    return lambda: menu_open(name)
-
-
-def _menu_list_input_map(names, back_label="back"):
-    """Input map for a menu whose rows open other menus."""
-    mode = {}
-    for i, name in enumerate(names):
-        if i < len(SELECT_NOISES):
-            mode[SELECT_NOISES[i]] = (MENU_TITLES.get(name, name),
-                                      menu_opener(name))
-    mode["tut"] = (back_label, menu_back)
-    mode[EXIT_NOISE] = ("exit", actions.user.parrot_rig_exit)
-    return mode
-
-
-def _profiles_input_map():
-    mode = {}
-    for i in range(min(PROFILE_SLOTS, len(SELECT_NOISES))):
-        mode[SELECT_NOISES[i]] = (
-            f"profile {i + 1}",
-            lambda i=i: _profile_slot(i),
-        )
-    mode["palate"] = ("overwrite active", _profile_save_current)
-    mode["tut"] = ("back", menu_back)
-    mode[EXIT_NOISE] = ("exit", actions.user.parrot_rig_exit)
-    return mode
-
-
-def _anchor_kind_input_map():
-    mode = {}
-    for i, (kind, label) in enumerate(ANCHOR_KINDS):
-        if i < len(SELECT_NOISES):
-            mode[SELECT_NOISES[i]] = (
-                label,
-                lambda k=kind: _anchor_kind(k),
-            )
-    mode["tut"] = ("keep point", menu_back)
-    mode[EXIT_NOISE] = ("exit", actions.user.parrot_rig_exit)
-    return mode
-
-
 def _typing_input_map():
     # Talking while typing must not fire noises. Only a double tut escapes,
     # and the bare tut is just the combo prefix.
@@ -410,20 +379,10 @@ input_map = {
     "window": input_map_window,
     "window_stop": input_map_window,
     "window_move": input_map_window,
-    "hub_select": _menu_list_input_map(HUB_MENUS, "close"),
-    "speeds_select": _menu_list_input_map(SPEED_MENUS),
-    "anchor_kind_select": _anchor_kind_input_map(),
-    "profiles_select": _profiles_input_map(),
+    # The only menus that still take a mode. A field wants the keyboard, and a
+    # noise fired mid sentence would move the mouse out from under it.
     "profile_name_select": _typing_input_map(),
     "setting_custom_select": _typing_input_map(),
-    **utility_input_maps(
-        maps=setting_maps,
-        ui_selectors=SELECT_NOISES,
-        ui_cancel=["tut"],
-        ui_exit=[EXIT_NOISE],
-        select=lambda n, i: actions.user.parrot_rig_setting_select(n, i),
-        close=lambda n: menu_back(),
-    ),
 }
 
 def _listen():
@@ -518,29 +477,3 @@ class Actions:
     def parrot_rig_show_help():
         """Show parrot rig cheatsheet"""
         parrot_actions.show_cheatsheet()
-
-    def parrot_rig_setting_get(name: str) -> str:
-        """Get the current value of a settings-menu setting"""
-        from .src.settings_menu import setting_get
-        return setting_get(name)
-
-    def parrot_rig_show_setting_selector(name: str):
-        """Show a settings selector UI and enter select mode"""
-        menu_open(name)
-
-    def parrot_rig_setting_select(name: str, slot: int):
-        """Select a setting value by slot index, or run its action if it has one"""
-        from .ui.setting_picker import show_notification
-        entries = list(setting_maps[name].items())
-        if slot < len(entries):
-            key, entry = entries[slot]
-            if key == "custom":
-                _setting_custom_prompt(name)
-                return
-            if len(entry) > 1:
-                menu_back()
-                SETTING_ACTIONS[entry[1]]()
-                return
-            setting_set(name, key)
-            show_notification(setting_title(name), setting_summary(name))
-        menu_back()

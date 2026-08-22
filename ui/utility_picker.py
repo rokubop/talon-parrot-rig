@@ -11,6 +11,7 @@ heard, what the rig did.
 
 from talon import actions
 from .picker import footer, now_line, panel, section, tile
+from ..src.menu import menu_back, menu_register
 from ..src.history import parrot_history, voice_history
 from ..src.utility import (
     PARROT, PHRASE, PRESET, utility_is, utility_label,
@@ -29,7 +30,7 @@ def _assign(setter):
     which setter they carry."""
     def on_click(_event):
         setter()
-        utility_picker_close()
+        menu_back()
         _notify()
     return on_click
 
@@ -82,27 +83,18 @@ def utility_picker_ui(props):
                 empty="Nothing done yet this session"),
         footer(
             [tile("Close", noise="tut", exit=True,
-                  on_click=lambda _e: utility_picker_close())],
+                  on_click=lambda _e: menu_back())],
             "Your noises keep working while this is open",
         ),
     ])
-
-
-def utility_picker_is_open() -> bool:
-    return actions.user.ui_elements_is_active(utility_picker_ui)
 
 
 def utility_picker_show():
     actions.user.ui_elements_show(utility_picker_ui, show_hints=False)
 
 
-def utility_picker_close():
-    if utility_picker_is_open():
-        actions.user.ui_elements_hide(utility_picker_ui)
+def utility_picker_hide():
+    actions.user.ui_elements_hide(utility_picker_ui)
 
 
-def utility_picker_toggle():
-    if utility_picker_is_open():
-        utility_picker_close()
-    else:
-        utility_picker_show()
+menu_register("utility_1", utility_picker_show, utility_picker_hide)

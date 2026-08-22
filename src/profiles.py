@@ -5,7 +5,7 @@ Loading it resets everything. Nothing else persists between sessions until a
 profile is saved.
 """
 
-from talon import actions, storage
+from talon import storage
 from .utility import utility_apply, utility_binding
 from .settings_menu import (
     setting_maps, setting_get, setting_set, setting_customs, setting_apply_customs,

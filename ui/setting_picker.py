@@ -15,33 +15,33 @@ def _menu_title(name: str) -> str:
     return MENU_TITLES.get(name, name)
 
 
+def _summary(name, current, numeric):
+    if current not in setting_maps[name]:
+        return ""
+    label = setting_maps[name][current][0]
+    return f"{label}  {setting_number_text(name, current)}" if numeric else label
+
+
 def _make_selector(name: str, options: dict, get_current):
     def selector_ui(props):
-        legend = actions.user.input_map_channel_get_legend(
-            "parrot_rig", mode=f"{name}_select")
+        from ..parrot_rig_actions import CANCEL_NOISE, setting_select
         current = get_current()
         numeric = is_numeric(name)
-
-        cancel_noises = [k for k, v in legend.items() if v == "back"]
-        # By label, not position: a pinned option sits wherever it was pinned,
-        # so the legend no longer runs in the same order as the map
-        noise_by_label = {v: k for k, v in legend.items() if v != "back"}
 
         tiles = [
             tile(
                 options[key][0],
-                noise=noise_by_label.get(options[key][0], ""),
                 value=setting_number_text(name, key) if numeric else None,
                 selected=key == current,
-                on_click=lambda _e, i=i: actions.user.parrot_rig_setting_select(name, i),
+                on_click=lambda _e, i=i: setting_select(name, i),
             )
             for i, key in enumerate(options)
         ]
 
         return panel(f"{name}_selector", props.get("title", name), [
-            now_line(options[current][0] if current in options else ""),
+            now_line(_summary(name, current, numeric)),
             section(None, tiles),
-            footer([tile("Back", noise=", ".join(cancel_noises), exit=True,
+            footer([tile("Back", noise=CANCEL_NOISE, exit=True,
                          on_click=lambda _e: menu_back())]),
         ])
     selector_ui.__qualname__ = f"{name}_selector_ui"

@@ -41,7 +41,7 @@ from .settings_menu import (
     setting_get, setting_set, setting_label, setting_title,
     setting_number, setting_step, turn_scale, boost_scale,
 )
-from .menu import menu_reset
+from .menu import menu_back, menu_current, menu_reset
 from .anchor import anchor_go, anchor_go_screen, anchor_toggle, anchors
 from .snap import active_rule, do_snap, snap_rule
 
@@ -382,10 +382,8 @@ class ParrotActions:
             stop_scrolling=True,
             disable_mods=True
         ):
-        from ..ui.utility_picker import utility_picker_close
         self._parrot_mode_enabled = False
         menu_reset()
-        utility_picker_close()
         ui_manager.hide_cheatsheet()
         ui_manager.hide()
 
@@ -475,9 +473,8 @@ class ParrotActions:
         """Progressive cancel, one step at a time:
         held button -> modifiers and slow steps -> mode -> exit
         """
-        from ..ui.utility_picker import utility_picker_close, utility_picker_is_open
-        if utility_picker_is_open():
-            utility_picker_close()
+        if menu_current():
+            menu_back()
             return
         if self._is_drag:
             self.alt_mode_close("canvas_drag")
