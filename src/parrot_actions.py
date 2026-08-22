@@ -19,6 +19,7 @@ from ..parrot_rig_settings import (
     BURST_SETTLE_HOLD_MS,
     BURST_SETTLE_REVERT_MS,
     GLIDE_RELEASE_RATE,
+    APP_PICKER_KEY,
     WINDOW_KEYS,
     WINDOW_SUPER_KEYS,
     WINDOW_SNAP_ASSIST_MS,
@@ -204,6 +205,12 @@ class ParrotActions:
         actions.user.mouse_rig_stop()
         tracking.activate()
         event_manager.set_mode("tracking")
+
+    def app_picker(self):
+        """The hotkey and normal tracking, nothing else. Window mode is a
+        different thing, on tut eh."""
+        actions.key(APP_PICKER_KEY)
+        self.tracking_activate()
 
     def canvas_tracking_activate(self):
         actions.user.mouse_rig_scroll_stop()

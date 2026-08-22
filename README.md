@@ -156,9 +156,11 @@ Say **"parrot help"** for mapping overlay.
 Utility 1 is the one noise you reassign as you go. `tut palate` opens the
 picker.
 
-Out of the box it is the app picker, the same ``alt+` `` that `tut eh` opens.
-`APP_PICKER_KEY` in [parrot_rig_settings.py](./parrot_rig_settings.py) is the
-key both use. Swap utility 1 for hold click, a repeat, or anything below.
+Out of the box it presses ``alt+` `` and starts tracking, so you look at the
+app you want and click it. No mode change, `tut eh` is still the one that goes
+to window mode. `APP_PICKER_KEY` in
+[parrot_rig_settings.py](./parrot_rig_settings.py) is the key both use. Swap
+utility 1 for hold click, a repeat, or anything below.
 
 Three sources, all on one screen:
 
