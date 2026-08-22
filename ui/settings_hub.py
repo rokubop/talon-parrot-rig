@@ -1,7 +1,6 @@
 from talon import actions
 from .picker import footer, now_line, panel, section, tile
 from ..src.anchor import anchors
-from ..src.events import event_manager
 from ..src.menu import menu_back, menu_open, menu_register
 from ..src.profiles import (
     PROFILE_SLOTS, profile_active, profile_is_locked, profile_names,
@@ -185,43 +184,20 @@ def setting_custom_ui(props):
                        "setting_custom", on_submit)
 
 
-# The only menus that still touch the input mode. A field wants the keyboard,
-# and a noise fired mid sentence would move the mouse out from under it, so
-# these two suppress every noise but a double tut while they are open.
-_typing_return = None
-
-
-def _typing_enter(mode: str):
-    global _typing_return
-    _typing_return = event_manager.get_mode()
-    event_manager.set_mode(mode)
-
-
-def _typing_leave():
-    global _typing_return
-    if _typing_return is not None:
-        event_manager.set_mode(_typing_return)
-        _typing_return = None
-
-
 def show_setting_custom():
-    _typing_enter("setting_custom_select")
     actions.user.ui_elements_show(setting_custom_ui, show_hints=False)
 
 
 def hide_setting_custom():
     actions.user.ui_elements_hide(setting_custom_ui)
-    _typing_leave()
 
 
 def show_profile_name():
-    _typing_enter("profile_name_select")
     actions.user.ui_elements_show(profile_name_ui, show_hints=False)
 
 
 def hide_profile_name():
     actions.user.ui_elements_hide(profile_name_ui)
-    _typing_leave()
 
 
 def show_hub():

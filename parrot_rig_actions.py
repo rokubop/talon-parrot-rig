@@ -197,8 +197,7 @@ def _on_input(event):
     if event.type != "input" or event.label in ("", "repeat last"):
         return
     _last_input = (event.mode, event.input)
-    if not (event.mode or "").endswith("_select"):
-        parrot_history_record(event.mode, event.input, event.label)
+    parrot_history_record(event.mode, event.input, event.label)
 
 
 def _repeat_last():
@@ -359,15 +358,6 @@ utility_presets = {
     },
 }
 
-def _typing_input_map():
-    # Talking while typing must not fire noises. Only a double tut escapes,
-    # and the bare tut is just the combo prefix.
-    return {
-        "tut": ("", lambda: None),
-        "tut tut": ("cancel", menu_back),
-    }
-
-
 input_map = {
     "default": input_map_default,
     "move": input_map_move,
@@ -379,10 +369,6 @@ input_map = {
     "window": input_map_window,
     "window_stop": input_map_window,
     "window_move": input_map_window,
-    # The only menus that still take a mode. A field wants the keyboard, and a
-    # noise fired mid sentence would move the mouse out from under it.
-    "profile_name_select": _typing_input_map(),
-    "setting_custom_select": _typing_input_map(),
 }
 
 def _listen():
