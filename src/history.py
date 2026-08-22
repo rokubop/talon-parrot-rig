@@ -1,15 +1,18 @@
 """The two histories the utility 1 picker offers, kept apart on purpose.
 
-Voice is Talon's own command history, read through the community
-`user.history_get`. Parrot rig is our own: every labelled input the channel
-announces, minus the ones already sitting on a bare noise.
-
-Voice history only ever fills outside parrot rig, since parrot mode disables
-command mode. That is the point of it: say a command, enter the rig, bind it.
+Voice is Talon's own, through `actions.core.recent_commands()`. Parrot rig is
+ours: every labelled input the channel announces, minus the ones already
+sitting on a bare noise.
 """
 
 from talon import actions
 from ..parrot_rig_settings import UTILITY_RECENT_COUNT, UTILITY_HISTORY_SKIP
+
+# parrot_rig_input.talon swallows speech with `^<phrase>$: skip()` so talking
+# cannot fire noises. Talon still records those recognitions, and what they
+# hold is the recogniser guessing at a mouth noise, never anything said on
+# purpose. Commands that matched only this rule are dropped.
+SWALLOWED_RULE = "<phrase>"
 
 # Newest first, so the picker reads top down without reversing
 _parrot = []
@@ -47,22 +50,23 @@ def parrot_history_clear():
 
 
 def voice_history(limit: int = None) -> list:
-    """Recent phrases, newest first, without consecutive repeats.
+    """Commands you ran, newest first, no repeats.
 
-    Absent `user.history_get` is not an error here. The picker just shows an
-    empty voice column, and every other kind still works."""
+    Commands rather than phrases, because a phrase the rig swallowed or a
+    stretch of dictation is not something anyone wants on a noise."""
     limit = limit or UTILITY_RECENT_COUNT
     phrases = []
-    index = 0
-    # History holds repeats, and reads past the end raise. Over-scan so a run
-    # of one phrase does not eat the whole column.
-    while len(phrases) < limit and index < limit * 5:
-        try:
-            phrase = actions.user.history_get(index)
-        except Exception:
+    for commands in reversed(actions.core.recent_commands()):
+        if not commands or all(_rule(c) == SWALLOWED_RULE for c, _ in commands):
+            continue
+        spoken = " ".join(str(capture) for _, capture in commands).strip()
+        if spoken and spoken not in phrases:
+            phrases.append(spoken)
+        if len(phrases) >= limit:
             break
-        index += 1
-        phrase = (phrase or "").strip()
-        if phrase and phrase not in phrases:
-            phrases.append(phrase)
     return phrases
+
+
+def _rule(command) -> str:
+    rule = getattr(command, "rule", None)
+    return getattr(rule, "rule", "") if rule is not None else ""

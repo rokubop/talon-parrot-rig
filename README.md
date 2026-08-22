@@ -159,7 +159,7 @@ picker.
 Three sources, all on one screen:
 
 - **Presets** - the eight mouse actions
-- **Last voice commands** - your last 5 phrases, bound as a `mimic`
+- **Last voice commands** - your last 5 commands, bound as a `mimic`
 - **Last parrot rig actions** - your last 5 rig actions, bound as the action itself
 
 Built for an eye tracker. Big tiles, no hints, nothing on a noise. Opening it
@@ -169,8 +169,10 @@ click anything. Only `tut` is borrowed, to close.
 Every other menu wears the same tiles, and every tile takes a click as well as
 the noise printed on it. Pick with your voice or your eyes.
 
-Voice history only fills outside the rig, since parrot mode turns command mode
-off. That is the use for it. Say a command, enter the rig, bind it.
+Commands, not phrases. Talon keeps recognising while the rig runs, and
+`^<phrase>$: skip()` swallows it so talking cannot fire noises. Those
+recognitions are still recorded, and they are the recogniser guessing at a
+mouth noise, so they are filtered out. What is left is what you meant to say.
 
 Rig actions already on a bare noise are left out of the list - binding `move
 left` to it gains nothing. `UTILITY_HISTORY_SKIP` in
