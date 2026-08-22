@@ -230,9 +230,9 @@ class ParrotActions:
         self.click_exit()
 
     def toggle_anchor(self):
-        from ..ui.utility_selector import show_utility_notification
+        from ..ui.setting_picker import show_notification
         result = anchor_toggle()
-        show_utility_notification("Anchor", f"{result} ({len(anchors())})")
+        show_notification("Anchor", f"{result} ({len(anchors())})")
 
     def snap_now(self):
         """Snap regardless of condition, using the active rule if there is one."""
@@ -382,10 +382,10 @@ class ParrotActions:
             stop_scrolling=True,
             disable_mods=True
         ):
-        from ..ui.palate_picker import palate_picker_close
+        from ..ui.utility_picker import utility_picker_close
         self._parrot_mode_enabled = False
         menu_reset()
-        palate_picker_close()
+        utility_picker_close()
         ui_manager.hide_cheatsheet()
         ui_manager.hide()
 
@@ -475,9 +475,9 @@ class ParrotActions:
         """Progressive cancel, one step at a time:
         held button -> modifiers and slow steps -> mode -> exit
         """
-        from ..ui.palate_picker import palate_picker_close, palate_picker_is_open
-        if palate_picker_is_open():
-            palate_picker_close()
+        from ..ui.utility_picker import utility_picker_close, utility_picker_is_open
+        if utility_picker_is_open():
+            utility_picker_close()
             return
         if self._is_drag:
             self.alt_mode_close("canvas_drag")
@@ -533,11 +533,11 @@ class ParrotActions:
         if event_manager.get_mode() in ("tracking", "canvas_tracking"):
             tracking.activate()
 
-    def show_utility_selector(self, name: str, title: str = ""):
-        ui_manager.show_utility_selector(name, title)
+    def show_setting_picker(self, name: str, title: str = ""):
+        ui_manager.show_setting_picker(name, title)
 
-    def hide_utility_selector(self, name: str):
-        ui_manager.hide_utility_selector(name)
+    def hide_setting_picker(self, name: str):
+        ui_manager.hide_setting_picker(name)
 
     def show_cheatsheet(self):
         ui_manager.show_cheatsheet()
@@ -627,9 +627,9 @@ class ParrotActions:
     def canvas_scale_speed_step(self, delta: int):
         """Some apps zoom a whole level per tick, so the range has to reach very
         low. Takes effect mid-scale, not just on the next one."""
-        from ..ui.utility_selector import show_utility_notification
+        from ..ui.setting_picker import show_notification
         label = setting_step("canvas_scale_speed", delta)
-        show_utility_notification(setting_title("canvas_scale_speed"), label)
+        show_notification(setting_title("canvas_scale_speed"), label)
         if event_manager.get_mode() == "canvas_scale_move":
             actions.user.mouse_rig_scroll_continuous(
                 self._canvas_scale_dir, setting_number("canvas_scale_speed"), force=True)

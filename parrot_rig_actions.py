@@ -9,7 +9,7 @@ from .src.settings_menu import (
 )
 from .src.history import parrot_history_record
 from .src.menu import menu_open, menu_back, menu_close
-from .src.palate import palate_label, palate_run, palate_set_preset
+from .src.utility import utility_run
 from .src.profiles import (
     PROFILE_SLOTS, profile_active, profile_delete, profile_load,
     profile_names, profile_save,
@@ -50,7 +50,7 @@ ANCHOR_KINDS = [
 
 MENU_TITLES = {
     **SETTING_TITLES,
-    "utility_1": "Palate",
+    "utility_1": "Utility 1",
     "profiles": "Profiles",
     "speeds": "Speeds",
 }
@@ -63,14 +63,14 @@ def _settings_menu():
     menu_open("hub")
 
 
-def _palate_picker():
+def _utility_picker():
     """Not a menu: it takes no mode and no noise, so the stack is closed
     rather than pushed onto. tut closes it, handled in parrot_actions.cancel."""
-    from .ui.palate_picker import palate_picker_toggle
+    from .ui.utility_picker import utility_picker_toggle
     from .src.menu import menu_current
     if menu_current():
         menu_close()
-    palate_picker_toggle()
+    utility_picker_toggle()
 
 
 def _anchor_chase_open() -> bool:
@@ -84,17 +84,17 @@ def _anchor_chase_open() -> bool:
 
 def _anchor_kind(kind: str):
     from .src.anchor import anchor_set_kind
-    from .ui.utility_selector import show_utility_notification
+    from .ui.setting_picker import show_notification
     anchor_set_kind(kind)
-    show_utility_notification("Anchor", dict(ANCHOR_KINDS).get(kind, kind).lower())
+    show_notification("Anchor", dict(ANCHOR_KINDS).get(kind, kind).lower())
     menu_back()
 
 
 def _anchor_clear_all():
     from .src.anchor import anchor_clear_all
-    from .ui.utility_selector import show_utility_notification
+    from .ui.setting_picker import show_notification
     anchor_clear_all()
-    show_utility_notification("Anchor", "cleared all")
+    show_notification("Anchor", "cleared all")
 
 
 def _setting_custom_prompt(name: str):
@@ -106,23 +106,23 @@ def _setting_custom_prompt(name: str):
 def _setting_custom_submit(text: str):
     """Store a typed number for the pending setting"""
     from .ui.settings_hub import custom_pending
-    from .ui.utility_selector import show_utility_notification
+    from .ui.setting_picker import show_notification
     name = custom_pending()
     if not name:
         return
     try:
         number = float((text or "").strip())
     except ValueError:
-        show_utility_notification(setting_title(name), "not a number")
+        show_notification(setting_title(name), "not a number")
         return
     setting_set_custom(name, number)
     menu_back()
-    show_utility_notification(setting_title(name), setting_summary(name))
+    show_notification(setting_title(name), setting_summary(name))
 
 
 def _profile_slot(slot: int):
     """Load the profile in a slot, or name a new one if it is the next free slot"""
-    from .ui.utility_selector import show_utility_notification
+    from .ui.setting_picker import show_notification
     names = profile_names()
     if slot == len(names):
         _profile_name_prompt()
@@ -130,18 +130,18 @@ def _profile_slot(slot: int):
     if slot > len(names):
         return
     profile_load(names[slot])
-    show_utility_notification("Profile", names[slot])
+    show_notification("Profile", names[slot])
     menu_back()
 
 
 def _profile_save_current():
     """Save to the active profile, or prompt for a name if it is locked"""
-    from .ui.utility_selector import show_utility_notification
+    from .ui.setting_picker import show_notification
     name = profile_active()
     if not profile_save(name):
         _profile_name_prompt()
         return
-    show_utility_notification("Profile", f"saved {name}")
+    show_notification("Profile", f"saved {name}")
 
 
 def _profile_name_prompt():
@@ -150,15 +150,15 @@ def _profile_name_prompt():
 
 def _profile_name_submit(name: str):
     """Save under the typed name and return to the profiles menu"""
-    from .ui.utility_selector import show_utility_notification
+    from .ui.setting_picker import show_notification
     name = (name or "").strip()
     if not name:
         return
     if not profile_save(name):
-        show_utility_notification("Profile", f"{name} is locked")
+        show_notification("Profile", f"{name} is locked")
         return
     menu_back()
-    show_utility_notification("Profile", f"saved {name}")
+    show_notification("Profile", f"saved {name}")
 
 
 # Settings rows that run something instead of setting a value, keyed by the
@@ -208,7 +208,7 @@ input_map_common = {
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", parrot_actions.tracking_activate),
     "er":     ("mode swap", parrot_actions.alt_mode_toggle),
-    "palate": ("palate", actions.user.parrot_rig_palate),
+    "palate": ("utility 1", utility_run),
     EXIT_NOISE: ("exit", actions.user.parrot_rig_exit),
     "tut":        ("cancel / exit", parrot_actions.cancel),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
@@ -222,7 +222,7 @@ input_map_common = {
     "tut hiss":   ("canvas scale", lambda: parrot_actions.alt_mode_open("canvas_scale")),
     "tut mm":     ("canvas drag", lambda: parrot_actions.alt_mode_open("canvas_drag")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
-    "tut palate": ("palate picker", actions.user.parrot_rig_palate_picker),
+    "tut palate": ("utility 1 picker", _utility_picker),
     "tut cluck":  ("settings", _settings_menu),
 }
 
@@ -332,7 +332,7 @@ input_map_canvas_tracking = {
     "mm":         ("click (pause)", actions.user.parrot_rig_click),
 }
 
-utility_maps = {
+utility_presets = {
     "utility_1": {
         "hold_click":       ("Hold Click",       lambda: actions.user.parrot_rig_click(0, True)),
         "click":            ("Click",            lambda: actions.user.parrot_rig_click(0)),
@@ -345,14 +345,20 @@ utility_maps = {
     },
 }
 
+def menu_opener(name: str):
+    """What a hub row does, picked by noise or clicked."""
+    if name == "utility_1":
+        return _utility_picker
+    return lambda: menu_open(name)
+
+
 def _menu_list_input_map(names, back_label="back"):
     """Input map for a menu whose rows open other menus."""
     mode = {}
     for i, name in enumerate(names):
         if i < len(SELECT_NOISES):
-            opener = _palate_picker if name == "utility_1" else (
-                lambda n=name: menu_open(n))
-            mode[SELECT_NOISES[i]] = (MENU_TITLES.get(name, name), opener)
+            mode[SELECT_NOISES[i]] = (MENU_TITLES.get(name, name),
+                                      menu_opener(name))
     mode["tut"] = (back_label, menu_back)
     mode[EXIT_NOISE] = ("exit", actions.user.parrot_rig_exit)
     return mode
@@ -513,22 +519,6 @@ class Actions:
         """Show parrot rig cheatsheet"""
         parrot_actions.show_cheatsheet()
 
-    def parrot_rig_palate():
-        """Run whatever palate is bound to"""
-        palate_run()
-
-    def parrot_rig_palate_picker():
-        """Toggle the palate picker"""
-        _palate_picker()
-
-    def parrot_rig_palate_label() -> str:
-        """Name of the current palate binding"""
-        return palate_label()
-
-    def parrot_rig_palate_preset(key: str):
-        """Bind palate to one of the presets in utility_maps"""
-        palate_set_preset(key)
-
     def parrot_rig_setting_get(name: str) -> str:
         """Get the current value of a settings-menu setting"""
         from .src.settings_menu import setting_get
@@ -540,7 +530,7 @@ class Actions:
 
     def parrot_rig_setting_select(name: str, slot: int):
         """Select a setting value by slot index, or run its action if it has one"""
-        from .ui.utility_selector import show_utility_notification
+        from .ui.setting_picker import show_notification
         entries = list(setting_maps[name].items())
         if slot < len(entries):
             key, entry = entries[slot]
@@ -552,5 +542,5 @@ class Actions:
                 SETTING_ACTIONS[entry[1]]()
                 return
             setting_set(name, key)
-            show_utility_notification(setting_title(name), setting_summary(name))
+            show_notification(setting_title(name), setting_summary(name))
         menu_back()

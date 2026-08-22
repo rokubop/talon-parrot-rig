@@ -65,7 +65,7 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
 | `er` | mode swap | Swap to the most recent mode, or back |
 | `cluck` | Start or exit parrot mode | any context |
-| `palate` | assignable | Runs whatever you bound to it. `tut palate` picks. |
+| `palate` | utility 1 | Runs whatever you bound to it. `tut palate` picks. |
 | `tut` | cancel / combo prefix | General cancel action (after 300ms) or prefix for combos. |
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.
@@ -144,16 +144,17 @@ CLICK_HOLD_MS = 16000
 | Canvas drag | `tut mm` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
 | Window control + pick (using [BentoPick](https://github.com/rokubop/bentopick)) | `tut eh` | Easy to click app launcher |
 | Window control | `tut ee` | Move windows around easily, close windows, alt+tab |
-| Palate picker | `tut palate` | Assign the `palate` noise. See below. |
+| Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. |
 | Settings | `tut cluck` | Speeds, click behavior, profiles |
 | Exit mode | `tut` or `er` | |
 | Most recent mode | `er` | |
 
 Say **"parrot help"** for mapping overlay.
 
-### Palate picker
+### Utility 1 picker
 
-`palate` is the one noise you reassign as you go. `tut palate` opens the picker.
+Utility 1 is the one noise you reassign as you go. `tut palate` opens the
+picker.
 
 Three sources, all on one screen:
 
@@ -161,17 +162,18 @@ Three sources, all on one screen:
 - **Last voice commands** - your last 5 phrases, bound as a `mimic`
 - **Last parrot rig actions** - your last 5 rig actions, bound as the action itself
 
-One panel each, so the three lists stay separate.
-
 Built for an eye tracker. Big tiles, no hints, nothing on a noise. Opening it
 takes no mode and no noise: move the cursor onto a tile and click it the way you
 click anything. Only `tut` is borrowed, to close.
 
+Every other menu wears the same tiles, and every tile takes a click as well as
+the noise printed on it. Pick with your voice or your eyes.
+
 Voice history only fills outside the rig, since parrot mode turns command mode
-off. That is the use for it. Say a command, enter the rig, bind it to `palate`.
+off. That is the use for it. Say a command, enter the rig, bind it.
 
 Rig actions already on a bare noise are left out of the list - binding `move
-left` to `palate` gains nothing. `PALATE_HISTORY_SKIP` in
+left` to it gains nothing. `UTILITY_HISTORY_SKIP` in
 [parrot_rig_settings.py](./parrot_rig_settings.py) is the filter.
 
 Whatever you pick is saved with your profile.

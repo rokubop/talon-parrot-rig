@@ -6,7 +6,7 @@ profile is saved.
 """
 
 from talon import actions, storage
-from .palate import palate_apply, palate_binding
+from .utility import utility_apply, utility_binding
 from .settings_menu import (
     setting_maps, setting_get, setting_set, setting_customs, setting_apply_customs,
 )
@@ -25,7 +25,7 @@ def profile_is_locked(name: str) -> bool:
 def factory_defaults() -> dict:
     return {
         "settings": {name: next(iter(options)) for name, options in setting_maps.items()},
-        "palate": None,
+        "utility_1": None,
         "customs": {},
     }
 
@@ -33,7 +33,7 @@ def factory_defaults() -> dict:
 def profile_snapshot() -> dict:
     return {
         "settings": {name: setting_get(name) for name in setting_maps},
-        "palate": palate_binding(),
+        "utility_1": utility_binding(),
         "customs": setting_customs(),
     }
 
@@ -43,14 +43,18 @@ def profile_apply(data: dict):
     for name, value in (data.get("settings") or {}).items():
         if name in setting_maps and value in setting_maps[name]:
             setting_set(name, value)
-    palate_apply(data.get("palate") or _legacy_palate(data))
+    utility_apply(data.get("utility_1") or _legacy_utility(data))
 
 
-def _legacy_palate(data: dict):
-    """Profiles saved before palate had its own binding stored the preset key
-    under utilities. Read it so those profiles still load."""
-    key = (data.get("utilities") or {}).get("utility_1")
-    return {"kind": "preset", "key": key} if key else None
+def _legacy_utility(data: dict):
+    """Older profiles stored this under other names: a preset key inside
+    utilities, then a binding under the noise it sat on, then shortcut. Read
+    them all so those profiles still load."""
+    for key in ("shortcut", "palate"):
+        if data.get(key):
+            return data[key]
+    preset = (data.get("utilities") or {}).get("utility_1")
+    return {"kind": "preset", "key": preset} if preset else None
 
 
 def all_profiles() -> dict:
