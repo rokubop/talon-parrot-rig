@@ -45,15 +45,10 @@ def menu_value(name: str) -> str:
         return profile_active()
     if name == "speeds":
         return ""
-    from ..parrot_rig_actions import utility_maps
-    util_map = utility_maps.get(name)
-    if not util_map:
-        return ""
-    try:
-        current = actions.user.input_map_single_mode_get(name)
-    except (ValueError, KeyError):
-        current = next(iter(util_map))
-    return util_map.get(current, ("",))[0]
+    if name == "utility_1":
+        from ..src.palate import palate_label
+        return palate_label()
+    return ""
 
 
 def _th(text_el, label, min_width):
@@ -134,7 +129,7 @@ def _speed_menus():
     return SPEED_MENUS
 
 
-hub_ui = _make_menu_list("settings_hub", "Settings (tut palate)", _hub_menus, "Close")
+hub_ui = _make_menu_list("settings_hub", "Settings (tut cluck)", _hub_menus, "Close")
 speeds_ui = _make_menu_list("speeds_menu", "Speeds", _speed_menus, "Back")
 
 

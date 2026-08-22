@@ -1,5 +1,4 @@
 from talon import actions
-from ..parrot_rig_actions import utility_maps
 from ..src.menu import menu_register
 from ..src.settings_menu import setting_maps, setting_get, setting_number_text, is_numeric
 from ..parrot_rig_settings import (
@@ -88,23 +87,11 @@ def _make_selector(name: str, util_map: dict, get_current):
         ]
     return selector_ui
 
-def _utility_current(name: str, util_map: dict):
-    def get():
-        try:
-            return actions.user.input_map_single_mode_get(name)
-        except (ValueError, KeyError):
-            return next(iter(util_map))
-    return get
-
+# Palate is absent on purpose: it has its own picker, aimed at rather than
+# spoken to, so it never becomes one of these noise-per-row tables.
 _selectors = {
-    **{
-        name: _make_selector(name, util_map, _utility_current(name, util_map))
-        for name, util_map in utility_maps.items()
-    },
-    **{
-        name: _make_selector(name, options, lambda n=name: setting_get(n))
-        for name, options in setting_maps.items()
-    },
+    name: _make_selector(name, options, lambda n=name: setting_get(n))
+    for name, options in setting_maps.items()
 }
 
 def show_utility_selector(name: str, title: str = ""):

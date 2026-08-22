@@ -6,6 +6,7 @@ profile is saved.
 """
 
 from talon import actions, storage
+from .palate import palate_apply, palate_binding
 from .settings_menu import (
     setting_maps, setting_get, setting_set, setting_customs, setting_apply_customs,
 )
@@ -17,11 +18,6 @@ DEFAULT_PROFILE = "default"
 _active = DEFAULT_PROFILE
 
 
-def _utility_maps():
-    from ..parrot_rig_actions import utility_maps
-    return utility_maps
-
-
 def profile_is_locked(name: str) -> bool:
     return name == DEFAULT_PROFILE
 
@@ -29,21 +25,15 @@ def profile_is_locked(name: str) -> bool:
 def factory_defaults() -> dict:
     return {
         "settings": {name: next(iter(options)) for name, options in setting_maps.items()},
-        "utilities": {name: next(iter(m)) for name, m in _utility_maps().items()},
+        "palate": None,
         "customs": {},
     }
 
 
 def profile_snapshot() -> dict:
-    utilities = {}
-    for name, util_map in _utility_maps().items():
-        try:
-            utilities[name] = actions.user.input_map_single_mode_get(name)
-        except (ValueError, KeyError):
-            utilities[name] = next(iter(util_map))
     return {
         "settings": {name: setting_get(name) for name in setting_maps},
-        "utilities": utilities,
+        "palate": palate_binding(),
         "customs": setting_customs(),
     }
 
@@ -53,10 +43,14 @@ def profile_apply(data: dict):
     for name, value in (data.get("settings") or {}).items():
         if name in setting_maps and value in setting_maps[name]:
             setting_set(name, value)
-    for name, value in (data.get("utilities") or {}).items():
-        util_map = _utility_maps().get(name)
-        if util_map and value in util_map:
-            actions.user.input_map_single_mode_set(name, value, util_map)
+    palate_apply(data.get("palate") or _legacy_palate(data))
+
+
+def _legacy_palate(data: dict):
+    """Profiles saved before palate had its own binding stored the preset key
+    under utilities. Read it so those profiles still load."""
+    key = (data.get("utilities") or {}).get("utility_1")
+    return {"kind": "preset", "key": key} if key else None
 
 
 def all_profiles() -> dict:

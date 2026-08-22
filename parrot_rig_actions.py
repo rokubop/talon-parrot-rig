@@ -7,7 +7,9 @@ from .src.settings_menu import (
     setting_maps, setting_set, setting_label, setting_title, SETTING_TITLES,
     setting_set_custom, setting_number_text, is_numeric,
 )
+from .src.history import parrot_history_record
 from .src.menu import menu_open, menu_back, menu_close
+from .src.palate import palate_label, palate_run, palate_set_preset
 from .src.profiles import (
     PROFILE_SLOTS, profile_active, profile_delete, profile_load,
     profile_names, profile_save,
@@ -59,6 +61,16 @@ MENU_TITLES = {
 
 def _settings_menu():
     menu_open("hub")
+
+
+def _palate_picker():
+    """Not a menu: it takes no mode and no noise, so the stack is closed
+    rather than pushed onto. tut closes it, handled in parrot_actions.cancel."""
+    from .ui.palate_picker import palate_picker_toggle
+    from .src.menu import menu_current
+    if menu_current():
+        menu_close()
+    palate_picker_toggle()
 
 
 def _anchor_chase_open() -> bool:
@@ -171,6 +183,8 @@ def _on_input(event):
     if event.type != "input" or event.label in ("", "repeat last"):
         return
     _last_input = (event.mode, event.input)
+    if not (event.mode or "").endswith("_select"):
+        parrot_history_record(event.mode, event.input, event.label)
 
 
 def _repeat_last():
@@ -194,7 +208,7 @@ input_map_common = {
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", parrot_actions.tracking_activate),
     "er":     ("mode swap", parrot_actions.alt_mode_toggle),
-    "palate": ("utility_1", lambda: actions.user.parrot_rig_utility("utility_1")),
+    "palate": ("palate", actions.user.parrot_rig_palate),
     EXIT_NOISE: ("exit", actions.user.parrot_rig_exit),
     "tut":        ("cancel / exit", parrot_actions.cancel),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
@@ -208,7 +222,8 @@ input_map_common = {
     "tut hiss":   ("canvas scale", lambda: parrot_actions.alt_mode_open("canvas_scale")),
     "tut mm":     ("canvas drag", lambda: parrot_actions.alt_mode_open("canvas_drag")),
     "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
-    "tut palate": ("settings", _settings_menu),
+    "tut palate": ("palate picker", actions.user.parrot_rig_palate_picker),
+    "tut cluck":  ("settings", _settings_menu),
 }
 
 input_map_default = {
@@ -335,10 +350,9 @@ def _menu_list_input_map(names, back_label="back"):
     mode = {}
     for i, name in enumerate(names):
         if i < len(SELECT_NOISES):
-            mode[SELECT_NOISES[i]] = (
-                MENU_TITLES.get(name, name),
-                lambda n=name: menu_open(n),
-            )
+            opener = _palate_picker if name == "utility_1" else (
+                lambda n=name: menu_open(n))
+            mode[SELECT_NOISES[i]] = (MENU_TITLES.get(name, name), opener)
     mode["tut"] = (back_label, menu_back)
     mode[EXIT_NOISE] = ("exit", actions.user.parrot_rig_exit)
     return mode
@@ -396,13 +410,6 @@ input_map = {
     "profiles_select": _profiles_input_map(),
     "profile_name_select": _typing_input_map(),
     "setting_custom_select": _typing_input_map(),
-    **utility_input_maps(
-        maps=utility_maps,
-        ui_selectors=SELECT_NOISES,
-        ui_cancel=["tut"],
-        ui_exit=[EXIT_NOISE],
-        close=lambda n: menu_back(),
-    ),
     **utility_input_maps(
         maps=setting_maps,
         ui_selectors=SELECT_NOISES,
@@ -506,23 +513,21 @@ class Actions:
         """Show parrot rig cheatsheet"""
         parrot_actions.show_cheatsheet()
 
-    def parrot_rig_utility(name: str):
-        """Execute the currently selected utility action"""
-        actions.user.input_map_single(name, utility_maps[name])
+    def parrot_rig_palate():
+        """Run whatever palate is bound to"""
+        palate_run()
 
-    def parrot_rig_show_utility_selector(name: str):
-        """Show utility selector UI and enter select mode"""
-        menu_open(name)
+    def parrot_rig_palate_picker():
+        """Toggle the palate picker"""
+        _palate_picker()
 
-    def parrot_rig_utility_select(name: str, slot: int):
-        """Select a utility option by slot index"""
-        from .ui.utility_selector import show_utility_notification
-        util_map = utility_maps[name]
-        keys = list(util_map.keys())
-        if slot < len(keys):
-            actions.user.input_map_single_mode_set(name, keys[slot], util_map)
-            show_utility_notification(MENU_TITLES.get(name, name), util_map[keys[slot]][0])
-        menu_back()
+    def parrot_rig_palate_label() -> str:
+        """Name of the current palate binding"""
+        return palate_label()
+
+    def parrot_rig_palate_preset(key: str):
+        """Bind palate to one of the presets in utility_maps"""
+        palate_set_preset(key)
 
     def parrot_rig_setting_get(name: str) -> str:
         """Get the current value of a settings-menu setting"""

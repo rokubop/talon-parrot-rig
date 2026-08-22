@@ -382,8 +382,10 @@ class ParrotActions:
             stop_scrolling=True,
             disable_mods=True
         ):
+        from ..ui.palate_picker import palate_picker_close
         self._parrot_mode_enabled = False
         menu_reset()
+        palate_picker_close()
         ui_manager.hide_cheatsheet()
         ui_manager.hide()
 
@@ -473,6 +475,10 @@ class ParrotActions:
         """Progressive cancel, one step at a time:
         held button -> modifiers and slow steps -> mode -> exit
         """
+        from ..ui.palate_picker import palate_picker_close, palate_picker_is_open
+        if palate_picker_is_open():
+            palate_picker_close()
+            return
         if self._is_drag:
             self.alt_mode_close("canvas_drag")
             return

@@ -34,7 +34,7 @@ def _make_mode(name, util_map, ui_selectors, ui_cancel, select, close, ui_exit):
 
 
 def utility_input_maps(maps: dict, ui_selectors: list, ui_cancel: list,
-                       select=None, close=None, ui_exit=None):
+                       select, close, ui_exit=None):
     """Create selector input map modes.
 
     maps: {"mode_name": util_map, ...}, entries (label, action) or
@@ -42,14 +42,11 @@ def utility_input_maps(maps: dict, ui_selectors: list, ui_cancel: list,
     ui_selectors: noises mapped to the unpinned slots, in order
     ui_cancel: noises that close the selector
     ui_exit: noises that leave parrot rig outright, winning over everything
-    select: (name, slot) -> None, defaults to picking a utility action
+    select: (name, slot) -> None, required
     close: (name) -> None, required
 
     Returns a dict with "{mode_name}_select" keys to spread into the main input_map.
     """
-    if select is None:
-        select = lambda n, i: actions.user.parrot_rig_utility_select(n, i)
-
     result = {}
     for name, util_map in maps.items():
         result[f"{name}_select"] = _make_mode(

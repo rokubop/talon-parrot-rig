@@ -149,3 +149,44 @@ UI_BORDER_COLOR = "#666666"
 UI_BACKGROUND_COLOR = "#4A4A4A"
 UI_TEXT_COLOR = "#FFFFFF"
 UI_SELECTED_COLOR = "#3E84DA"
+# Palate picker (tut palate). Big targets for an eye tracker, nothing on a
+# noise. Styled after the BentoPick panel: one backdrop, sections named by a
+# header instead of boxed off, and tiles that carry every state in their fill.
+PALATE_TILE_WIDTH = 140
+PALATE_TILE_HEIGHT = 100
+PALATE_COLUMNS = 5
+PALATE_GAP = 10
+PALATE_PADDING = 18
+PALATE_RADIUS = 8
+PALATE_SECTION_GAP = 10
+PALATE_HEADER_GAP = 6
+PALATE_FONT = "Segoe UI"
+
+PALATE_PANEL_COLOR = "1A1A1EF0"
+# The window derives its title bar from the panel and drops the alpha doing it,
+# so the matching translucent tone is set rather than computed
+PALATE_TITLE_BAR_COLOR = "242428F0"
+PALATE_TILE_COLOR = "2A2A32"
+# Neighbouring sections alternate between the two tile fills. That is what
+# separates them, in place of a border around each.
+PALATE_TILE_ALT_COLOR = "22222A"
+PALATE_TILE_HOVER_COLOR = "3C3C48"
+PALATE_TILE_SELECTED_COLOR = "4C5A78"
+PALATE_TEXT_COLOR = "E8E8EC"
+PALATE_HEADER_COLOR = "9A9AA8"
+
+# How many entries each Recent row offers. Voice and parrot rig histories are
+# separate lists, this is the depth of each.
+PALATE_RECENT_COUNT = 5
+# Longest phrase shown on a tile, so one rambling command cannot stretch the
+# whole row
+PALATE_PHRASE_MAX = 38
+# Parrot rig actions kept out of the Recent column, matched as substrings of
+# the action label. These are the ones already sitting on a bare noise or
+# already offered as a preset, so binding them to palate would gain nothing.
+PALATE_HISTORY_SKIP = (
+    "move", "track", "glide", "boost", "burst", "brake",
+    "scroll up", "scroll down", "resume", "stop", "reset", "speed",
+    "exit", "cancel", "return", "mode swap", "repeat", "click",
+    "escape", "back", "palate",
+)
