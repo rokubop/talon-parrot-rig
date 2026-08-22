@@ -10,7 +10,7 @@ from ..src.settings_menu import (
 )
 from ..parrot_rig_settings import (
     PICKER_HEADER_COLOR, PICKER_PADDING, PICKER_PANEL_COLOR, PICKER_RADIUS,
-    PICKER_TITLE_BAR_COLOR,
+    PICKER_TEXT_SIZE, PICKER_TITLE_BAR_COLOR,
 )
 
 _pending_custom = None
@@ -176,8 +176,9 @@ def _form_panel(window_id, title, prompt, input_id, on_submit):
                title_bar_style={"background_color": PICKER_TITLE_BAR_COLOR},
                border_radius=PICKER_RADIUS, border_width=0)[
             form(on_submit=on_submit)[
-                div(padding=PICKER_PADDING, gap=12, min_width=320)[
-                    text(prompt, color=PICKER_HEADER_COLOR, font_size=13),
+                div(padding=PICKER_PADDING, gap=14, min_width=360)[
+                    text(prompt, color=PICKER_HEADER_COLOR,
+                         font_size=PICKER_TEXT_SIZE),
                     input_text(id=input_id, autofocus=True),
                     div(flex_direction="row", gap=8, justify_content="flex_end")[
                         button("Save", type="submit"),

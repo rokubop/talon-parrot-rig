@@ -5,7 +5,8 @@ from ..src.settings_menu import (
     setting_maps, setting_get, setting_number_text, is_numeric,
 )
 from ..parrot_rig_settings import (
-    PICKER_HEADER_COLOR, PICKER_PANEL_COLOR, PICKER_RADIUS, PICKER_TEXT_COLOR,
+    PICKER_GAP, PICKER_HEADER_COLOR, PICKER_PANEL_COLOR, PICKER_RADIUS,
+    PICKER_TEXT_COLOR, PICKER_TITLE_SIZE,
 )
 
 
@@ -80,11 +81,11 @@ def _notification(props):
     label = props.get("label", "")
 
     return screen(align_items="center", justify_content="flex_end")[
-        div(flex_direction="row", gap=8, align_items="center", padding=14,
-            margin_bottom=100, background_color=PICKER_PANEL_COLOR,
-            border_radius=PICKER_RADIUS)[
-            text(noise, color=PICKER_HEADER_COLOR, font_size=18),
-            text(label, color=PICKER_TEXT_COLOR, font_size=18,
+        div(flex_direction="row", gap=PICKER_GAP, align_items="center",
+            padding=16, padding_left=20, padding_right=20, margin_bottom=100,
+            background_color=PICKER_PANEL_COLOR, border_radius=PICKER_RADIUS)[
+            text(noise, color=PICKER_HEADER_COLOR, font_size=PICKER_TITLE_SIZE),
+            text(label, color=PICKER_TEXT_COLOR, font_size=PICKER_TITLE_SIZE,
                  font_weight="bold"),
         ]
     ]

@@ -153,15 +153,23 @@ UI_SELECTED_COLOR = "#3E84DA"
 # well as the noise beside it. Styled after the BentoPick panel: one backdrop,
 # sections named by a header instead of boxed off, tiles that carry every state
 # in their fill.
-PICKER_TILE_WIDTH = 140
-PICKER_TILE_HEIGHT = 100
+PICKER_TILE_WIDTH = 160
+PICKER_TILE_HEIGHT = 118
 PICKER_COLUMNS = 5
-PICKER_GAP = 10
-PICKER_PADDING = 18
+PICKER_GAP = 12
+PICKER_PADDING = 20
 PICKER_RADIUS = 8
-PICKER_SECTION_GAP = 10
-PICKER_HEADER_GAP = 6
+# Clearly bigger than the gap between tiles. Nothing is boxed, so this space is
+# what tells one section from the next.
+PICKER_SECTION_GAP = 22
+PICKER_HEADER_GAP = 10
+PICKER_TILE_GAP = 6
 PICKER_FONT = "Segoe UI"
+
+# Nothing in a picker goes under this. These are read at a glance, from a
+# distance, by someone aiming rather than reading.
+PICKER_TEXT_SIZE = 16
+PICKER_TITLE_SIZE = 20
 
 PICKER_PANEL_COLOR = "1A1A1EF0"
 # The window derives its title bar from the panel and drops the alpha doing it,

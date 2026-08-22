@@ -19,10 +19,10 @@ def only_current_mode_table():
     # Create header row
     header_row = tr()[
         th(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-            text("Noise", color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
+            text("Noise", color=UI_TEXT_COLOR, font_weight="bold", font_size=16)
         ],
         th(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-            text(f"Mode: {current_mode.upper()}", color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
+            text(f"Mode: {current_mode.upper()}", color=UI_TEXT_COLOR, font_weight="bold", font_size=16)
         ]
     ]
 
@@ -96,14 +96,14 @@ def cheatsheet_ui():
                 padding_left=6,
             )[
                 svg(width=svg_width)[*icons],
-                text(title.upper(), color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
+                text(title.upper(), color=UI_TEXT_COLOR, font_weight="bold", font_size=16)
             ]
         ]
 
     header_row = tr()[
         th(padding=0, border_width=1, border_color=UI_BORDER_COLOR, background_color=UI_BACKGROUND_COLOR)[
             div(flex_direction="row", align_items="center", gap=6, padding_left=6)[
-                text("NOISE", color=UI_TEXT_COLOR, font_weight="bold", font_size=12),
+                text("NOISE", color=UI_TEXT_COLOR, font_weight="bold", font_size=16),
                 svg()[
                     circle(cx=12, cy=12, r=7, fill=UI_BACKGROUND_COLOR)
                 ],
