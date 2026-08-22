@@ -345,8 +345,10 @@ input_map_canvas_tracking = {
     "mm":         ("click (pause)", actions.user.parrot_rig_click),
 }
 
+# First entry is what utility 1 does until you pick something else.
 utility_presets = {
     "utility_1": {
+        "app_picker":       ("App Picker",       lambda: parrot_actions.alt_mode_open("window_pick")),
         "hold_click":       ("Hold Click",       lambda: actions.user.parrot_rig_click(0, True)),
         "click":            ("Click",            lambda: actions.user.parrot_rig_click(0)),
         "right_click":      ("Right Click",      lambda: actions.user.parrot_rig_click(1)),

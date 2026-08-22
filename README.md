@@ -65,7 +65,7 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
 | `er` | mode swap | Swap to the most recent mode, or back |
 | `cluck` | Start or exit parrot mode | any context |
-| `palate` | utility 1 | Runs whatever you bound to it. `tut palate` picks. |
+| `palate` | utility 1 | App picker by default. `tut palate` rebinds it. |
 | `tut` | cancel / combo prefix | General cancel action (after 300ms) or prefix for combos. |
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.
@@ -156,9 +156,13 @@ Say **"parrot help"** for mapping overlay.
 Utility 1 is the one noise you reassign as you go. `tut palate` opens the
 picker.
 
+Out of the box it is the app picker, the same ``alt+` `` that `tut eh` opens.
+`APP_PICKER_KEY` in [parrot_rig_settings.py](./parrot_rig_settings.py) is the
+key both use. Swap utility 1 for hold click, a repeat, or anything below.
+
 Three sources, all on one screen:
 
-- **Presets** - the eight mouse actions
+- **Presets** - app picker, plus the eight mouse actions
 - **Last voice commands** - your last 5 commands, bound as a `mimic`
 - **Last parrot rig actions** - your last 5 rig actions, bound as the action itself
 

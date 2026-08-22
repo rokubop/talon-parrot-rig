@@ -25,9 +25,13 @@ GLIDE_RELEASE_RATE = 5
 # Scroll
 SCROLL_SPEED = 0.4
 
+# The app picker hotkey, named because two things reach for it: tut eh opens
+# it, and utility 1 is set to it out of the box. This is what BentoPick binds.
+APP_PICKER_KEY = "alt-`"
+
 # Window mode. Whatever your window manager uses.
 WINDOW_KEYS = {
-    "picker":   "alt-`",
+    "picker":   APP_PICKER_KEY,
     "tab_next": "ctrl-tab",
     "tab_prev": "ctrl-shift-tab",
     "tab_close": "ctrl-w",
