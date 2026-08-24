@@ -63,7 +63,7 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `hiss` | scroll / boost | Scroll down, boost in move mode |
 | `shush` | scroll / boost | Scroll up, boost in move mode |
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
-| `er` | mode swap | Swap to the most recent mode, or back |
+| `er` | mode gateway | Canvas and back. On arrival, `hiss` `mm` `ee` redirect elsewhere for 300ms |
 | `cluck` | Start or exit parrot mode | any context |
 | `palate` | utility 1 | App picker by default. `tut palate` rebinds it. |
 | `tut` | cancel / combo prefix | General cancel action (after 300ms) or prefix for combos. |
@@ -91,7 +91,7 @@ Replace all instances of that noise throughout the file (it appears in multiple 
 
 If you don't have enough noises, you can use combos to free up single noises for more actions. For example, `"tut ah"`, `"tut oh"`, `"tut mm"` as combos instead of using those noises alone.
 
-**Mac users:** Change `"ctrl"` to `"cmd"` in the modifier toggle for `tut t` in `input_map_common`.
+**Mac users:** Change `"ctrl"` to `"cmd"` in the modifier toggle for `tut ee` in `input_map_common`.
 
 **2. [parrot_rig_input.talon](./parrot_rig_input.talon)** - Match the `parrot(...)` trigger on the left to your noise. The string on the right must match the key you used in step 1:
 
@@ -139,17 +139,41 @@ CLICK_HOLD_MS = 16000
 | Exit parrot mode | `cluck` | |
 | Stopped | - | |
 | Cursor move | use a direction noise `ah`, `oh`, `t`, `guh` | |
-| Canvas scroll | `tut shush` | Like moving 2 fingers on a trackpad |
-| Canvas scale | `tut hiss` | 6 noises to account for [ctrl, alt, shift] + [scroll up/down] |
-| Canvas drag | `tut mm` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
-| Window control + pick (using [BentoPick](https://github.com/rokubop/bentopick)) | `tut eh` | Easy to click app launcher |
-| Window control | `tut ee` | Move windows around easily, close windows, alt+tab |
+| Canvas scroll | `er`, or `tut shush` | Like moving 2 fingers on a trackpad |
+| Canvas scale | `er` then `hiss`, or `tut hiss` | 6 noises to account for [ctrl, alt, shift] + [scroll up/down] |
+| Canvas drag | `er` then `mm` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
+| Window control | `tut` + a direction, or `er` then `ee` | Moves the window as it enters. Close windows, alt+tab, tabs on `hiss` and `shush` |
+| App picker (using [BentoPick](https://github.com/rokubop/bentopick)) | `palate`, or `eh` in window mode | Easy to click app launcher |
 | Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. |
 | Settings | `tut cluck` | Speeds, click behavior, profiles |
 | Exit mode | `tut` or `er` | |
-| Most recent mode | `er` | |
 
 Say **"parrot help"** for mapping overlay.
+
+### The `er` gateway
+
+`er` goes to canvas and back. Always canvas, never whatever you used last, so it
+is a door you can aim at rather than guess.
+
+The other modes come from the moment right after. For 300ms after `er` lands you
+in canvas, three noises go somewhere else instead of doing their canvas job:
+
+| | |
+|---|---|
+| `hiss` | canvas scale |
+| `mm` | canvas drag |
+| `ee` | window |
+
+After that they go back to canvas resume, click, and stop. The cheatsheet shows
+both meanings in the canvas column, the redirect under the window it lasts.
+
+This is [talon-input-map](https://github.com/rokubop/talon-input-map/)'s `":init"`.
+`user.input_map_init_window` changes the 300ms.
+
+### Modifiers
+
+`tut eh` shift, `tut ee` ctrl, `tut er` alt. They stack, and `tut` on its own
+clears them.
 
 ### Utility 1 picker
 

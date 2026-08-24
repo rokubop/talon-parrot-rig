@@ -332,6 +332,13 @@ class ParrotActions:
         self._window_super_release()
         actions.key(WINDOW_KEYS[name])
 
+    def window_move_enter(self, name: str):
+        """tut+direction is the door into window mode as well as the nudge, so
+        it stops what was running first. window_move alone only holds super."""
+        if self.alt_mode_current() not in ("window_pick", "window_control"):
+            self.alt_mode_open("window_control")
+        self.window_move(name)
+
     def window_move(self, name: str):
         """Super stays down across a run of these, so the next one still lands."""
         if not self._window_super_held:

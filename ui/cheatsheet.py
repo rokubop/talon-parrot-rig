@@ -3,18 +3,47 @@ Cheatsheet UI for parrot mode v7
 Shows the noise-to-action mapping in a table format
 """
 
-from talon import actions
+from talon import actions, settings
 from ..parrot_rig_settings import MODE_COLORS
 from ..parrot_rig_settings import UI_BORDER_COLOR, UI_BACKGROUND_COLOR, UI_TEXT_COLOR
 from ..parrot_rig_actions import input_map as parrot_input_map
 
+# Secondary line in a cell, quieter than the label above it
+INIT_COLOR = "#8A8A98"
+
+
+def _split_key(key: str):
+    """'hiss:init_150' -> ('hiss', 150). Throttle and debounce suffixes drop
+    out, since they do not change what the noise does."""
+    base, *suffixes = key.split(":")
+    for part in suffixes:
+        if part == "init":
+            return base, settings.get("user.input_map_init_window", 300)
+        if part.startswith("init_") and part[5:].isdigit():
+            return base, int(part[5:])
+    return base, None
+
+
+def mode_labels(config: dict):
+    """One map into {noise: label} and {noise: (window_ms, label)}, so a noise
+    that means one thing on arrival and another after shows up once, not twice."""
+    normal, init = {}, {}
+    for key, entry in config.items():
+        base, window = _split_key(key)
+        if window is not None:
+            init[base] = (window, entry[0])
+        elif key == base or base not in normal:
+            normal[base] = entry[0]
+    return normal, init
+
+
 def only_current_mode_table():
     """Create a table showing only the current mode"""
     table, tr, td, th = actions.user.ui_elements(["table", "tr", "td", "th"])
-    text, state = actions.user.ui_elements(["text", "state"])
+    text, state, div = actions.user.ui_elements(["text", "state", "div"])
 
     current_mode = state.get("mode", "default")
-    mode_config = parrot_input_map.get(current_mode, {})
+    normal, init = mode_labels(parrot_input_map.get(current_mode, {}))
 
     # Create header row
     header_row = tr()[
@@ -33,9 +62,13 @@ def only_current_mode_table():
                 text(noise, color=UI_TEXT_COLOR, font_family="monospace")
             ],
             td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-                text(mode_config.get(noise, ("",))[0], color=UI_TEXT_COLOR)
+                div(flex_direction="column", gap=2)[
+                    text(normal.get(noise, ""), color=UI_TEXT_COLOR),
+                    *([text(f"{init[noise][0]}ms  {init[noise][1]}", color=INIT_COLOR, font_size=13)]
+                      if noise in init else []),
+                ]
             ]
-        ] for noise in mode_config.keys()]
+        ] for noise in sorted(set(normal) | set(init))]
     ]
 
 # One column per input map, wearing the shape and every colour the cursor uses
@@ -69,10 +102,11 @@ def cheatsheet_ui():
 
     current_mode, set_current_mode = state.use("mode", "default")
 
-    columns = [(title, parrot_input_map.get(mode, {}), shape, states)
+    columns = [(title, *mode_labels(parrot_input_map.get(mode, {})), shape, states)
                for title, mode, shape, states in COLUMNS]
 
-    all_noises = sorted({n for _, config, _, _ in columns for n in config})
+    all_noises = sorted({n for _, normal, init, _, _ in columns
+                         for n in list(normal) + list(init)})
 
     def _icon(mode, shape, cx):
         color = MODE_COLORS.get(mode, "#FF0000")
@@ -109,25 +143,40 @@ def cheatsheet_ui():
                 ],
             ]
         ],
-        *[create_mode_header(title, shape, states) for title, _, shape, states in columns]
+        *[create_mode_header(title, shape, states) for title, _, _, shape, states in columns]
     ]
 
     DIM_COLOR = "#666666"
 
+    def marked_label(label, color, mark):
+        """A label, wearing the mark of the mode it takes you to when it has one."""
+        if not mark:
+            return text(label, color=color)
+        shape, mode = mark
+        return div(flex_direction="row", align_items="center", gap=6)[
+            svg(width=24)[_icon(mode, shape, 12)],
+            text(label, color=color),
+        ]
+
     def create_noise_row(noise: str):
-        labels = [config.get(noise, ("",))[0] for _, config, _, _ in columns]
+        labels = [normal.get(noise, "") for _, normal, _, _, _ in columns]
+        inits = [init.get(noise) for _, _, init, _, _ in columns]
 
         def cell_for_mode(idx):
             label = labels[idx]
             is_same_as_prev = idx > 0 and label == labels[idx - 1]
             color = DIM_COLOR if is_same_as_prev else UI_TEXT_COLOR
             mark = None if is_same_as_prev else MODE_LABELS.get(label)
-            body = text(label, color=color)
-            if mark:
-                shape, mode = mark
-                body = div(flex_direction="row", align_items="center", gap=6)[
-                    svg(width=24)[_icon(mode, shape, 12)],
-                    text(label, color=color),
+            body = marked_label(label, color, mark)
+            entry = inits[idx]
+            if entry:
+                window, init_label = entry
+                body = div(flex_direction="column", gap=2)[
+                    body,
+                    div(flex_direction="row", align_items="center", gap=6)[
+                        text(f"{window}ms", color=INIT_COLOR, font_size=13),
+                        marked_label(init_label, INIT_COLOR, MODE_LABELS.get(init_label)),
+                    ],
                 ]
             return td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
                 body
@@ -142,7 +191,7 @@ def cheatsheet_ui():
 
     visible_noises = [
         noise for noise in all_noises
-        if any(config.get(noise, ("",))[0] for _, config, _, _ in columns)
+        if any(normal.get(noise) or init.get(noise) for _, normal, init, _, _ in columns)
     ]
     noise_rows = [create_noise_row(noise) for noise in visible_noises]
 
