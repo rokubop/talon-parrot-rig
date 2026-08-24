@@ -310,11 +310,11 @@ class ParrotActions:
         self.window_picker()
 
     def window_enter_stopped(self):
-        """Window mode with nothing else: no picker, no tracking."""
+        """Window mode with nothing else. No picker, and tracking is left
+        running: changing what the noises do should not drop your aim."""
         self._canvas_scale_release()
         actions.user.mouse_rig_stop()
         actions.user.mouse_rig_scroll_stop()
-        tracking.freeze()
         event_manager.set_mode("window_stop")
 
     def window_picker(self):
@@ -588,6 +588,15 @@ class ParrotActions:
             reset_mode=False,
         )
 
+    def canvas_toggle(self):
+        """Canvas and back, always. The other modes are reached from the
+        redirect window canvas opens with, not from here."""
+        current = self.alt_mode_current()
+        if current:
+            self.alt_mode_close(current)
+        else:
+            self.alt_mode_open("canvas_scroll")
+
     def alt_mode_toggle(self):
         """Swap to the most recent mode, or back. The alt_mode setting picks
         the first one."""
@@ -604,7 +613,6 @@ class ParrotActions:
         else:
             actions.user.mouse_rig_move_stop()
             actions.user.mouse_rig_scroll_stop()
-            tracking.freeze()
             event_manager.set_mode("canvas_scale")
             self._emit_speed_level()
 

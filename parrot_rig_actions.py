@@ -220,7 +220,7 @@ input_map_common = {
     "t":      ("move up", lambda: actions.user.parrot_rig_move("up")),
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", parrot_actions.tracking_activate),
-    "er":     ("mode swap", parrot_actions.alt_mode_toggle),
+    "er":     ("canvas", parrot_actions.canvas_toggle),
     "palate": ("utility 1", utility_run),
     EXIT_NOISE: ("exit", actions.user.parrot_rig_exit),
     "tut":        ("cancel / exit", parrot_actions.cancel),
@@ -270,7 +270,7 @@ input_map_tracking = {
     "shush_stop:db_170": ("", parrot_actions.scroll_stop_temp),
 }
 
-input_map_canvas_stop = {
+input_map_canvas_base = {
     **input_map_common,
     "ah":     ("canvas left", lambda: parrot_actions.canvas_move_dir("left")),
     "oh":     ("canvas right", lambda: parrot_actions.canvas_move_dir("right")),
@@ -281,6 +281,15 @@ input_map_canvas_stop = {
     "shush_stop": ("", lambda: None),
     "hiss":       ("canvas resume", parrot_actions.canvas_resume),
     "hiss_stop":  ("", lambda: None),
+}
+
+# The redirect window. er drops you here instantly, and for its first moments
+# these three go on to another mode instead of doing their canvas job.
+input_map_canvas_stop = {
+    **input_map_canvas_base,
+    "hiss:init": ("canvas scale", lambda: parrot_actions.alt_mode_open("canvas_scale")),
+    "mm:init":   ("canvas drag", lambda: parrot_actions.alt_mode_open("canvas_drag")),
+    "ee:init":   ("window", lambda: parrot_actions.alt_mode_open("window_control")),
 }
 
 input_map_canvas_move = {
@@ -339,7 +348,7 @@ input_map_canvas_scale = {
 }
 
 input_map_canvas_tracking = {
-    **input_map_canvas_stop,
+    **input_map_canvas_base,
     "ee":         ("canvas stop / reset",
                    lambda: parrot_actions.stop_or_reset(parrot_actions.canvas_stop)),
     "mm":         ("click (pause)", actions.user.parrot_rig_click),
