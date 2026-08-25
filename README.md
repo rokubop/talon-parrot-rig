@@ -108,6 +108,27 @@ parrot(cluck): user.parrot_rig_enable()
 parrot rig start: user.parrot_rig_enable()
 ```
 
+These go through their own input map channel, `input_map_global` in
+[parrot_rig_actions.py](./parrot_rig_actions.py), so they get combos too:
+
+| | |
+|---|---|
+| `pop` | click |
+| `cluck` | parrot rig |
+| `palate` | whatever the picker says, Repeat Phrase out of the box |
+| `tut` | reverse command, or back out of a menu |
+| `tut pop` | next anchor |
+| `tut palate` | palate picker |
+
+`tut` is a combo prefix, which normally makes a noise wait out the combo window
+before it fires. `":now"` opts out: `tut` fires straight away and the combo
+still lands after it. The cost is that a combo runs `tut` first, so `tut pop`
+reverses and then steps the anchor. Drop the `":now"` if you would rather wait
+out the window and have the combos land clean.
+
+Anchors survive leaving parrot mode, so `tut pop` cycles the ones you already
+set.
+
 See [talon-input-map](https://github.com/rokubop/talon-input-map/) for the full set of options to fine-tune how each noise behaves:
 - **combos** (`"tut ah"`) - trigger an action with a sequence of noises
 - **throttle** (`:th_100`) - limit how often a noise fires (e.g. make a continuous noise act like a discrete trigger)
@@ -194,6 +215,12 @@ Three sources, all on one screen:
 - **Last parrot rig actions** - your last 5 rig actions, bound as the action itself
 
 Built for an eye tracker. Big tiles, no hints, nothing on a noise.
+
+**Two slots, one picker.** `tut palate` inside parrot mode picks for utility 1.
+`tut palate` with the rig off picks for palate out there, its own binding and
+its own preset list, and neither slot knows about the other. Both save with the
+profile. `UTILITY_SLOTS` in
+[parrot_rig_settings.py](./parrot_rig_settings.py) names them.
 
 Every menu works this way. Opening one takes no mode and no noise, so the rig
 keeps running underneath and you move the cursor onto a tile the way you move

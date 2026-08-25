@@ -1,8 +1,11 @@
-"""What the utility 1 noise does. One binding, three kinds of thing it can be.
+"""What a utility noise does. One binding per slot, three kinds of thing it can be.
 
-preset - an entry in utility_presets, the eight mouse actions it always had
+preset - an entry in utility_presets, the mouse actions the slot always had
 phrase - something you said, replayed with mimic
 parrot - an input map entry, called the way the noise that fired it would
+
+Slots are independent. utility_1 is the noise inside parrot mode, utility_global
+is palate with the rig off, and neither knows about the other.
 
 Held here rather than in input_map_single because only presets are keys in a
 map. A phrase and a parrot action carry their own payload, and the picker
@@ -15,66 +18,65 @@ PRESET = "preset"
 PHRASE = "phrase"
 PARROT = "parrot"
 
-_binding = None
+_bindings = {}
 
 
-def _presets() -> dict:
+def utility_slots() -> list:
+    from ..parrot_rig_settings import UTILITY_SLOTS
+    return list(UTILITY_SLOTS)
+
+
+def _presets(slot: str) -> dict:
     from ..parrot_rig_actions import utility_presets
-    return utility_presets["utility_1"]
+    return utility_presets[slot]
 
 
-def _default() -> dict:
-    return {"kind": PRESET, "key": next(iter(_presets()))}
+def _default(slot: str) -> dict:
+    return {"kind": PRESET, "key": next(iter(_presets(slot)))}
 
 
-def utility_binding() -> dict:
-    global _binding
-    if _binding is None:
-        _binding = _default()
-    return dict(_binding)
+def utility_binding(slot: str) -> dict:
+    if _bindings.get(slot) is None:
+        _bindings[slot] = _default(slot)
+    return dict(_bindings[slot])
 
 
-def utility_reset():
-    global _binding
-    _binding = None
+def utility_reset(slot: str):
+    _bindings[slot] = None
 
 
-def utility_set_preset(key: str):
-    global _binding
-    if key in _presets():
-        _binding = {"kind": PRESET, "key": key}
+def utility_set_preset(slot: str, key: str):
+    if key in _presets(slot):
+        _bindings[slot] = {"kind": PRESET, "key": key}
 
 
-def utility_set_phrase(phrase: str):
-    global _binding
+def utility_set_phrase(slot: str, phrase: str):
     phrase = (phrase or "").strip()
     if phrase:
-        _binding = {"kind": PHRASE, "phrase": phrase}
+        _bindings[slot] = {"kind": PHRASE, "phrase": phrase}
 
 
-def utility_set_parrot(mode: str, key: str, label: str):
-    global _binding
-    _binding = {"kind": PARROT, "mode": mode, "key": key, "label": label}
+def utility_set_parrot(slot: str, mode: str, key: str, label: str):
+    _bindings[slot] = {"kind": PARROT, "mode": mode, "key": key, "label": label}
 
 
-def utility_apply(data: dict):
+def utility_apply(slot: str, data: dict):
     """Restore a binding from a profile, ignoring one that no longer resolves."""
-    global _binding
     kind = (data or {}).get("kind")
-    if kind == PRESET and data.get("key") in _presets():
-        _binding = {"kind": PRESET, "key": data["key"]}
+    if kind == PRESET and data.get("key") in _presets(slot):
+        _bindings[slot] = {"kind": PRESET, "key": data["key"]}
     elif kind == PHRASE and data.get("phrase"):
-        _binding = {"kind": PHRASE, "phrase": data["phrase"]}
+        _bindings[slot] = {"kind": PHRASE, "phrase": data["phrase"]}
     elif kind == PARROT and _parrot_entry(data.get("mode"), data.get("key")):
-        _binding = {"kind": PARROT, "mode": data["mode"], "key": data["key"],
-                    "label": data.get("label", data["key"])}
+        _bindings[slot] = {"kind": PARROT, "mode": data["mode"], "key": data["key"],
+                           "label": data.get("label", data["key"])}
     else:
-        _binding = _default()
+        _bindings[slot] = _default(slot)
 
 
-def utility_is(kind: str, ident=None) -> bool:
+def utility_is(slot: str, kind: str, ident=None) -> bool:
     """Whether the picker should show a tile as the current binding."""
-    binding = utility_binding()
+    binding = utility_binding(slot)
     if binding["kind"] != kind:
         return False
     if ident is None:
@@ -86,11 +88,11 @@ def utility_is(kind: str, ident=None) -> bool:
     return (binding["mode"], binding["key"]) == ident
 
 
-def utility_label() -> str:
+def utility_label(slot: str) -> str:
     """One line naming the binding, for the picker header and the settings hub."""
-    binding = utility_binding()
+    binding = utility_binding(slot)
     if binding["kind"] == PRESET:
-        entry = _presets().get(binding["key"])
+        entry = _presets(slot).get(binding["key"])
         return entry[0] if entry else binding["key"]
     if binding["kind"] == PHRASE:
         return f'"{binding["phrase"]}"'
@@ -112,11 +114,11 @@ def _parrot_entry(mode: str, key: str):
     return None
 
 
-def utility_run():
-    """Fire whatever utility 1 is bound to."""
-    binding = utility_binding()
+def utility_run(slot: str):
+    """Fire whatever this slot is bound to."""
+    binding = utility_binding(slot)
     if binding["kind"] == PRESET:
-        entry = _presets().get(binding["key"])
+        entry = _presets(slot).get(binding["key"])
         if entry:
             entry[1]()
         return

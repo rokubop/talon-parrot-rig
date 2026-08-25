@@ -6,7 +6,7 @@ profile is saved.
 """
 
 from talon import storage
-from .utility import utility_apply, utility_binding
+from .utility import utility_apply, utility_binding, utility_slots
 from .settings_menu import (
     setting_maps, setting_get, setting_set, setting_customs, setting_apply_customs,
 )
@@ -25,7 +25,7 @@ def profile_is_locked(name: str) -> bool:
 def factory_defaults() -> dict:
     return {
         "settings": {name: next(iter(options)) for name, options in setting_maps.items()},
-        "utility_1": None,
+        **{slot: None for slot in utility_slots()},
         "customs": {},
     }
 
@@ -33,7 +33,7 @@ def factory_defaults() -> dict:
 def profile_snapshot() -> dict:
     return {
         "settings": {name: setting_get(name) for name in setting_maps},
-        "utility_1": utility_binding(),
+        **{slot: utility_binding(slot) for slot in utility_slots()},
         "customs": setting_customs(),
     }
 
@@ -43,7 +43,11 @@ def profile_apply(data: dict):
     for name, value in (data.get("settings") or {}).items():
         if name in setting_maps and value in setting_maps[name]:
             setting_set(name, value)
-    utility_apply(data.get("utility_1") or _legacy_utility(data))
+    for slot in utility_slots():
+        stored = data.get(slot)
+        if slot == "utility_1":
+            stored = stored or _legacy_utility(data)
+        utility_apply(slot, stored)
 
 
 def _legacy_utility(data: dict):

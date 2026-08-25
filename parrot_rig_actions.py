@@ -1,6 +1,6 @@
-from talon import Module, actions, ctrl
+from talon import Module, actions, app, ctrl
 from .src.parrot_actions import parrot_actions
-from .parrot_rig_settings import CLICK_HOLD_MS
+from .parrot_rig_settings import APP_PICKER_KEY, CLICK_HOLD_MS
 from .src.settings_menu import (
     setting_maps, setting_set, setting_label, setting_title, SETTING_TITLES,
     setting_set_custom, setting_number_text, is_numeric,
@@ -23,6 +23,7 @@ def setting_summary(name: str) -> str:
     return setting_label(name)
 
 CHANNEL = "parrot_rig"
+GLOBAL_CHANNEL = "parrot_rig_global"
 
 EXIT_NOISE = "cluck"
 # Menus are aimed at, not spoken to. Nothing in one sits on a noise, so this is
@@ -31,8 +32,8 @@ CANCEL_NOISE = "tut"
 
 HUB_MENUS = [
     "click_freeze", "track_freeze", "speeds", "move_mode", "alt_mode",
-    "drag_hold", "anchor_move", "return_fallback", "utility_1", "profiles",
-    "cheatsheet",
+    "drag_hold", "anchor_move", "return_fallback", "utility_1",
+    "utility_global", "profiles", "cheatsheet",
 ]
 
 SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "canvas_move_speed",
@@ -49,6 +50,7 @@ ANCHOR_KINDS = [
 MENU_TITLES = {
     **SETTING_TITLES,
     "utility_1": "Utility 1",
+    "utility_global": "Palate (rig off)",
     "profiles": "Profiles",
     "speeds": "Speeds",
     "cheatsheet": "Cheatsheet",
@@ -62,13 +64,22 @@ def _settings_menu():
     menu_open("hub")
 
 
-def _utility_picker():
+def _utility_picker(slot: str):
     """Same combo opens and closes it. From the hub it stacks, so tut goes back
     there rather than all the way out."""
-    if menu_current() == "utility_1":
+    if menu_current() == slot:
         menu_back()
     else:
-        menu_open("utility_1")
+        menu_open(slot)
+
+
+def _global_cancel():
+    """tut with the rig off. A menu is the only thing out here to back out of,
+    so anywhere else it is still the reverse."""
+    if menu_current():
+        menu_back()
+    else:
+        parrot_actions.reverse_command()
 
 
 def _anchor_chase_open() -> bool:
@@ -86,6 +97,11 @@ def _anchor_kind(kind: str):
     anchor_set_kind(kind)
     show_notification("Anchor", dict(ANCHOR_KINDS).get(kind, kind).lower())
     menu_back()
+
+
+def _anchor_go():
+    from .src.anchor import anchor_go
+    anchor_go()
 
 
 def _anchor_clear_all():
@@ -223,7 +239,7 @@ input_map_common = {
     "guh":    ("move down", lambda: actions.user.parrot_rig_move("down")),
     "eh":     ("track", parrot_actions.tracking_activate),
     "er":     ("canvas", parrot_actions.canvas_toggle),
-    "palate": ("utility 1", utility_run),
+    "palate": ("utility 1", lambda: utility_run("utility_1")),
     EXIT_NOISE: ("exit", actions.user.parrot_rig_exit),
     "tut":        ("cancel / exit", parrot_actions.cancel),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
@@ -238,7 +254,7 @@ input_map_common = {
     "tut shush":  ("canvas scroll", lambda: parrot_actions.alt_mode_open("canvas_scroll")),
     "tut hiss":   ("canvas scale", lambda: parrot_actions.alt_mode_open("canvas_scale")),
     "tut mm":     ("right click", lambda: actions.user.parrot_rig_click(1)),
-    "tut palate": ("utility 1 picker", _utility_picker),
+    "tut palate": ("utility 1 picker", lambda: _utility_picker("utility_1")),
     "tut cluck":  ("settings", _settings_menu),
 }
 
@@ -371,6 +387,19 @@ utility_presets = {
         "repeat_last":      ("Repeat Last",      lambda: actions.core.repeat_command()),
         "repeat_phrase":    ("Repeat Phrase",    lambda: actions.user.parrot_rig_repeat_phrase()),
     },
+    # With the rig off. Nothing here changes a mode, because out here there is
+    # no rig running underneath to change it for.
+    "utility_global": {
+        "repeat_phrase":   ("Repeat Phrase",   parrot_actions.repeat_phrase),
+        "repeat_command":  ("Repeat Command",  lambda: actions.core.repeat_command()),
+        "reverse_command": ("Reverse Command", parrot_actions.reverse_command),
+        "next_anchor":     ("Next Anchor",     _anchor_go),
+        "app_picker":      ("App Picker",      lambda: actions.key(APP_PICKER_KEY)),
+        "parrot_rig":      ("Parrot Rig",      parrot_actions.parrot_mode_enable),
+        "click":           ("Click",           lambda: ctrl.mouse_click(button=0, hold=CLICK_HOLD_MS)),
+        "right_click":     ("Right Click",     lambda: ctrl.mouse_click(button=1, hold=CLICK_HOLD_MS)),
+        "middle_click":    ("Middle Click",    lambda: ctrl.mouse_click(button=2, hold=CLICK_HOLD_MS)),
+    },
 }
 
 input_map = {
@@ -385,6 +414,40 @@ input_map = {
     "window_stop": input_map_window,
     "window_move": input_map_window,
 }
+
+# Outside parrot mode. parrot.talon sends its four noises here instead of
+# straight to an action, so tut can carry a combo.
+input_map_global = {
+    "default": {
+        "pop":     ("click", lambda: ctrl.mouse_click(button=0, hold=CLICK_HOLD_MS)),
+        "cluck":   ("parrot rig", parrot_actions.parrot_mode_enable),
+        "palate":  ("palate", lambda: utility_run("utility_global")),
+        # ':now' keeps tut instant, and the combo still lands after it, so a
+        # combo runs this first.
+        "tut:now": ("cancel / reverse command", _global_cancel),
+        "tut pop": ("next anchor", _anchor_go),
+        "tut palate": ("palate picker", lambda: _utility_picker("utility_global")),
+    },
+}
+
+
+def global_channel_init():
+    """At ready, not on parrot mode enable: these are the noises for when
+    parrot mode is off."""
+    if GLOBAL_CHANNEL in actions.user.input_map_channel_list():
+        actions.user.input_map_channel_unregister(GLOBAL_CHANNEL)
+    actions.user.input_map_channel_register(GLOBAL_CHANNEL, input_map_global)
+
+
+app.register("ready", global_channel_init)
+
+# A reload happens long after ready, so the new module has to take the channel
+# back itself.
+try:
+    global_channel_init()
+except Exception:
+    pass
+
 
 def _listen():
     """Reloading leaves the previous module's listener on the channel, and the

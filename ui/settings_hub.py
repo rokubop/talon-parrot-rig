@@ -10,7 +10,7 @@ from ..src.settings_menu import (
 )
 from ..parrot_rig_settings import (
     PICKER_HEADER_COLOR, PICKER_PADDING, PICKER_PANEL_COLOR, PICKER_RADIUS,
-    PICKER_TEXT_SIZE, PICKER_TITLE_BAR_COLOR,
+    PICKER_TEXT_SIZE, PICKER_TITLE_BAR_COLOR, UTILITY_SLOTS,
 )
 
 _pending_custom = None
@@ -40,9 +40,9 @@ def menu_value(name: str) -> str:
         return setting_label(name)
     if name == "profiles":
         return profile_active()
-    if name == "utility_1":
+    if name in UTILITY_SLOTS:
         from ..src.utility import utility_label
-        return utility_label()
+        return utility_label(name)
     return ""
 
 

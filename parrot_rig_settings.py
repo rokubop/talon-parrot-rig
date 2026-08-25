@@ -191,7 +191,12 @@ PICKER_TEXT_COLOR = "E8E8EC"
 PICKER_HEADER_COLOR = "9A9AA8"
 PICKER_NOISE_COLOR = "8A8A98"
 
-# Utility 1 picker (tut palate)
+# Utility pickers (tut palate)
+# One binding each, and they do not know about each other. utility_1 is the
+# noise inside parrot mode, utility_global is palate with the rig off.
+# Named here rather than beside their presets so the picker can build itself
+# without importing the module that holds them.
+UTILITY_SLOTS = ("utility_1", "utility_global")
 # How many entries each Recent row offers. Voice and parrot rig histories are
 # separate lists, this is the depth of each.
 UTILITY_RECENT_COUNT = 5
