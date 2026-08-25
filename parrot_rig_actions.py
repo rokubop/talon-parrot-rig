@@ -322,12 +322,11 @@ input_map_window = {
     "ee":     ("escape", parrot_actions.window_escape),
     "shush:th_90": ("next tab", lambda: parrot_actions.window_key("tab_next")),
     "hiss:th_90":  ("previous tab", lambda: parrot_actions.window_key("tab_prev")),
-    "tut pop":   ("close window", lambda: parrot_actions.window_key("close")),
-    # Tabs live on hiss and shush here, so the destructive one joins them
-    # rather than sitting on tut+direction, which now means a window nudge.
-    "tut hiss":  ("close tab", lambda: parrot_actions.window_key("tab_close")),
+    # The window keypad: screens on the horizontal, closes on the vertical.
     "tut ah":    ("screen left", lambda: parrot_actions.window_move("screen_left")),
     "tut oh":    ("screen right", lambda: parrot_actions.window_move("screen_right")),
+    "tut t":     ("close tab", lambda: parrot_actions.window_key("tab_close")),
+    "tut guh":   ("close window", lambda: parrot_actions.window_key("close")),
 }
 
 # Three pairs, one modifier each, both ways on the vertical wheel. No axis to
