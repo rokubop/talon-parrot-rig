@@ -176,11 +176,13 @@ class CursorUI:
         self._scroll_direction = "down"
 
     def _get_state(self):
+        # Copies. ui_elements keeps what it is handed and skips the render
+        # when the new value equals the stored one.
         return {
             "cursor_color": self._color,
             "border_color": self._border_color,
             "show_border": self._border_show,
-            "modifiers": self._modifiers,
+            "modifiers": self._modifiers.copy(),
             "mode": self._mode,
             "speed_level": self._speed_level,
             "scroll_direction": self._scroll_direction,

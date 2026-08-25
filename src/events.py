@@ -57,20 +57,21 @@ class ParrotEventManager:
     def return_to_previous_mode(self):
         self.set_mode(self._previous_mode)
 
+    # Copies. A subscriber that keeps what it is handed would hold this set.
     def add_modifier(self, modifier: str):
         self._active_modifiers.add(modifier)
-        self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
+        self.emit("modifiers_changed", {"modifiers": self.get_modifiers()})
 
     def remove_modifier(self, modifier: str):
         self._active_modifiers.discard(modifier)
-        self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
+        self.emit("modifiers_changed", {"modifiers": self.get_modifiers()})
 
     def get_modifiers(self) -> Set[str]:
         return self._active_modifiers.copy()
 
     def clear_modifiers(self):
         self._active_modifiers.clear()
-        self.emit("modifiers_changed", {"modifiers": self._active_modifiers})
+        self.emit("modifiers_changed", {"modifiers": self.get_modifiers()})
 
     def debug_listeners(self):
         print("Current event listeners:")
