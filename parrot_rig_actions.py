@@ -30,8 +30,9 @@ EXIT_NOISE = "cluck"
 CANCEL_NOISE = "tut"
 
 HUB_MENUS = [
-    "click_freeze", "speeds", "move_mode", "alt_mode", "drag_hold",
-    "anchor_move", "return_fallback", "utility_1", "profiles", "cheatsheet",
+    "click_freeze", "track_freeze", "speeds", "move_mode", "alt_mode",
+    "drag_hold", "anchor_move", "return_fallback", "utility_1", "profiles",
+    "cheatsheet",
 ]
 
 SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "canvas_move_speed",

@@ -23,6 +23,11 @@ setting_maps = {
         "freeze":    ("Freeze on Click",),
         "no_freeze": ("Keep Moving",),
     },
+    # Aim is the whole point of a track mode, so clicking leaves it running.
+    "track_freeze": {
+        "no_freeze": ("Keep Moving",),
+        "freeze":    ("Freeze on Click",),
+    },
     # Which mode the swap picks first, until one of these has been used.
     "alt_mode": {
         "canvas_scroll":  ("Canvas Scroll",),
@@ -85,6 +90,7 @@ setting_maps = {
 
 SETTING_TITLES = {
     "click_freeze": "Click",
+    "track_freeze": "Track Click",
     "alt_mode": "Alt Mode",
     "drag_hold": "Drag",
     "move_mode": "Move",

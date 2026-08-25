@@ -275,9 +275,11 @@ class ParrotActions:
         self._canvas_scale_release()
         current_mode = event_manager.get_mode()
 
-        should_stop = hold != True and setting_get("click_freeze") == "freeze" and (
-            (current_mode in CLICK_BEHAVIOR) or
-            (current_mode in ("tracking", "canvas_tracking"))
+        should_stop = hold != True and (
+            (current_mode in CLICK_BEHAVIOR
+             and setting_get("click_freeze") == "freeze") or
+            (current_mode in ("tracking", "canvas_tracking")
+             and setting_get("track_freeze") == "freeze")
         )
 
         if self._is_left_click_held:
@@ -436,6 +438,7 @@ class ParrotActions:
             "drag": self._is_drag,
             "drag_hold": self._drag_hold,
             "click_freeze": setting_get("click_freeze"),
+            "track_freeze": setting_get("track_freeze"),
             "alt_mode": setting_get("alt_mode"),
             "last_alt_mode": self._last_alt_mode,
         }
