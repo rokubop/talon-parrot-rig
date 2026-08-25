@@ -70,8 +70,8 @@ class UIManager:
 
     def show_cheatsheet(self):
         """Show the cheatsheet UI"""
-        from .cheatsheet import cheatsheet_ui
-        actions.user.ui_elements_toggle(cheatsheet_ui)
+        from .cheatsheet import show_cheatsheet
+        show_cheatsheet()
 
     def hide_cheatsheet(self):
         """Hide the cheatsheet UI"""

@@ -4,6 +4,7 @@ Shows the noise-to-action mapping in a table format
 """
 
 from talon import actions, settings
+from ..src.menu import menu_back, menu_current, menu_open, menu_register
 from ..parrot_rig_settings import MODE_COLORS
 from ..parrot_rig_settings import UI_BORDER_COLOR, UI_BACKGROUND_COLOR, UI_TEXT_COLOR
 from ..parrot_rig_actions import input_map as parrot_input_map
@@ -208,5 +209,21 @@ def cheatsheet_ui():
         ]
     ]
 
+def cheatsheet_show():
+    actions.user.ui_elements_show(cheatsheet_ui, show_hints=False)
+
+
+def cheatsheet_hide():
+    actions.user.ui_elements_hide(cheatsheet_ui)
+
+
 def show_cheatsheet():
-    actions.user.ui_elements_toggle(cheatsheet_ui)
+    """The voice command and the hub tile open the same thing. Going through
+    the stack is what makes tut back out of it, like every other menu."""
+    if menu_current() == "cheatsheet":
+        menu_back()
+    else:
+        menu_open("cheatsheet")
+
+
+menu_register("cheatsheet", cheatsheet_show, cheatsheet_hide)

@@ -31,7 +31,7 @@ CANCEL_NOISE = "tut"
 
 HUB_MENUS = [
     "click_freeze", "speeds", "move_mode", "alt_mode", "drag_hold",
-    "anchor_move", "return_fallback", "utility_1", "profiles",
+    "anchor_move", "return_fallback", "utility_1", "profiles", "cheatsheet",
 ]
 
 SPEED_MENUS = ["move_speed", "turn_speed", "scroll_speed", "canvas_move_speed",
@@ -50,6 +50,7 @@ MENU_TITLES = {
     "utility_1": "Utility 1",
     "profiles": "Profiles",
     "speeds": "Speeds",
+    "cheatsheet": "Cheatsheet",
 }
 
 # Wiring the input map and the UI call directly. The public surface is the

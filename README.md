@@ -145,10 +145,11 @@ CLICK_HOLD_MS = 16000
 | Window control | `tut` + a direction, or `er` then `ee` | Moves the window as it enters. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush` |
 | App picker (using [BentoPick](https://github.com/rokubop/bentopick)) | `palate` | Easy to click app launcher |
 | Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. |
-| Settings | `tut cluck` | Speeds, click behavior, profiles |
+| Settings | `tut cluck` | Speeds, click behavior, profiles, cheatsheet |
 | Exit mode | `tut` or `er` | |
 
-Say **"parrot help"** for mapping overlay.
+The cheatsheet is the last tile in settings, or say **"parrot help"**. Both
+open the same one, and `tut` backs out of it like any other menu.
 
 ### The `er` gateway
 
