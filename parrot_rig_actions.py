@@ -290,9 +290,9 @@ input_map_canvas_base = {
 # these three go on to another mode instead of doing their canvas job.
 input_map_canvas_stop = {
     **input_map_canvas_base,
-    "hiss:init": ("canvas scale", lambda: parrot_actions.alt_mode_open("canvas_scale")),
-    "mm:init":   ("canvas drag", lambda: parrot_actions.alt_mode_open("canvas_drag")),
-    "ee:init":   ("window", lambda: parrot_actions.alt_mode_open("window_control")),
+    "hiss:init":  ("canvas scale", lambda: parrot_actions.alt_mode_open("canvas_scale")),
+    "shush:init": ("window", lambda: parrot_actions.alt_mode_open("window_control")),
+    "mm:init":    ("canvas drag", lambda: parrot_actions.alt_mode_open("canvas_drag")),
 }
 
 input_map_canvas_move = {

@@ -142,7 +142,7 @@ CLICK_HOLD_MS = 16000
 | Canvas scroll | `er`, or `tut shush` | Like moving 2 fingers on a trackpad |
 | Canvas scale | `er` then `hiss`, or `tut hiss` | 6 noises to account for [ctrl, alt, shift] + [scroll up/down] |
 | Canvas drag | `er` then `mm` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
-| Window control | `tut` + a direction, or `er` then `ee` | Moves the window as it enters. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush` |
+| Window control | `tut` + a direction, or `er` then `shush` | Moves the window as it enters. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush` |
 | App picker (using [BentoPick](https://github.com/rokubop/bentopick)) | `palate` | Easy to click app launcher |
 | Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. |
 | Settings | `tut cluck` | Speeds, click behavior, profiles, cheatsheet |
@@ -162,10 +162,10 @@ in canvas, three noises go somewhere else instead of doing their canvas job:
 | | |
 |---|---|
 | `hiss` | canvas scale |
+| `shush` | window |
 | `mm` | canvas drag |
-| `ee` | window |
 
-After that they go back to canvas resume, click, and stop. The cheatsheet shows
+After that they go back to canvas resume, canvas resume, and click. The cheatsheet shows
 both meanings in the canvas column, the redirect under the window it lasts.
 
 This is [talon-input-map](https://github.com/rokubop/talon-input-map/)'s `":init"`.
