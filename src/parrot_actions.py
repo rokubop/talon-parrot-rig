@@ -446,6 +446,9 @@ class ParrotActions:
     def parrot_mode_get_mode(self):
         return event_manager.get_mode()
 
+    def parrot_mode_is_enabled(self) -> bool:
+        return self._parrot_mode_enabled
+
     def parrot_mode_toggle(self):
         if self._parrot_mode_enabled:
             self.parrot_mode_disable()

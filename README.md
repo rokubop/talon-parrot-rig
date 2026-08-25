@@ -118,7 +118,7 @@ These go through their own input map channel, `input_map_global` in
 | `palate` | whatever the picker says, Repeat Phrase out of the box |
 | `tut` | reverse command, or back out of a menu |
 | `tut pop` | next anchor |
-| `tut palate` | palate picker |
+| `tut palate` | palate picker, borrowing the rig to aim it |
 
 `tut` is a combo prefix, which normally makes a noise wait out the combo window
 before it fires. `":now"` opts out: `tut` fires straight away and the combo
@@ -128,6 +128,10 @@ out the window and have the combos land clean.
 
 Anchors survive leaving parrot mode, so `tut pop` cycles the ones you already
 set.
+
+With the rig off nothing is aiming, so `tut palate` turns parrot mode and the
+tracker on for the picker and back off when it closes. From the settings hub,
+where the rig is already running, nothing changes.
 
 See [talon-input-map](https://github.com/rokubop/talon-input-map/) for the full set of options to fine-tune how each noise behaves:
 - **combos** (`"tut ah"`) - trigger an action with a sequence of noises
@@ -222,10 +226,9 @@ its own preset list, and neither slot knows about the other. Both save with the
 profile. `UTILITY_SLOTS` in
 [parrot_rig_settings.py](./parrot_rig_settings.py) names them.
 
-Every menu works this way. Opening one takes no mode and no noise, so the rig
-keeps running underneath and you move the cursor onto a tile the way you move
-it anywhere else. `tut` is the only noise a menu takes, and it always means
-back.
+Every menu works this way. Opening one takes no noise and puts the rig in
+tracking, so you look at a tile and click it. `tut` is the only noise a menu
+takes, and it always means back.
 
 Commands, not phrases. Talon keeps recognising while the rig runs, and
 `^<phrase>$: skip()` swallows it so talking cannot fire noises. Those

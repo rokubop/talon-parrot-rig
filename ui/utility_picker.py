@@ -1,9 +1,8 @@
 """Picker for what a utility noise does. One per slot.
 
 The one picker with no noises at all. Every other menu is spoken and clicked;
-this one is only clicked, because it opens without taking a mode or a noise
-away. The rig keeps working underneath, so you move the cursor onto a tile the
-way you move it anywhere else. Only tut is borrowed, to close.
+this one is only clicked. Opening it puts the rig in tracking, so you look at a
+tile and click it. Only tut is borrowed, to close.
 
 Three sections, because they are three separate lists: the presets, what Talon
 heard, what the rig did.
@@ -110,6 +109,8 @@ def utility_picker_show(slot):
 
 def utility_picker_hide(slot):
     actions.user.ui_elements_hide(_pickers[slot])
+    from ..parrot_rig_actions import utility_picker_closed
+    utility_picker_closed(slot)
 
 
 for _slot in _pickers:

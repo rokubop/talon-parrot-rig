@@ -1,8 +1,9 @@
 """Menu navigation stack. Opening drills in, tut backs out one level.
 
-No menu takes a mode or a noise. They open over the rig and it keeps running
-underneath, so you aim at one the way you aim at anything. tut is the only
-noise they take, handled in parrot_actions.cancel.
+No menu takes a noise. tut is the only one they borrow, handled in
+parrot_actions.cancel.
+
+Opening one takes a mode. A menu is aimed at, so the rig goes to tracking.
 """
 
 _stack = []
@@ -13,9 +14,18 @@ def menu_register(name: str, show, hide):
     _registry[name] = (show, hide)
 
 
+def _track():
+    """Tracking is what puts the cursor on a tile. Nothing to aim with when
+    parrot mode is off, so this skips."""
+    from .parrot_actions import parrot_actions
+    if parrot_actions.parrot_mode_is_enabled():
+        parrot_actions.tracking_activate()
+
+
 def menu_open(name: str):
     if name not in _registry or name in _stack:
         return
+    _track()
     previous = _stack[-1] if _stack else None
     if previous:
         _registry[previous][1]()

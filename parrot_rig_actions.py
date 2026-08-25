@@ -73,6 +73,34 @@ def _utility_picker(slot: str):
         menu_open(slot)
 
 
+# The global picker is a UI you aim at, and with the rig off nothing is aiming.
+# It borrows parrot mode and the tracker, and hands them back when it closes.
+_picker_borrowed_rig = False
+
+
+def _global_utility_picker():
+    global _picker_borrowed_rig
+    if menu_current() == "utility_global":
+        menu_back()
+        return
+    if not parrot_actions.parrot_mode_is_enabled():
+        _picker_borrowed_rig = True
+        parrot_actions.parrot_mode_enable()
+    # menu_open takes it to tracking
+    menu_open("utility_global")
+
+
+def utility_picker_closed(slot: str):
+    """However it closed: the tile, tut, or parrot mode going down under it."""
+    global _picker_borrowed_rig
+    if slot != "utility_global" or not _picker_borrowed_rig:
+        return
+    # Cleared first, so the teardown popping this menu again lands on a no-op
+    _picker_borrowed_rig = False
+    if parrot_actions.parrot_mode_is_enabled():
+        parrot_actions.parrot_mode_disable()
+
+
 def _global_cancel():
     """tut with the rig off. A menu is the only thing out here to back out of,
     so anywhere else it is still the reverse."""
@@ -426,7 +454,7 @@ input_map_global = {
         # combo runs this first.
         "tut:now": ("cancel / reverse command", _global_cancel),
         "tut pop": ("next anchor", _anchor_go),
-        "tut palate": ("palate picker", lambda: _utility_picker("utility_global")),
+        "tut palate": ("palate picker", _global_utility_picker),
     },
 }
 
