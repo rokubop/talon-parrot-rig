@@ -202,15 +202,18 @@ class ParrotActions:
         self._burst_settle()
 
     def tracking_activate(self):
+        """The way out to plain tracking from anywhere, so a super window mode
+        was holding is let go here rather than at every caller."""
+        self._window_super_release()
         actions.user.mouse_rig_stop()
         tracking.activate()
         event_manager.set_mode("tracking")
 
     def app_picker(self):
-        """The hotkey and normal tracking, nothing else. Window mode is a
-        different thing, on tut eh."""
-        actions.key(APP_PICKER_KEY)
+        """Tracking first: it is what lets go of a held super, and win+alt+`
+        is not the hotkey."""
         self.tracking_activate()
+        actions.key(APP_PICKER_KEY)
 
     def canvas_tracking_activate(self):
         actions.user.mouse_rig_scroll_stop()

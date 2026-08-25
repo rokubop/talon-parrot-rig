@@ -310,16 +310,16 @@ input_map_canvas_move = {
 }
 
 # Tracking stays live here, because the app picker is an overlay you aim at.
+# eh and palate are left to the common map on purpose: eh is the way out to
+# plain tracking from anywhere, and palate is utility 1 everywhere.
 input_map_window = {
     **input_map_common,
     "ah":     ("window left", lambda: parrot_actions.window_move("left")),
     "oh":     ("window right", lambda: parrot_actions.window_move("right")),
     "t":      ("window up", lambda: parrot_actions.window_move("up")),
     "guh":    ("window down", lambda: parrot_actions.window_move("down")),
-    "eh":     ("app picker", parrot_actions.window_picker),
     "pop":    ("alt tab", parrot_actions.window_alt_tab),
     "ee":     ("escape", parrot_actions.window_escape),
-    "palate": ("repeat last", lambda: _repeat_last()),
     "shush:th_90": ("next tab", lambda: parrot_actions.window_key("tab_next")),
     "hiss:th_90":  ("previous tab", lambda: parrot_actions.window_key("tab_prev")),
     "tut pop":   ("close window", lambda: parrot_actions.window_key("close")),
