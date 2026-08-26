@@ -26,7 +26,7 @@ GLIDE_RELEASE_RATE = 5
 SCROLL_SPEED = 0.4
 
 # The app picker hotkey, named because two things reach for it: tut eh opens
-# it, and utility 1 is set to it out of the box. This is what BentoPick binds.
+# it, and utility 1 is set to it out of the box. This is what BentoLaunch binds.
 APP_PICKER_KEY = "alt-`"
 
 # Window mode. Whatever your window manager uses.
@@ -154,7 +154,7 @@ UI_BACKGROUND_COLOR = "#4A4A4A"
 UI_TEXT_COLOR = "#FFFFFF"
 UI_SELECTED_COLOR = "#3E84DA"
 # Picker menus. Big targets for an eye tracker, and every tile takes a click as
-# well as the noise beside it. Styled after the BentoPick panel: one backdrop,
+# well as the noise beside it. Styled after the BentoLaunch panel: one backdrop,
 # sections named by a header instead of boxed off, tiles that carry every state
 # in their fill.
 PICKER_TILE_WIDTH = 160

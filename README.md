@@ -22,6 +22,10 @@ You'll need at least 9 noises to use this, 14 recommended for the full experienc
 - [**talon-ui-elements**](https://github.com/rokubop/talon-ui-elements) (v0.16.0+)
 - [**talon-rig-core**](https://github.com/rokubop/talon-rig-core) (v0.6.5+) - required by talon-mouse-rig
 
+### Optional
+
+- [**BentoLaunch**](https://github.com/rokubop/bentolaunch) - Windows app launcher on ``alt+` ``. That is the key the app picker presses, so any launcher bound to it works.
+
 ### Install
 
 Clone the dependencies and this repo into your [Talon](https://talonvoice.com/) user directory:
@@ -168,7 +172,7 @@ CLICK_HOLD_MS = 16000
 | Canvas scale | `er` then `hiss`, or `tut hiss` | 6 noises to account for [ctrl, alt, shift] + [scroll up/down] |
 | Canvas drag | `er` then `mm` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
 | Window control | `tut` + a direction, or `er` then `shush` | Moves the window as it enters. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush` |
-| App picker (using [BentoPick](https://github.com/rokubop/bentopick)) | `palate` | Easy to click app launcher |
+| App picker (using [BentoLaunch](https://github.com/rokubop/bentolaunch)) | `palate` | Easy to click app launcher |
 | Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. |
 | Settings | `tut cluck` | Speeds, click behavior, profiles, cheatsheet |
 | Exit mode | `tut` or `er` | |

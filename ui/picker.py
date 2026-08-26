@@ -1,6 +1,6 @@
 """Shared look for every picker menu.
 
-Taken from the BentoPick panel: one backdrop, sections named by a header
+Taken from the BentoLaunch panel: one backdrop, sections named by a header
 rather than boxed off, tiles carrying every state in their fill. Neighbouring
 sections alternate between two tile fills, and that is what separates them.
 
