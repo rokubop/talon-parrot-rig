@@ -20,7 +20,9 @@
   ],
   "dependencies": {
     "community": {
-      "github": "https://github.com/talonhub/community"
+      "github": "https://github.com/talonhub/community",
+      "optional": true,
+      "description": "reverse command only; repeat falls back to talon core"
     },
     "talon-input-map": {
       "min_version": "1.0.1",
