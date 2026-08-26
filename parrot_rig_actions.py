@@ -566,6 +566,20 @@ class Actions:
         """Get current mode (default/move/boost/glide/tracking/canvas_*)"""
         return parrot_actions.parrot_mode_get_mode()
 
+    def parrot_rig_alt_mode_current() -> str:
+        """Get the open alt mode (canvas_scroll/canvas_scale/canvas_drag/window_pick/window_control), or "" for none"""
+        return parrot_actions.alt_mode_current() or ""
+
+    def parrot_rig_alt_mode_open(name: str):
+        """Open an alt mode by name, leaving the open one first"""
+        parrot_actions.alt_mode_open(name)
+
+    def parrot_rig_alt_mode_close():
+        """Close the open alt mode, back to cursor move"""
+        current = parrot_actions.alt_mode_current()
+        if current:
+            parrot_actions.alt_mode_close(current)
+
     def parrot_rig_show_help():
         """Show parrot rig cheatsheet"""
         parrot_actions.show_cheatsheet()
