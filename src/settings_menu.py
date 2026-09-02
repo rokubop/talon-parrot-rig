@@ -7,7 +7,7 @@ names a base to scale, otherwise the multiplier itself. Their "custom" option
 holds a typed number instead.
 """
 
-from ..parrot_rig_settings import MOVE_SPEED, SCROLL_SPEED, SCROLL_MOVE_SPEED
+from ..parrot_rig_settings import MOVE_SPEED, SCROLL_SPEED, CANVAS_MOVE_SPEED, CANVAS_SCALE_SPEED
 
 SPEED_OPTIONS = (
     ("normal",    ("Normal",)),
@@ -23,9 +23,26 @@ setting_maps = {
         "freeze":    ("Freeze on Click",),
         "no_freeze": ("Keep Moving",),
     },
-    "er_mode": {
-        "scroll":      ("Scroll Mode",),
-        "middle_drag": ("Middle Drag",),
+    # Aim is the whole point of a track mode, so clicking leaves it running.
+    "track_freeze": {
+        "no_freeze": ("Keep Moving",),
+        "freeze":    ("Freeze on Click",),
+    },
+    # Which mode the swap picks first, until one of these has been used.
+    "alt_mode": {
+        "canvas_scroll":  ("Canvas Scroll",),
+        "canvas_scale":   ("Canvas Scale",),
+        "canvas_drag":    ("Canvas Drag",),
+        "window_pick":    ("Window Pick",),
+        "window_control": ("Window Control",),
+    },
+    # What canvas drag holds down while you move. Space is what pans in a lot of
+    # canvas apps, and it is a key, not a button.
+    "drag_hold": {
+        "middle": ("Hold Middle",),
+        "left":   ("Hold Left",),
+        "right":  ("Hold Right",),
+        "space":  ("Hold Space",),
     },
     "move_mode": {
         "orthogonal":   ("Orthogonal",),
@@ -40,30 +57,50 @@ setting_maps = {
     },
     "move_speed": dict(SPEED_OPTIONS),
     "scroll_speed": dict(SPEED_OPTIONS),
-    "scroll_move_speed": dict(SPEED_OPTIONS),
+    "canvas_move_speed": dict(SPEED_OPTIONS),
+    "canvas_scale_speed": {
+        "normal":    ("Normal",),
+        "fast":      ("Fast",),
+        "slow":      ("Slow",),
+        "very_slow": ("Very Slow",),
+        "crawl":     ("Crawl",),
+        "custom":    ("Custom",),
+    },
     "boost_power": {
         "normal": ("Normal",),
         "strong": ("Strong",),
         "gentle": ("Gentle",),
         "custom": ("Custom",),
     },
-    # A second tuple entry names an action to run instead of setting the value
+    # A second tuple entry names a SETTING_ACTIONS entry to run instead of
+    # setting the value
     "anchor_move": {
         "smooth":  ("Over Time",),
         "instant": ("Instant",),
-        "clear":   ("Clear All", "parrot_rig_anchor_clear_all"),
+        "clear":   ("Clear All", "anchor_clear_all"),
+    },
+    # What return does empty handed, with no anchors of your own and no snap
+    # rule. Click & Exit hands control back. Screen Anchors falls back to the
+    # invisible SCREEN_ANCHORS instead, so return keeps behaving like return.
+    "return_fallback": {
+        "click_exit":     ("Click & Exit",),
+        "screen_anchors": ("Screen Anchors",),
     },
 }
 
 SETTING_TITLES = {
     "click_freeze": "Click",
-    "er_mode": "Er",
+    "track_freeze": "Track Click",
+    "alt_mode": "Alt Mode",
+    "drag_hold": "Drag",
     "move_mode": "Move",
     "turn_speed": "Turn",
     "anchor_move": "Anchor",
-    "move_speed": "Move Speed",
+    "return_fallback": "Return",
+    "move_speed": "Cursor Speed",
     "scroll_speed": "Scroll Speed",
-    "scroll_move_speed": "Scroll Move",
+    "canvas_move_speed": "Canvas Speed",
+    "canvas_scale_speed": "Canvas Scale Speed",
     "boost_power": "Boost",
 }
 
@@ -82,6 +119,16 @@ SPEED_SCALES = {
     "very_slow": 0.5,
 }
 
+# Apps differ wildly in how much one wheel tick zooms, so this reaches lower
+# than the shared speeds do
+CANVAS_SCALE_SCALES = {
+    "normal":    1.0,
+    "fast":      1.5,
+    "slow":      0.5,
+    "very_slow": 0.25,
+    "crawl":     0.1,
+}
+
 BOOST_SCALES = {
     "normal": 1.0,
     "strong": 1.5,
@@ -92,7 +139,8 @@ BOOST_SCALES = {
 NUMERIC_SETTINGS = {
     "move_speed":        {"base": MOVE_SPEED,        "scales": SPEED_SCALES},
     "scroll_speed":      {"base": SCROLL_SPEED,      "scales": SPEED_SCALES},
-    "scroll_move_speed": {"base": SCROLL_MOVE_SPEED, "scales": SPEED_SCALES},
+    "canvas_move_speed": {"base": CANVAS_MOVE_SPEED, "scales": SPEED_SCALES},
+    "canvas_scale_speed": {"base": CANVAS_SCALE_SPEED, "scales": CANVAS_SCALE_SCALES},
     "turn_speed":        {"base": None,              "scales": TURN_SCALES},
     "boost_power":       {"base": None,              "scales": BOOST_SCALES},
 }
@@ -151,6 +199,20 @@ def setting_customs() -> dict:
 def setting_apply_customs(customs: dict):
     _customs.clear()
     _customs.update({k: v for k, v in (customs or {}).items() if k in NUMERIC_SETTINGS})
+
+
+def setting_step(name: str, delta: int) -> str:
+    """Move a numeric setting one option along its scale, slowest to fastest.
+    A custom value steps from whichever option it sits nearest."""
+    spec = NUMERIC_SETTINGS[name]
+    order = sorted(spec["scales"], key=lambda k: spec["scales"][k])
+    current = setting_get(name)
+    if current not in order:
+        number = setting_number(name)
+        current = min(order, key=lambda k: abs(setting_number(name, k) - number))
+    index = min(max(order.index(current) + delta, 0), len(order) - 1)
+    setting_set(name, order[index])
+    return setting_label(name)
 
 
 def turn_scale() -> float:

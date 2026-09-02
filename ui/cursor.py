@@ -1,8 +1,7 @@
 from talon import actions
 from ..parrot_rig_settings import MODE_COLORS, MODIFIER_LETTERS
+from ..parrot_rig_settings import CANVAS_MODES, CANVAS_SCALE_MODES, WINDOW_MODES
 from ..parrot_rig_settings import CURSOR_UI_ENABLED
-
-SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide", "scroll_tracking"}
 
 TRIANGLE_PATHS = {
     "down":  "M 12 19 L 4 5 L 20 5 Z",
@@ -32,8 +31,23 @@ TRIANGLE_BORDER_INNER = {
     "right": "M 21 12 L 4 3 L 4 21 Z",
 }
 
+
+DIAMOND_PATH = "M 12 4 L 20 12 L 12 20 L 4 12 Z"
+
+DIAMOND_BORDER_OUTER = "M 12 1 L 23 12 L 12 23 L 1 12 Z"
+DIAMOND_BORDER_MID = "M 12 2 L 22 12 L 12 22 L 2 12 Z"
+DIAMOND_BORDER_INNER = "M 12 3 L 21 12 L 12 21 L 3 12 Z"
+
+# Window mode gets the square, the one shape the other three modes leave free
+SQUARE_PATH = "M 6 6 H 18 V 18 H 6 Z"
+
+SQUARE_BORDER_OUTER = "M 3 3 H 21 V 21 H 3 Z"
+SQUARE_BORDER_MID = "M 4 4 H 20 V 20 H 4 Z"
+SQUARE_BORDER_INNER = "M 5 5 H 19 V 19 H 5 Z"
+
 default_cursor_color = "FF0000"
 default_border_color = "FFFFFF"
+
 
 def cursor_ui():
     screen, cursor, svg, circle, state = actions.user.ui_elements(
@@ -99,9 +113,27 @@ def cursor_ui():
         ]
 
     mode = state.get("mode")
-    is_scroll = mode in SCROLL_MODES
+    is_canvas = mode in CANVAS_MODES
 
-    if is_scroll:
+    if mode in WINDOW_MODES:
+        cursor_shape = svg(position="absolute", left=10, top=10)[
+            path(d=SQUARE_PATH, fill=cursor_color)
+        ]
+        border_shape = svg(position="absolute", left=10, top=10)[
+            path(d=SQUARE_BORDER_OUTER, fill="black"),
+            path(d=SQUARE_BORDER_MID, fill=border_color),
+            path(d=SQUARE_BORDER_INNER, fill="black"),
+        ] if show_border else None
+    elif mode in CANVAS_SCALE_MODES:
+        cursor_shape = svg(position="absolute", left=10, top=10)[
+            path(d=DIAMOND_PATH, fill=cursor_color)
+        ]
+        border_shape = svg(position="absolute", left=10, top=10)[
+            path(d=DIAMOND_BORDER_OUTER, fill="black"),
+            path(d=DIAMOND_BORDER_MID, fill=border_color),
+            path(d=DIAMOND_BORDER_INNER, fill="black"),
+        ] if show_border else None
+    elif is_canvas:
         scroll_dir = state.get("scroll_direction") or "down"
         cursor_shape = svg(position="absolute", left=10, top=10)[
             path(d=TRIANGLE_PATHS[scroll_dir], fill=cursor_color)
@@ -144,11 +176,13 @@ class CursorUI:
         self._scroll_direction = "down"
 
     def _get_state(self):
+        # Copies. ui_elements keeps what it is handed and skips the render
+        # when the new value equals the stored one.
         return {
             "cursor_color": self._color,
             "border_color": self._border_color,
             "show_border": self._border_show,
-            "modifiers": self._modifiers,
+            "modifiers": self._modifiers.copy(),
             "mode": self._mode,
             "speed_level": self._speed_level,
             "scroll_direction": self._scroll_direction,
