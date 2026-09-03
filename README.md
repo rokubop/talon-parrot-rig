@@ -65,7 +65,7 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `pop` | return | Either click and exit, or return to an anchor position |
 | `mm` | click | Click (stay in mode) |
 | `hiss` | scroll / boost | Scroll down, boost in move mode |
-| `shush` | scroll / boost | Scroll up, boost in move mode |
+| `shush` | scroll / boost | Scroll up, boost in move mode. `hiss` brakes out of one, shedding speed at a fixed rate so a fast boost takes longer to stop |
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
 | `er` | mode gateway | Canvas and back. On arrival, `hiss` `mm` `ee` redirect elsewhere for 300ms |
 | `cluck` | Start or exit parrot mode | any context |

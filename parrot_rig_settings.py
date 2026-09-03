@@ -22,6 +22,12 @@ BURST_SETTLE_HOLD_MS = 700
 BURST_SETTLE_REVERT_MS = 500
 GLIDE_RELEASE_RATE = 5
 
+# Braking out of a boost. A rate, not a duration: speed comes off at this many
+# units a second, so how long it takes is however much there was to shed. The
+# same idea as GLIDE_RELEASE_RATE above, quicker because it is a brake.
+BRAKE_RATE = 20
+BRAKE_EASING = "linear"
+
 # Scroll
 SCROLL_SPEED = 0.4
 

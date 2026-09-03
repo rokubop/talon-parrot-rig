@@ -19,6 +19,8 @@ from ..parrot_rig_settings import (
     BURST_SETTLE_HOLD_MS,
     BURST_SETTLE_REVERT_MS,
     GLIDE_RELEASE_RATE,
+    BRAKE_RATE,
+    BRAKE_EASING,
     APP_PICKER_KEY,
     WINDOW_KEYS,
     WINDOW_SUPER_KEYS,
@@ -181,13 +183,16 @@ class ParrotActions:
     def mouse_burst_or_brake(self):
         actions.user.mouse_rig().layer("burst_settle").revert(0)
         if event_manager.get_mode() in ("boost", "glide"):
+            # bake absorbs the boost into base speed and drops the layer, so
+            # this is the only thing moving the speed afterwards. It comes off
+            # at a rate, which is what makes a fast boost take longer to shed
+            # than a slow one rather than every brake taking the same time.
             rig = actions.user.mouse_rig()
             rig.bake()
             speed = self._get_move_speed()
-            rig.speed.to(speed)
+            rig.speed.to(speed).over(rate=BRAKE_RATE, easing=BRAKE_EASING)
             event_manager.set_mode("move")
             self._burst_or_brake_did_break = True
-            self._burst_settle()
             return
         self._burst_or_brake_did_break = False
         self._burst_glide(True)
