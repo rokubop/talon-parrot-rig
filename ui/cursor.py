@@ -174,6 +174,15 @@ class CursorUI:
         self._mode = "default"
         self._speed_level = 0
         self._scroll_direction = "down"
+        self._shown = False
+
+    def _set(self, key, value):
+        """Only talk to a mounted UI. A set_state while hidden creates the key
+        with that value as its initial one, and initial_state at the next show
+        is a one-shot that cannot correct it: the cursor comes back in the mode
+        it went down in. The fields above are what the next mount reads."""
+        if self._shown:
+            actions.user.ui_elements_set_state(key, value)
 
     def _get_state(self):
         # Copies. ui_elements keeps what it is handed and skips the render
@@ -196,11 +205,13 @@ class CursorUI:
             initial_state=self._get_state(),
             min_version="0.10.0"
         )
+        self._shown = True
 
     def hide(self):
         if not CURSOR_UI_ENABLED:
             return
         actions.user.ui_elements_hide(cursor_ui)
+        self._shown = False
         self._color = default_cursor_color
         self._border_color = default_border_color
         self._border_show = False
@@ -213,55 +224,55 @@ class CursorUI:
         if not CURSOR_UI_ENABLED:
             return
         self._color = color
-        actions.user.ui_elements_set_state("cursor_color", color)
+        self._set("cursor_color", color)
 
     def show_border(self):
         if not CURSOR_UI_ENABLED:
             return
         self._border_show = True
-        actions.user.ui_elements_set_state("show_border", True)
+        self._set("show_border", True)
 
     def hide_border(self):
         if not CURSOR_UI_ENABLED:
             return
         self._border_show = False
-        actions.user.ui_elements_set_state("show_border", False)
+        self._set("show_border", False)
 
     def add_modifier(self, modifier):
         if not CURSOR_UI_ENABLED:
             return
         self._modifiers.add(modifier)
-        actions.user.ui_elements_set_state("modifiers", self._modifiers.copy())
+        self._set("modifiers", self._modifiers.copy())
 
     def remove_modifier(self, modifier):
         if not CURSOR_UI_ENABLED:
             return
         self._modifiers.discard(modifier)
-        actions.user.ui_elements_set_state("modifiers", self._modifiers.copy())
+        self._set("modifiers", self._modifiers.copy())
 
     def clear_modifiers(self):
         if not CURSOR_UI_ENABLED:
             return
         self._modifiers.clear()
-        actions.user.ui_elements_set_state("modifiers", set())
+        self._set("modifiers", set())
 
     def set_mode(self, mode: str):
         if not CURSOR_UI_ENABLED:
             return
         self._mode = mode
-        actions.user.ui_elements_set_state("mode", mode)
+        self._set("mode", mode)
 
     def set_speed_level(self, level: int):
         if not CURSOR_UI_ENABLED:
             return
         self._speed_level = level
-        actions.user.ui_elements_set_state("speed_level", level)
+        self._set("speed_level", level)
 
     def set_scroll_direction(self, direction: str):
         if not CURSOR_UI_ENABLED:
             return
         self._scroll_direction = direction
-        actions.user.ui_elements_set_state("scroll_direction", direction)
+        self._set("scroll_direction", direction)
 
     def get_mode(self) -> str:
         return self._mode

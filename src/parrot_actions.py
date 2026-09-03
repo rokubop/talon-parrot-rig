@@ -1,5 +1,5 @@
 import time
-from talon import actions, ctrl, cron
+from talon import actions, ctrl, cron, scope
 from .tracking import tracking
 from ..ui.ui_manager import ui_manager
 from .keys import keys
@@ -64,6 +64,7 @@ class ParrotActions:
         self._is_drag = False
         self._drag_hold = "middle"
         self._parrot_mode_enabled = False
+        self._command_before = True
         self._stop_time_job = None
         self._move_speed_level = 0
         self._canvas_speed_level = 0
@@ -337,13 +338,6 @@ class ParrotActions:
         self._window_super_release()
         actions.key(WINDOW_KEYS[name])
 
-    def window_move_enter(self, name: str):
-        """tut+direction is the door into window mode as well as the nudge, so
-        it stops what was running first. window_move alone only holds super."""
-        if self.alt_mode_current() not in ("window_pick", "window_control"):
-            self.alt_mode_open("window_control")
-        self.window_move(name)
-
     def window_move(self, name: str):
         """Super stays down across a run of these, so the next one still lands."""
         if not self._window_super_held:
@@ -383,15 +377,31 @@ class ParrotActions:
         actions.user.mouse_rig_scroll_stop()
         self.stop_temporarily()
 
-    def parrot_mode_enable(self):
+    def enter_mode(self, mode: str):
+        """Enter any mode by name. An alt mode opens, the two tracking modes
+        start the tracker, everything else is just the mode the HUD reads."""
+        if mode in ALT_MODE_MODES:
+            self.alt_mode_open(mode)
+        elif mode == "tracking":
+            self.tracking_activate()
+        elif mode == "canvas_tracking":
+            self.canvas_tracking_activate()
+        else:
+            event_manager.set_mode(mode)
+
+    def parrot_mode_enable(self, mode: str = "default"):
+        """Enters `mode` before the HUD mounts, so starting somewhere other
+        than default does not flash the default cursor first."""
         from ..parrot_rig_actions import channel_init
         self._parrot_mode_enabled = True
+        self._command_before = "command" in scope.get("mode")
         channel_init()
         actions.mode.disable("command")
         actions.mode.enable("user.parrot_rig")
         event_manager.set_mode("default")
-        ui_manager.show()
+        self.enter_mode(mode)
         self._emit_speed_level()
+        ui_manager.show()
         print("Parrot mode enabled")
 
     def parrot_mode_disable(
@@ -423,7 +433,10 @@ class ParrotActions:
         self._window_super_release()
 
         actions.mode.disable("user.parrot_rig")
-        actions.mode.enable("command")
+        # Only hand command mode back if it was on when we took it. Entering
+        # parrot mode asleep and leaving it should not wake Talon.
+        if self._command_before:
+            actions.mode.enable("command")
         print("Parrot mode disabled")
 
     def parrot_rig_get_state(self):

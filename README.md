@@ -170,8 +170,8 @@ CLICK_HOLD_MS = 16000
 | Cursor move | use a direction noise `ah`, `oh`, `t`, `guh` | |
 | Canvas scroll | `er`, or `tut shush` | Like moving 2 fingers on a trackpad |
 | Canvas scale | `er` then `hiss`, or `tut hiss` | 6 noises to account for [ctrl, alt, shift] + [scroll up/down] |
-| Canvas drag | `er` then `mm` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
-| Window control | `tut` + a direction, or `er` then `shush` | Moves the window as it enters. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush` |
+| Canvas drag | `er` then `mm`, or `tut guh` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
+| Window control | `tut t`, or `er` then `shush` | Directions nudge the window. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush` |
 | App picker (using [BentoLaunch](https://github.com/rokubop/bentolaunch)) | `palate` | Easy to click app launcher |
 | Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. |
 | Settings | `tut cluck` | Speeds, click behavior, profiles, cheatsheet |
@@ -214,7 +214,7 @@ Out of the box it presses ``alt+` `` and starts tracking, so you look at the
 app you want and click it. Same in every mode, window mode included, and no
 mode change. `APP_PICKER_KEY` in
 [parrot_rig_settings.py](./parrot_rig_settings.py) is the key. Swap utility 1
-for hold click, a repeat, or anything below.
+for a repeat, or anything below.
 
 Three sources, all on one screen:
 

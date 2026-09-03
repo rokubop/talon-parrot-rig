@@ -271,17 +271,19 @@ input_map_common = {
     EXIT_NOISE: ("exit", actions.user.parrot_rig_exit),
     "tut":        ("cancel / exit", parrot_actions.cancel),
     "tut tut":    ("exit", actions.user.parrot_rig_exit),
-    "tut ah":     ("window left", lambda: parrot_actions.window_move_enter("left")),
-    "tut oh":     ("window right", lambda: parrot_actions.window_move_enter("right")),
-    "tut t":      ("window up", lambda: parrot_actions.window_move_enter("up")),
-    "tut guh":    ("window down", lambda: parrot_actions.window_move_enter("down")),
+    # mm is the plain left click, so the rest of the buttons live here.
+    "tut ah":     ("hold click / release", lambda: actions.user.parrot_rig_click(0, True)),
+    "tut oh":     ("right click", lambda: actions.user.parrot_rig_click(1)),
+    "tut mm":     ("middle click", lambda: actions.user.parrot_rig_click(2)),
+    # Every alt mode has a tut door: window and drag, plus the two below.
+    "tut t":      ("window", lambda: parrot_actions.alt_mode_open("window_control")),
+    "tut guh":    ("canvas drag", lambda: parrot_actions.alt_mode_open("canvas_drag")),
     "tut eh":     ("toggle shift", lambda: parrot_actions.toggle_modifier("shift")),
     "tut ee":     ("toggle ctrl", lambda: parrot_actions.toggle_modifier("ctrl")),
     "tut er":     ("toggle alt", lambda: parrot_actions.toggle_modifier("alt")),
     "tut pop":    ("anchor set / clear", parrot_actions.toggle_anchor),
     "tut shush":  ("canvas scroll", lambda: parrot_actions.alt_mode_open("canvas_scroll")),
     "tut hiss":   ("canvas scale", lambda: parrot_actions.alt_mode_open("canvas_scale")),
-    "tut mm":     ("right click", lambda: actions.user.parrot_rig_click(1)),
     "tut palate": ("utility 1 picker", lambda: _utility_picker("utility_1")),
     "tut cluck":  ("settings", _settings_menu),
 }
@@ -506,9 +508,9 @@ except Exception:
 
 @mod.action_class
 class Actions:
-    def parrot_rig_enable():
-        """Enable parrot rig"""
-        parrot_actions.parrot_mode_enable()
+    def parrot_rig_enable(mode: str = "default"):
+        """Enable parrot rig, starting in mode (any event or alt mode name)"""
+        parrot_actions.parrot_mode_enable(mode)
 
     def parrot_rig_disable():
         """Disable parrot rig"""
