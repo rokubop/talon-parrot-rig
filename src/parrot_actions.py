@@ -26,6 +26,7 @@ from ..parrot_rig_settings import (
     WINDOW_SUPER_KEYS,
     WINDOW_SNAP_ASSIST_MS,
     WINDOW_ALT_TAB_HOLD_MS,
+    WINDOW_NUMBER_MS,
     CANVAS_SLOW_MODE_MULTIPLIER,
     CANVAS_BOOST_LONG_AMOUNT,
     CANVAS_BOOST_LONG_OVER_MS,
@@ -77,6 +78,7 @@ class ParrotActions:
         self._canvas_scale_last = "ctrl"
         self._canvas_scale_dir = "up"
         self._window_super_held = False
+        self._window_number_at = None
         self._burst_gliding = False
         self._burst_glide_job = None
         self._last_alt_mode = None
@@ -327,24 +329,40 @@ class ParrotActions:
         actions.user.mouse_rig_stop()
         actions.user.mouse_rig_scroll_stop()
         event_manager.set_mode("window_stop")
+        self._window_number_at = time.perf_counter()
+
+    def window_number(self, number: int) -> bool:
+        """win+N on arrival in window mode. False once the window has closed,
+        so the noise goes on to its window job instead."""
+        if self._window_number_at is None:
+            return False
+        if (time.perf_counter() - self._window_number_at) * 1000 >= WINDOW_NUMBER_MS:
+            return False
+        self._window_number_at = None
+        actions.key(f"super-{number}")
+        return True
 
     def window_picker(self):
         """The picker is an overlay you aim at, so this tracks."""
+        self._window_number_at = None
         self._window_super_release()
         tracking.activate()
         event_manager.set_mode("window")
         actions.key(WINDOW_KEYS["picker"])
 
     def window_exit(self):
+        self._window_number_at = None
         self._window_super_release()
         self.stopper()
 
     def window_key(self, name: str):
+        self._window_number_at = None
         self._window_super_release()
         actions.key(WINDOW_KEYS[name])
 
     def window_move(self, name: str):
         """Super stays down across a run of these, so the next one still lands."""
+        self._window_number_at = None
         if not self._window_super_held:
             actions.key("super:down")
             self._window_super_held = True
@@ -362,6 +380,7 @@ class ParrotActions:
 
     def window_escape(self):
         """Letting super go is what raises snap assist, so escape follows it."""
+        self._window_number_at = None
         if self._window_super_release():
             actions.sleep(f"{WINDOW_SNAP_ASSIST_MS}ms")
         actions.key("escape")
@@ -372,6 +391,7 @@ class ParrotActions:
     def window_alt_tab(self):
         """Alt has to be down before and after the tab or the switcher never
         comes up, so this is held rather than sent as one chord."""
+        self._window_number_at = None
         actions.key("alt:down")
         actions.sleep(f"{WINDOW_ALT_TAB_HOLD_MS}ms")
         actions.key("tab")

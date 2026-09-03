@@ -1,11 +1,12 @@
 from talon import Module, actions, app, ctrl
 from .src.parrot_actions import parrot_actions
-from .parrot_rig_settings import APP_PICKER_KEY, CLICK_HOLD_MS
+from .parrot_rig_settings import APP_PICKER_KEY, CLICK_HOLD_MS, WINDOW_NUMBER_MS
 from .src.settings_menu import (
     setting_maps, setting_set, setting_label, setting_title, SETTING_TITLES,
     setting_set_custom, setting_number_text, is_numeric,
 )
 from .src.history import parrot_history_record
+from .src.numbers import number_overlay
 from .src.menu import menu_open, menu_back, menu_current
 from .src.utility import utility_run
 from .src.profiles import (
@@ -376,6 +377,15 @@ input_map_window = {
     "tut t":     ("close tab", lambda: parrot_actions.window_key("tab_close")),
     "tut guh":   ("close window", lambda: parrot_actions.window_key("close")),
 }
+
+# On arrival the digit noises are win+N instead. The number rule is in
+# src/numbers.py, and parrot_actions.window_number owns how long it lasts.
+input_map_window = number_overlay(
+    input_map_window,
+    WINDOW_NUMBER_MS,
+    parrot_actions.window_number,
+    lambda number: f"win+{number}",
+)
 
 # Three pairs, one modifier each, both ways on the vertical wheel. No axis to
 # choose, because that is the only wheel apps read for these gestures. Tracking

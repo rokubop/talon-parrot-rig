@@ -1,6 +1,23 @@
 # Note:
 # Say "parrot rig reload" after changing these
 
+# Numbers
+# One rule for every place the rig means a number. tut before a digit noise
+# adds ten, so tut ah is 11 and tut mm is 19.
+NOISE_NUMBERS = {
+    "ee": 0,
+    "ah": 1,
+    "oh": 2,
+    "hiss": 3,
+    "shush": 4,
+    "eh": 5,
+    "er": 6,
+    "t": 7,
+    "guh": 8,
+    "mm": 9,
+}
+NUMBER_TEEN_PREFIX = "tut"
+
 # Mouse
 MOVE_SPEED = 3
 SLOW_MODE_MULTIPLIER = 0.5
@@ -61,6 +78,10 @@ WINDOW_ALT_TAB_HOLD_MS = 60
 
 # Gap between letting super go and the escape that dismisses snap assist
 WINDOW_SNAP_ASSIST_MS = 80
+
+# How long after arriving in window mode the digit noises send win+N instead of
+# their window job. One number closes it, and so does any other window action.
+WINDOW_NUMBER_MS = 300
 
 # Canvas scale. Every wheel tick is a zoom step in most apps, so this runs
 # slower than plain scroll. Boost and burst keep the same ratio to it that the

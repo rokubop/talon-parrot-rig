@@ -171,7 +171,7 @@ CLICK_HOLD_MS = 16000
 | Canvas scroll | `er`, or `tut shush` | Like moving 2 fingers on a trackpad |
 | Canvas scale | `er` then `hiss`, or `tut hiss` | 6 noises to account for [ctrl, alt, shift] + [scroll up/down] |
 | Canvas drag | `er` then `mm`, or `tut guh` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
-| Window control | `tut t`, or `er` then `shush` | Directions nudge the window. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush` |
+| Window control | `tut t`, or `er` then `shush` | Directions nudge the window. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush`. On arrival the digits are win+N |
 | App picker (using [BentoLaunch](https://github.com/rokubop/bentolaunch)) | `palate` | Easy to click app launcher |
 | Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. |
 | Settings | `tut cluck` | Speeds, click behavior, profiles, cheatsheet |
@@ -179,6 +179,24 @@ CLICK_HOLD_MS = 16000
 
 The cheatsheet is the last tile in settings, or say **"parrot help"**. Both
 open the same one, and `tut` backs out of it like any other menu.
+
+### Numbers
+
+Ten noises are the digits. `tut` before one adds ten, so `tut ah` is 11 and
+`tut mm` is 19. This is the one rule wherever the rig means a number, and
+`NOISE_NUMBERS` in [parrot_rig_settings.py](./parrot_rig_settings.py) is where
+it lives.
+
+| | | | | |
+|---|---|---|---|---|
+| `ee` 0 | `ah` 1 | `oh` 2 | `hiss` 3 | `shush` 4 |
+| `eh` 5 | `er` 6 | `t` 7 | `guh` 8 | `mm` 9 |
+
+For 300ms after arriving in bare window mode those ten send win+N instead of
+their window job, which is the taskbar. `pop`, `palate`, `cluck` and the `tut`
+combos are not digits, so nothing you would reach for to back out is covered.
+Any window action closes the window early, so a direction nudges and leaves
+nothing armed behind it. `WINDOW_NUMBER_MS` changes the 300ms.
 
 ### The `er` gateway
 
