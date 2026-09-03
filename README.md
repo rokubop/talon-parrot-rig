@@ -121,8 +121,9 @@ These go through their own input map channel, `input_map_global` in
 | `cluck` | parrot rig |
 | `palate` | whatever the picker says, Repeat Phrase out of the box |
 | `tut` | reverse command, or back out of a menu |
-| `tut pop` | next anchor |
-| `tut palate` | palate picker, borrowing the rig to aim it |
+| `tut pop` | switch app, alt+tab, without turning the rig on |
+| `tut cluck` | rig on, straight into window mode with the numbers open |
+| `tut palate` | rig on with the app picker already up |
 
 `tut` is a combo prefix, which normally makes a noise wait out the combo window
 before it fires. `":now"` opts out: `tut` fires straight away and the combo
@@ -130,12 +131,13 @@ still lands after it. The cost is that a combo runs `tut` first, so `tut pop`
 reverses and then steps the anchor. Drop the `":now"` if you would rather wait
 out the window and have the combos land clean.
 
-Anchors survive leaving parrot mode, so `tut pop` cycles the ones you already
-set.
+`tut cluck` and `tut palate` are the two doors into the rig that arrive
+somewhere rather than at the default. Both turn parrot mode on and open a
+window mode in the same noise: `tut cluck` the bare one, where the digit noises
+are live, and `tut palate` the one that presses ``alt+` `` on the way in.
 
-With the rig off nothing is aiming, so `tut palate` turns parrot mode and the
-tracker on for the picker and back off when it closes. From the settings hub,
-where the rig is already running, nothing changes.
+The palate picker has no combo out here. Reach it from the settings hub,
+where the rig is already running and there is something to aim with.
 
 See [talon-input-map](https://github.com/rokubop/talon-input-map/) for the full set of options to fine-tune how each noise behaves:
 - **combos** (`"tut ah"`) - trigger an action with a sequence of noises
@@ -171,9 +173,9 @@ CLICK_HOLD_MS = 16000
 | Canvas scroll | `er`, or `tut shush` | Like moving 2 fingers on a trackpad |
 | Canvas scale | `er` then `hiss`, or `tut hiss` | 6 noises to account for [ctrl, alt, shift] + [scroll up/down] |
 | Canvas drag | `er` then `mm`, or `tut guh` | Hold middle mouse and movement. **Drag** in settings holds left, right, or space instead |
-| Window control | `tut t`, or `er` then `shush` | Directions nudge the window. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush`. On arrival the digits are win+N |
+| Window control | `tut cluck` off the rig, `tut t`, or `er` then `shush` | Directions nudge the window. Inside, `tut` + a direction is the screens and the two closes, alt+tab on `pop`, tabs on `hiss` and `shush`. On arrival the digits are win+N |
 | App picker (using [BentoLaunch](https://github.com/rokubop/bentolaunch)) | `palate` | Easy to click app launcher |
-| Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. |
+| Utility 1 picker | `tut palate` | Assign the utility 1 noise. See below. Off the rig this combo is the app picker |
 | Settings | `tut cluck` | Speeds, click behavior, profiles, cheatsheet |
 | Exit mode | `tut` or `er` | |
 
@@ -243,8 +245,8 @@ Three sources, all on one screen:
 Built for an eye tracker. Big tiles, no hints, nothing on a noise.
 
 **Two slots, one picker.** `tut palate` inside parrot mode picks for utility 1.
-`tut palate` with the rig off picks for palate out there, its own binding and
-its own preset list, and neither slot knows about the other. Both save with the
+The settings hub picks for palate off the rig, its own binding and its own
+preset list, and neither slot knows about the other. Both save with the
 profile. `UTILITY_SLOTS` in
 [parrot_rig_settings.py](./parrot_rig_settings.py) names them.
 

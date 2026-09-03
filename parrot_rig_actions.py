@@ -102,6 +102,17 @@ def utility_picker_closed(slot: str):
         parrot_actions.parrot_mode_disable()
 
 
+def _window_mode():
+    """Rig on and straight into bare window mode, where the digit noises are
+    win+N for a moment."""
+    parrot_actions.parrot_mode_enable("window_control")
+
+
+def _app_picker():
+    """Rig on with the picker already up, in one noise."""
+    parrot_actions.parrot_mode_enable("window_pick")
+
+
 def _global_cancel():
     """tut with the rig off. A menu is the only thing out here to back out of,
     so anywhere else it is still the reverse."""
@@ -465,8 +476,9 @@ input_map_global = {
         # ':now' keeps tut instant, and the combo still lands after it, so a
         # combo runs this first.
         "tut:now": ("cancel / reverse command", _global_cancel),
-        "tut pop": ("next anchor", _anchor_go),
-        "tut palate": ("palate picker", _global_utility_picker),
+        "tut pop":    ("switch app", parrot_actions.window_alt_tab),
+        "tut cluck":  ("window mode", _window_mode),
+        "tut palate": ("app picker", _app_picker),
     },
 }
 
