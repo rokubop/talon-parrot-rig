@@ -1,8 +1,7 @@
 from talon import actions
 from ..parrot_rig_settings import MODE_COLORS, MODIFIER_LETTERS
+from ..parrot_rig_settings import CANVAS_MODES, CANVAS_SCALE_MODES, WINDOW_MODES
 from ..parrot_rig_settings import CURSOR_UI_ENABLED
-
-SCROLL_MODES = {"scroll_stop", "scroll_move", "scroll_boost", "scroll_glide", "scroll_tracking"}
 
 TRIANGLE_PATHS = {
     "down":  "M 12 19 L 4 5 L 20 5 Z",
@@ -32,8 +31,23 @@ TRIANGLE_BORDER_INNER = {
     "right": "M 21 12 L 4 3 L 4 21 Z",
 }
 
+
+DIAMOND_PATH = "M 12 4 L 20 12 L 12 20 L 4 12 Z"
+
+DIAMOND_BORDER_OUTER = "M 12 1 L 23 12 L 12 23 L 1 12 Z"
+DIAMOND_BORDER_MID = "M 12 2 L 22 12 L 12 22 L 2 12 Z"
+DIAMOND_BORDER_INNER = "M 12 3 L 21 12 L 12 21 L 3 12 Z"
+
+# Window mode gets the square, the one shape the other three modes leave free
+SQUARE_PATH = "M 6 6 H 18 V 18 H 6 Z"
+
+SQUARE_BORDER_OUTER = "M 3 3 H 21 V 21 H 3 Z"
+SQUARE_BORDER_MID = "M 4 4 H 20 V 20 H 4 Z"
+SQUARE_BORDER_INNER = "M 5 5 H 19 V 19 H 5 Z"
+
 default_cursor_color = "FF0000"
 default_border_color = "FFFFFF"
+
 
 def cursor_ui():
     screen, cursor, svg, circle, state = actions.user.ui_elements(
@@ -99,9 +113,27 @@ def cursor_ui():
         ]
 
     mode = state.get("mode")
-    is_scroll = mode in SCROLL_MODES
+    is_canvas = mode in CANVAS_MODES
 
-    if is_scroll:
+    if mode in WINDOW_MODES:
+        cursor_shape = svg(position="absolute", left=10, top=10)[
+            path(d=SQUARE_PATH, fill=cursor_color)
+        ]
+        border_shape = svg(position="absolute", left=10, top=10)[
+            path(d=SQUARE_BORDER_OUTER, fill="black"),
+            path(d=SQUARE_BORDER_MID, fill=border_color),
+            path(d=SQUARE_BORDER_INNER, fill="black"),
+        ] if show_border else None
+    elif mode in CANVAS_SCALE_MODES:
+        cursor_shape = svg(position="absolute", left=10, top=10)[
+            path(d=DIAMOND_PATH, fill=cursor_color)
+        ]
+        border_shape = svg(position="absolute", left=10, top=10)[
+            path(d=DIAMOND_BORDER_OUTER, fill="black"),
+            path(d=DIAMOND_BORDER_MID, fill=border_color),
+            path(d=DIAMOND_BORDER_INNER, fill="black"),
+        ] if show_border else None
+    elif is_canvas:
         scroll_dir = state.get("scroll_direction") or "down"
         cursor_shape = svg(position="absolute", left=10, top=10)[
             path(d=TRIANGLE_PATHS[scroll_dir], fill=cursor_color)
@@ -142,13 +174,24 @@ class CursorUI:
         self._mode = "default"
         self._speed_level = 0
         self._scroll_direction = "down"
+        self._shown = False
+
+    def _set(self, key, value):
+        """Only talk to a mounted UI. A set_state while hidden creates the key
+        with that value as its initial one, and initial_state at the next show
+        is a one-shot that cannot correct it: the cursor comes back in the mode
+        it went down in. The fields above are what the next mount reads."""
+        if self._shown:
+            actions.user.ui_elements_set_state(key, value)
 
     def _get_state(self):
+        # Copies. ui_elements keeps what it is handed and skips the render
+        # when the new value equals the stored one.
         return {
             "cursor_color": self._color,
             "border_color": self._border_color,
             "show_border": self._border_show,
-            "modifiers": self._modifiers,
+            "modifiers": self._modifiers.copy(),
             "mode": self._mode,
             "speed_level": self._speed_level,
             "scroll_direction": self._scroll_direction,
@@ -162,11 +205,13 @@ class CursorUI:
             initial_state=self._get_state(),
             min_version="0.10.0"
         )
+        self._shown = True
 
     def hide(self):
         if not CURSOR_UI_ENABLED:
             return
         actions.user.ui_elements_hide(cursor_ui)
+        self._shown = False
         self._color = default_cursor_color
         self._border_color = default_border_color
         self._border_show = False
@@ -179,55 +224,55 @@ class CursorUI:
         if not CURSOR_UI_ENABLED:
             return
         self._color = color
-        actions.user.ui_elements_set_state("cursor_color", color)
+        self._set("cursor_color", color)
 
     def show_border(self):
         if not CURSOR_UI_ENABLED:
             return
         self._border_show = True
-        actions.user.ui_elements_set_state("show_border", True)
+        self._set("show_border", True)
 
     def hide_border(self):
         if not CURSOR_UI_ENABLED:
             return
         self._border_show = False
-        actions.user.ui_elements_set_state("show_border", False)
+        self._set("show_border", False)
 
     def add_modifier(self, modifier):
         if not CURSOR_UI_ENABLED:
             return
         self._modifiers.add(modifier)
-        actions.user.ui_elements_set_state("modifiers", self._modifiers.copy())
+        self._set("modifiers", self._modifiers.copy())
 
     def remove_modifier(self, modifier):
         if not CURSOR_UI_ENABLED:
             return
         self._modifiers.discard(modifier)
-        actions.user.ui_elements_set_state("modifiers", self._modifiers.copy())
+        self._set("modifiers", self._modifiers.copy())
 
     def clear_modifiers(self):
         if not CURSOR_UI_ENABLED:
             return
         self._modifiers.clear()
-        actions.user.ui_elements_set_state("modifiers", set())
+        self._set("modifiers", set())
 
     def set_mode(self, mode: str):
         if not CURSOR_UI_ENABLED:
             return
         self._mode = mode
-        actions.user.ui_elements_set_state("mode", mode)
+        self._set("mode", mode)
 
     def set_speed_level(self, level: int):
         if not CURSOR_UI_ENABLED:
             return
         self._speed_level = level
-        actions.user.ui_elements_set_state("speed_level", level)
+        self._set("speed_level", level)
 
     def set_scroll_direction(self, direction: str):
         if not CURSOR_UI_ENABLED:
             return
         self._scroll_direction = direction
-        actions.user.ui_elements_set_state("scroll_direction", direction)
+        self._set("scroll_direction", direction)
 
     def get_mode(self) -> str:
         return self._mode

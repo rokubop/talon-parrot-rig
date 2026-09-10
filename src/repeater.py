@@ -22,7 +22,7 @@ for key, value in two_way_opposites:
     opposites[value] = key
 
 # Snapshot captured on first repeat. Locked until timeout.
-# Palate always repeats _snapshot_phrase, tut always repeats its reverse.
+# Utility 1 always repeats _snapshot_phrase, tut its reverse.
 _snapshot_phrase = ""
 _snapshot_reversed = ""
 _snapshot_timer = None

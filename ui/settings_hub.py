@@ -1,6 +1,7 @@
 from talon import actions
+from .picker import footer, now_line, panel, section, tile
 from ..src.anchor import anchors
-from ..src.menu import menu_register
+from ..src.menu import menu_back, menu_open, menu_register
 from ..src.profiles import (
     PROFILE_SLOTS, profile_active, profile_is_locked, profile_names,
 )
@@ -8,7 +9,8 @@ from ..src.settings_menu import (
     setting_maps, setting_label, setting_title, setting_number_text, is_numeric,
 )
 from ..parrot_rig_settings import (
-    UI_BORDER_COLOR, UI_BACKGROUND_COLOR, UI_TEXT_COLOR, UI_SELECTED_COLOR,
+    PICKER_HEADER_COLOR, PICKER_PADDING, PICKER_PANEL_COLOR, PICKER_RADIUS,
+    PICKER_TEXT_SIZE, PICKER_TITLE_BAR_COLOR, UTILITY_SLOTS,
 )
 
 _pending_custom = None
@@ -21,11 +23,6 @@ def set_custom_pending(name: str):
 
 def custom_pending():
     return _pending_custom
-
-
-def _noises():
-    from ..parrot_rig_actions import SELECT_NOISES
-    return SELECT_NOISES
 
 
 def _titles():
@@ -43,81 +40,33 @@ def menu_value(name: str) -> str:
         return setting_label(name)
     if name == "profiles":
         return profile_active()
-    if name == "speeds":
-        return ""
-    from ..parrot_rig_actions import utility_maps
-    util_map = utility_maps.get(name)
-    if not util_map:
-        return ""
-    try:
-        current = actions.user.input_map_single_mode_get(name)
-    except (ValueError, KeyError):
-        current = next(iter(util_map))
-    return util_map.get(current, ("",))[0]
+    if name in UTILITY_SLOTS:
+        from ..src.utility import utility_label
+        return utility_label(name)
+    return ""
 
 
-def _th(text_el, label, min_width):
-    th = actions.user.ui_elements(["th"])
-    return th(padding=8, border_width=1, border_color=UI_BORDER_COLOR,
-              background_color=UI_BACKGROUND_COLOR, min_width=min_width)[
-        text_el(label, color=UI_TEXT_COLOR, font_weight="bold", font_size=12)
-    ]
-
-
-def _noise_cell(td, text_el, noise):
-    return td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-        text_el(noise, color=UI_TEXT_COLOR, font_family="monospace")
-    ]
-
-
-def _back_row(tr, td, text_el, label):
-    return tr()[
-        td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
-            text_el("tut", color=UI_TEXT_COLOR, font_family="monospace", font_weight="bold")
-        ],
-        td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
-            text_el(label, color=UI_TEXT_COLOR, font_weight="bold")
-        ],
-        td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
-            text_el("", color=UI_TEXT_COLOR)
-        ],
-    ]
+def _back_tile(label="Back"):
+    from ..parrot_rig_actions import CANCEL_NOISE
+    return tile(label, noise=CANCEL_NOISE, exit=True,
+                on_click=lambda _e: menu_back())
 
 
 def _make_menu_list(window_id: str, title: str, menus_fn, back_label: str):
-    """A menu whose rows open other menus."""
+    """A menu whose tiles open other menus."""
     def menu_list_ui(props):
-        screen, window = actions.user.ui_elements(["screen", "window"])
-        table, tr, td = actions.user.ui_elements(["table", "tr", "td"])
-        text = actions.user.ui_elements(["text"])
-        noises, titles = _noises(), _titles()
+        titles = _titles()
 
-        rows = []
-        for i, name in enumerate(menus_fn()):
-            noise = noises[i] if i < len(noises) else ""
-            rows.append(tr()[
-                _noise_cell(td, text, noise),
-                td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-                    text(titles.get(name, name), color=UI_TEXT_COLOR, font_weight="bold")
-                ],
-                td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-                    text(menu_value(name), color=UI_TEXT_COLOR)
-                ],
-            ])
-
-        return screen(justify_content="center", align_items="center")[
-            window(id=window_id, title=title, padding=0)[
-                table(width="100%")[
-                    tr()[
-                        _th(text, "Noise", 80),
-                        _th(text, "Setting", 120),
-                        _th(text, "Value", 140),
-                    ],
-                    *rows,
-                    _back_row(tr, td, text, back_label),
-                ]
-            ]
+        tiles = [
+            tile(titles.get(name, name), value=menu_value(name),
+                 on_click=lambda _e, n=name: menu_open(n))
+            for name in menus_fn()
         ]
+
+        return panel(window_id, title, [
+            section(None, tiles),
+            footer([_back_tile(back_label)]),
+        ])
 
     menu_list_ui.__qualname__ = f"{window_id}_ui"
     menu_list_ui.__name__ = menu_list_ui.__qualname__
@@ -134,120 +83,105 @@ def _speed_menus():
     return SPEED_MENUS
 
 
-hub_ui = _make_menu_list("settings_hub", "Settings (tut palate)", _hub_menus, "Close")
+hub_ui = _make_menu_list("settings_hub", "Settings", _hub_menus, "Close")
 speeds_ui = _make_menu_list("speeds_menu", "Speeds", _speed_menus, "Back")
 
 
 def profiles_ui(props):
-    screen, window = actions.user.ui_elements(["screen", "window"])
-    table, tr, td = actions.user.ui_elements(["table", "tr", "td"])
-    text = actions.user.ui_elements(["text"])
-    noises = _noises()
-
+    from ..parrot_rig_actions import _profile_slot, _profile_save_current
     saved = profile_names()
     current = profile_active()
 
-    rows = []
-    for i, name in enumerate(saved[:PROFILE_SLOTS]):
-        is_active = name == current
-        rows.append(tr()[
-            _noise_cell(td, text, noises[i] if i < len(noises) else ""),
-            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR,
-               background_color=UI_SELECTED_COLOR if is_active else None)[
-                text(f"{name} (locked)" if profile_is_locked(name) else name,
-                     color=UI_TEXT_COLOR,
-                     font_weight="bold" if is_active else "normal")
-            ],
-        ])
+    tiles = [
+        tile(
+            name,
+            value="locked" if profile_is_locked(name) else None,
+            selected=name == current,
+            on_click=lambda _e, i=i: _profile_slot(i),
+        )
+        for i, name in enumerate(saved[:PROFILE_SLOTS])
+    ]
 
     next_free = len(saved)
-    if next_free < min(PROFILE_SLOTS, len(noises)):
-        rows.append(tr()[
-            _noise_cell(td, text, noises[next_free]),
-            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-                text("save here (new)", color=UI_TEXT_COLOR)
-            ],
-        ])
+    if next_free < PROFILE_SLOTS:
+        tiles.append(tile("Save here", value="new",
+                          on_click=lambda _e, i=next_free: _profile_slot(i)))
 
+    overwrite = []
     if not profile_is_locked(current):
-        rows.append(tr()[
-            _noise_cell(td, text, "palate"),
-            td(padding=8, border_width=1, border_color=UI_BORDER_COLOR)[
-                text(f"overwrite {current}", color=UI_TEXT_COLOR)
-            ],
-        ])
+        overwrite = [tile(f"Overwrite {current}",
+                          on_click=lambda _e: _profile_save_current())]
+
+    return panel("profiles_menu", "Profiles", [
+        now_line(current, "Active"),
+        section(None, tiles),
+        footer(overwrite + [_back_tile()]),
+    ])
+
+
+def anchor_kind_ui(props):
+    from ..parrot_rig_actions import ANCHOR_KINDS, _anchor_kind
+
+    tiles = [
+        tile(label, on_click=lambda _e, k=kind: _anchor_kind(k))
+        for kind, label in ANCHOR_KINDS
+    ]
+
+    return panel("anchor_kind", "Anchor", [
+        section(None, tiles),
+        footer([_back_tile("Keep point")]),
+    ])
+
+
+def _form_panel(window_id, title, prompt, input_id, on_submit):
+    """The two menus that take typing rather than a pick. Same backdrop, but a
+    field instead of tiles, because a name and a number are not a known set."""
+    screen, window = actions.user.ui_elements(["screen", "window"])
+    div, text = actions.user.ui_elements(["div", "text"])
+    form, input_text, button = actions.user.ui_elements(["form", "input_text", "button"])
 
     return screen(justify_content="center", align_items="center")[
-        window(id="profiles_menu", title="Profiles", padding=0)[
-            table(width="100%")[
-                tr()[
-                    _th(text, "Noise", 80),
-                    _th(text, "Profile", 180),
-                ],
-                *rows,
-                tr()[
-                    td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
-                        text("tut", color=UI_TEXT_COLOR, font_family="monospace", font_weight="bold")
+        window(id=window_id, title=title, padding=0,
+               background_color=PICKER_PANEL_COLOR,
+               title_bar_style={"background_color": PICKER_TITLE_BAR_COLOR},
+               border_radius=PICKER_RADIUS, border_width=0)[
+            form(on_submit=on_submit)[
+                div(padding=PICKER_PADDING, gap=14, min_width=360)[
+                    text(prompt, color=PICKER_HEADER_COLOR,
+                         font_size=PICKER_TEXT_SIZE),
+                    input_text(id=input_id, autofocus=True),
+                    div(flex_direction="row", gap=8, justify_content="flex_end")[
+                        button("Save", type="submit"),
+                        button("Cancel", on_click=lambda e: menu_back()),
                     ],
-                    td(padding=8, border_width=1, border_color=UI_BORDER_COLOR, background_color="#8B0000")[
-                        text("Back", color=UI_TEXT_COLOR, font_weight="bold")
-                    ],
-                ],
+                ]
             ]
         ]
     ]
 
 
 def profile_name_ui(props):
-    screen, window = actions.user.ui_elements(["screen", "window"])
-    div, text = actions.user.ui_elements(["div", "text"])
-    form, input_text, button = actions.user.ui_elements(["form", "input_text", "button"])
-
     def on_submit(event):
-        actions.user.parrot_rig_profile_name_submit(event.data.get("profile_name", ""))
+        from ..parrot_rig_actions import _profile_name_submit
+        _profile_name_submit(event.data.get("profile_name", ""))
 
-    return screen(justify_content="center", align_items="center")[
-        window(id="profile_name", title="Save profile", padding=0)[
-            form(on_submit=on_submit)[
-                div(padding=16, gap=12, min_width=280)[
-                    text("Name this profile, enter to save", color=UI_TEXT_COLOR),
-                    input_text(id="profile_name", autofocus=True),
-                    div(flex_direction="row", gap=8, justify_content="flex_end")[
-                        button("Save", type="submit"),
-                        button("Cancel", on_click=lambda e: actions.user.parrot_rig_menu_back()),
-                    ],
-                ]
-            ]
-        ]
-    ]
+    return _form_panel("profile_name", "Save profile",
+                       "Name this profile, enter to save",
+                       "profile_name", on_submit)
 
 
 def setting_custom_ui(props):
-    screen, window = actions.user.ui_elements(["screen", "window"])
-    div, text = actions.user.ui_elements(["div", "text"])
-    form, input_text, button = actions.user.ui_elements(["form", "input_text", "button"])
-
     name = custom_pending()
     title = setting_title(name) if name else "Custom"
     current = setting_number_text(name) if name else ""
 
     def on_submit(event):
-        actions.user.parrot_rig_setting_custom_submit(event.data.get("setting_custom", ""))
+        from ..parrot_rig_actions import _setting_custom_submit
+        _setting_custom_submit(event.data.get("setting_custom", ""))
 
-    return screen(justify_content="center", align_items="center")[
-        window(id="setting_custom", title=f"{title} custom", padding=0)[
-            form(on_submit=on_submit)[
-                div(padding=16, gap=12, min_width=280)[
-                    text(f"Currently {current}. Enter a number.", color=UI_TEXT_COLOR),
-                    input_text(id="setting_custom", autofocus=True),
-                    div(flex_direction="row", gap=8, justify_content="flex_end")[
-                        button("Set", type="submit"),
-                        button("Cancel", on_click=lambda e: actions.user.parrot_rig_menu_back()),
-                    ],
-                ]
-            ]
-        ]
-    ]
+    return _form_panel("setting_custom", f"{title} custom",
+                       f"Currently {current}. Enter a number.",
+                       "setting_custom", on_submit)
 
 
 def show_setting_custom():
@@ -290,8 +224,17 @@ def hide_speeds():
     actions.user.ui_elements_hide(speeds_ui)
 
 
+def show_anchor_kind():
+    actions.user.ui_elements_show(anchor_kind_ui, show_hints=False)
+
+
+def hide_anchor_kind():
+    actions.user.ui_elements_hide(anchor_kind_ui)
+
+
 menu_register("hub", show_hub, hide_hub)
 menu_register("speeds", show_speeds, hide_speeds)
+menu_register("anchor_kind", show_anchor_kind, hide_anchor_kind)
 menu_register("profiles", show_profiles, hide_profiles)
 menu_register("profile_name", show_profile_name, hide_profile_name)
 menu_register("setting_custom", show_setting_custom, hide_setting_custom)

@@ -5,7 +5,8 @@ Loading it resets everything. Nothing else persists between sessions until a
 profile is saved.
 """
 
-from talon import actions, storage
+from talon import storage
+from .utility import utility_apply, utility_binding, utility_slots
 from .settings_menu import (
     setting_maps, setting_get, setting_set, setting_customs, setting_apply_customs,
 )
@@ -17,11 +18,6 @@ DEFAULT_PROFILE = "default"
 _active = DEFAULT_PROFILE
 
 
-def _utility_maps():
-    from ..parrot_rig_actions import utility_maps
-    return utility_maps
-
-
 def profile_is_locked(name: str) -> bool:
     return name == DEFAULT_PROFILE
 
@@ -29,21 +25,15 @@ def profile_is_locked(name: str) -> bool:
 def factory_defaults() -> dict:
     return {
         "settings": {name: next(iter(options)) for name, options in setting_maps.items()},
-        "utilities": {name: next(iter(m)) for name, m in _utility_maps().items()},
+        **{slot: None for slot in utility_slots()},
         "customs": {},
     }
 
 
 def profile_snapshot() -> dict:
-    utilities = {}
-    for name, util_map in _utility_maps().items():
-        try:
-            utilities[name] = actions.user.input_map_single_mode_get(name)
-        except (ValueError, KeyError):
-            utilities[name] = next(iter(util_map))
     return {
         "settings": {name: setting_get(name) for name in setting_maps},
-        "utilities": utilities,
+        **{slot: utility_binding(slot) for slot in utility_slots()},
         "customs": setting_customs(),
     }
 
@@ -53,10 +43,22 @@ def profile_apply(data: dict):
     for name, value in (data.get("settings") or {}).items():
         if name in setting_maps and value in setting_maps[name]:
             setting_set(name, value)
-    for name, value in (data.get("utilities") or {}).items():
-        util_map = _utility_maps().get(name)
-        if util_map and value in util_map:
-            actions.user.input_map_single_mode_set(name, value, util_map)
+    for slot in utility_slots():
+        stored = data.get(slot)
+        if slot == "utility_1":
+            stored = stored or _legacy_utility(data)
+        utility_apply(slot, stored)
+
+
+def _legacy_utility(data: dict):
+    """Older profiles stored this under other names: a preset key inside
+    utilities, then a binding under the noise it sat on, then shortcut. Read
+    them all so those profiles still load."""
+    for key in ("shortcut", "palate"):
+        if data.get(key):
+            return data[key]
+    preset = (data.get("utilities") or {}).get("utility_1")
+    return {"kind": "preset", "key": preset} if preset else None
 
 
 def all_profiles() -> dict:

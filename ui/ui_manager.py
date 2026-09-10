@@ -70,8 +70,8 @@ class UIManager:
 
     def show_cheatsheet(self):
         """Show the cheatsheet UI"""
-        from .cheatsheet import cheatsheet_ui
-        actions.user.ui_elements_toggle(cheatsheet_ui)
+        from .cheatsheet import show_cheatsheet
+        show_cheatsheet()
 
     def hide_cheatsheet(self):
         """Hide the cheatsheet UI"""
@@ -82,15 +82,15 @@ class UIManager:
         """Check if cheatsheet is currently active"""
         return actions.user.ui_elements_is_active("cheatsheet")
 
-    def show_utility_selector(self, name: str, title: str = ""):
+    def show_setting_picker(self, name: str, title: str = ""):
         """Show a utility selector UI by name"""
-        from .utility_selector import show_utility_selector
-        show_utility_selector(name, title)
+        from .setting_picker import show_setting_picker
+        show_setting_picker(name, title)
 
-    def hide_utility_selector(self, name: str):
+    def hide_setting_picker(self, name: str):
         """Hide a utility selector UI by name"""
-        from .utility_selector import hide_utility_selector
-        hide_utility_selector(name)
+        from .setting_picker import hide_setting_picker
+        hide_setting_picker(name)
 
 # Create global instance
 # Clean up previous instance if it exists (for module reloads)
