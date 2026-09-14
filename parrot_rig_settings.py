@@ -29,6 +29,16 @@ BOOST_LONG_OVER_MS = 1000
 BOOST_LONG_RELEASE_MS = 1000
 BOOST_LONG_MAX = 15
 BURST_AMOUNT = 4.5
+
+# Palate while moving. The shush boost above eases in over a second and is for
+# covering a screen. This one is at full speed almost at once and linear both
+# ways, for closing a gap you can already see.
+BOOST_FAST_AMOUNT = 12
+BOOST_FAST_OVER_MS = 80
+BOOST_FAST_HOLD_MS = 300
+BOOST_FAST_RELEASE_MS = 500
+BOOST_FAST_MAX = 18
+BOOST_FAST_EASING = "linear"
 BRAKE_REVERT_MS = 0
 # A burst is usually a hop to something nearby, so the cursor eases down after
 # one to make the click easier. Another hiss inside the window clears it and

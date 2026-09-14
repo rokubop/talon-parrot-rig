@@ -316,10 +316,13 @@ input_map_move = {
     "guh":        ("move down / slow", lambda: parrot_actions.mouse_move_or_slow_dir("down")),
     "eh":         ("glide / lock turn", parrot_actions.mouse_toggle_glide),
     "mm":         ("click", actions.user.parrot_rig_click),
+    # Two boosts: shush ramps for distance, palate is immediate for a gap you
+    # can see. hiss is the one deceleration, so it never bursts in here.
+    "palate":     ("fast boost", _anchor_chase(parrot_actions.mouse_boost_fast)),
     "shush":      ("boost", _anchor_chase(parrot_actions.mouse_boost_long)),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("burst / brake", parrot_actions.mouse_burst_or_brake),
-    "hiss_stop:db_50": ("", parrot_actions.mouse_burst_or_brake_stop),
+    "hiss":            ("slow down", parrot_actions.mouse_brake),
+    "hiss_stop:db_50": ("", lambda: None),
 }
 
 input_map_tracking = {

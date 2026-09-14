@@ -12,6 +12,12 @@ from ..parrot_rig_settings import (
     BOOST_LONG_OVER_MS,
     BOOST_LONG_RELEASE_MS,
     BOOST_LONG_MAX,
+    BOOST_FAST_AMOUNT,
+    BOOST_FAST_OVER_MS,
+    BOOST_FAST_HOLD_MS,
+    BOOST_FAST_RELEASE_MS,
+    BOOST_FAST_MAX,
+    BOOST_FAST_EASING,
     BURST_AMOUNT,
     BRAKE_REVERT_MS,
     BURST_SETTLE_SCALE,
@@ -120,7 +126,12 @@ class ParrotActions:
         else:
             actions.user.mouse_rig_move_continuous(direction, speed)
         if mode not in ("glide", "boost"):
-            event_manager.set_mode("glide" if always_glide else "move")
+            # glide keeps whatever input map is live rather than swapping to
+            # one of its own, so it has to be entered from move or the default
+            # map stays and none of the move noises exist.
+            event_manager.set_mode("move")
+            if always_glide:
+                event_manager.set_mode("glide")
             self._emit_speed_level()
 
     def mouse_move_dir(self, direction: str):
@@ -156,6 +167,40 @@ class ParrotActions:
         actions.user.mouse_rig_boost(amount, over_ms=BOOST_LONG_OVER_MS, release_ms=BOOST_LONG_RELEASE_MS, max_speed=max_speed).then(
             lambda: event_manager.return_to_previous_mode()
                 if event_manager.get_mode() == "boost" else None)
+
+    def mouse_boost_fast(self):
+        """Palate while moving. The long boost ramps for a second and is for
+        covering a screen; this one is there almost at once and comes off
+        linearly, for closing a gap you can already see."""
+        event_manager.set_mode("boost")
+        amount = BOOST_FAST_AMOUNT * boost_scale() * self._move_speed_scale()
+        max_speed = BOOST_FAST_MAX * boost_scale()
+        actions.user.mouse_rig().speed.offset.add(amount).max(max_speed) \
+            .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING) \
+            .hold(BOOST_FAST_HOLD_MS) \
+            .revert(BOOST_FAST_RELEASE_MS, BOOST_FAST_EASING) \
+            .stack(1) \
+            .then(lambda: event_manager.return_to_previous_mode()
+                  if event_manager.get_mode() == "boost" else None)
+
+    def mouse_brake(self):
+        """hiss while moving, whatever put the speed there. Over cursor speed
+        it brakes back to it; already there, it steps the slow multiplier, so
+        hiss always slows down rather than bursting some of the time."""
+        rig = actions.user.mouse_rig()
+        rig.layer("burst_settle").revert(0)
+        rig.layer("hiss_boost").revert(0)
+        self._burst_glide(False)
+        rig.bake()
+        speed = self._get_move_speed()
+        if actions.user.mouse_rig_state_speed() > speed:
+            rig.speed.to(speed).over(rate=BRAKE_RATE, easing=BRAKE_EASING)
+        else:
+            self._move_speed_level += 1
+            actions.user.mouse_rig_speed_mul(SLOW_MODE_MULTIPLIER)
+        if event_manager.get_mode() in ("glide", "boost"):
+            event_manager.set_mode("move")
+        self._emit_speed_level()
 
     def _burst_glide(self, on: bool, ms: int = 0):
         """Turns stay smooth through a burst and its settle. A flag, not the

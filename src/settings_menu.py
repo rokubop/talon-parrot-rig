@@ -44,9 +44,11 @@ setting_maps = {
         "right":  ("Hold Right",),
         "space":  ("Hold Space",),
     },
+    # First entry is the default, so movement is smooth unless you pick
+    # orthogonal.
     "move_mode": {
-        "orthogonal":   ("Orthogonal",),
         "always_glide": ("Always Glide",),
+        "orthogonal":   ("Orthogonal",),
     },
     "turn_speed": {
         "normal":    ("Normal",),
