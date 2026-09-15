@@ -378,6 +378,13 @@ class ParrotActions:
              and setting_get("track_freeze") == "freeze")
         )
 
+        # Before the button goes out, not after. The rig stops synchronously,
+        # so stopping first means down and up land on the same pixel. The other
+        # way round the cursor travels between them and the click arrives as a
+        # short drag, which is worse the faster you were going.
+        if should_stop:
+            self._click_stop(current_mode)
+
         if self._is_left_click_held:
             self.click_release()
         elif hold:
@@ -389,14 +396,14 @@ class ParrotActions:
             ctrl.mouse_click(button=button, hold=CLICK_HOLD_MS)
             ui_manager.hide_border()
 
-        if should_stop:
-            if current_mode in ("tracking", "canvas_tracking"):
-                self.stop_temporarily()
-            elif CLICK_BEHAVIOR.get(current_mode) in ("canvas_stop", "canvas_scale"):
-                actions.user.mouse_rig_scroll_stop()
-                event_manager.set_mode(CLICK_BEHAVIOR[current_mode])
-            else:
-                self.stopper()
+    def _click_stop(self, mode):
+        if mode in ("tracking", "canvas_tracking"):
+            self.stop_temporarily()
+        elif CLICK_BEHAVIOR.get(mode) in ("canvas_stop", "canvas_scale"):
+            actions.user.mouse_rig_scroll_stop()
+            event_manager.set_mode(CLICK_BEHAVIOR[mode])
+        else:
+            self.stopper()
 
     def scroll(self, direction: str):
         actions.user.mouse_rig_scroll_continuous(direction, setting_number("scroll_speed"))
