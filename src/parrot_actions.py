@@ -158,7 +158,14 @@ class ParrotActions:
     def _canvas_speed_scale(self):
         return CANVAS_SLOW_MODE_MULTIPLIER ** self._canvas_speed_level
 
+    def _lock_heading(self):
+        """Boosts commit to the heading they fired on, so a turn still sweeping
+        is baked rather than carrying the boost around the curve."""
+        if self._is_turning():
+            actions.user.mouse_rig().direction.bake()
+
     def mouse_boost_long(self):
+        self._lock_heading()
         event_manager.set_mode("boost")
         amount = BOOST_LONG_AMOUNT * boost_scale() * self._move_speed_scale()
         max_speed = BOOST_LONG_MAX * boost_scale()
@@ -168,15 +175,12 @@ class ParrotActions:
 
     def mouse_boost_fast(self):
         """Palate while moving. Immediate where shush ramps, and it stays
-        until hiss or ee. Bakes a sweeping turn first so the boost goes
-        straight instead of around the curve."""
-        rig = actions.user.mouse_rig()
-        if self._is_turning():
-            rig.direction.bake()
+        until hiss or ee."""
+        self._lock_heading()
         event_manager.set_mode("boost")
         amount = BOOST_FAST_AMOUNT * boost_scale() * self._move_speed_scale()
         max_speed = BOOST_FAST_MAX * boost_scale()
-        rig.speed.offset.add(amount).max(max_speed) \
+        actions.user.mouse_rig().speed.offset.add(amount).max(max_speed) \
             .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING)
 
     def mouse_brake(self):
