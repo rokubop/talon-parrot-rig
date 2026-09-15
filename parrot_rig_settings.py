@@ -30,12 +30,11 @@ BOOST_LONG_RELEASE_MS = 1000
 BOOST_LONG_MAX = 15
 BURST_AMOUNT = 4.5
 
-# Palate while moving. shush above ramps over a second; this one is there
-# almost at once and stays until hiss or ee. Flat, not scaled by the slow
-# steps, so the boost is the same size however slow the cursor is under it.
-BOOST_FAST_AMOUNT = 14
+# Palate while moving. shush above adds to whatever the cursor is doing; this
+# one overrides, so palate is exactly this speed however slow or fast you were
+# under it. Stays until hiss or ee.
+BOOST_FAST_SPEED = 17
 BOOST_FAST_OVER_MS = 80
-BOOST_FAST_MAX = 20
 BOOST_FAST_EASING = "linear"
 BRAKE_REVERT_MS = 0
 # A burst is usually a hop to something nearby, so the cursor eases down after

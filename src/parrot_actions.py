@@ -12,9 +12,8 @@ from ..parrot_rig_settings import (
     BOOST_LONG_OVER_MS,
     BOOST_LONG_RELEASE_MS,
     BOOST_LONG_MAX,
-    BOOST_FAST_AMOUNT,
+    BOOST_FAST_SPEED,
     BOOST_FAST_OVER_MS,
-    BOOST_FAST_MAX,
     BOOST_FAST_EASING,
     BURST_AMOUNT,
     BRAKE_REVERT_MS,
@@ -183,15 +182,18 @@ class ParrotActions:
                 if event_manager.get_mode() == "boost" else None)
 
     def mouse_boost_fast(self):
-        """Palate while moving. Immediate where shush ramps, and it stays until
-        hiss or ee. The amount is flat: the slow steps scale the cursor under
-        it, not the boost itself."""
+        """Palate while moving. An override, not an offset: palate is exactly
+        this speed whatever the cursor was doing under it, slow steps included.
+        Stays until hiss or ee."""
         self._lock_heading()
         self._fast_boosting = True
         event_manager.set_mode("boost")
-        amount = BOOST_FAST_AMOUNT * boost_scale()
-        max_speed = BOOST_FAST_MAX * boost_scale()
-        actions.user.mouse_rig().speed.offset.add(amount).max(max_speed) \
+        rig = actions.user.mouse_rig()
+        # An override ramps from base speed, not from the speed you can see, so
+        # fold any live offset in first. Without this, palate over a shush boost
+        # drops to base before it climbs.
+        rig.speed.bake()
+        rig.speed.override.to(BOOST_FAST_SPEED * boost_scale()) \
             .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING)
 
     def mouse_boost_or_brake(self):
