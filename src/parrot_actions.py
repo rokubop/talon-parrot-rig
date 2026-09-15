@@ -14,8 +14,6 @@ from ..parrot_rig_settings import (
     BOOST_LONG_MAX,
     BOOST_FAST_AMOUNT,
     BOOST_FAST_OVER_MS,
-    BOOST_FAST_HOLD_MS,
-    BOOST_FAST_RELEASE_MS,
     BOOST_FAST_MAX,
     BOOST_FAST_EASING,
     BURST_AMOUNT,
@@ -162,9 +160,15 @@ class ParrotActions:
 
     def _lock_heading(self):
         """Boosts commit to the heading they fired on, so a turn still sweeping
-        is baked rather than carrying the boost around the curve."""
-        if self._is_turning():
-            actions.user.mouse_rig().direction.bake()
+        is baked rather than carrying the boost around the curve. A reversal
+        lerps through a zero vector at its midpoint, and baking that would
+        freeze a dead heading, so leave those frames alone."""
+        if not self._is_turning():
+            return
+        rig = actions.user.mouse_rig()
+        if rig.state.direction.current.magnitude() < 0.5:
+            return
+        rig.direction.bake()
 
     def mouse_boost_long(self):
         self._lock_heading()
@@ -176,19 +180,15 @@ class ParrotActions:
                 if event_manager.get_mode() == "boost" else None)
 
     def mouse_boost_fast(self):
-        """Palate while moving. Immediate where shush ramps, and off again
-        linearly, for a gap you can already see."""
+        """Palate while moving. Immediate where shush ramps, and it stays until
+        hiss or ee. The amount is flat: the slow steps scale the cursor under
+        it, not the boost itself."""
         self._lock_heading()
         event_manager.set_mode("boost")
-        amount = BOOST_FAST_AMOUNT * boost_scale() * self._move_speed_scale()
+        amount = BOOST_FAST_AMOUNT * boost_scale()
         max_speed = BOOST_FAST_MAX * boost_scale()
         actions.user.mouse_rig().speed.offset.add(amount).max(max_speed) \
-            .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING) \
-            .hold(BOOST_FAST_HOLD_MS) \
-            .revert(BOOST_FAST_RELEASE_MS, BOOST_FAST_EASING) \
-            .stack(1) \
-            .then(lambda: event_manager.return_to_previous_mode()
-                  if event_manager.get_mode() == "boost" else None)
+            .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING)
 
     def mouse_brake(self):
         """hiss while moving, whatever put the speed there. Over cursor speed

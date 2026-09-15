@@ -31,12 +31,11 @@ BOOST_LONG_MAX = 15
 BURST_AMOUNT = 4.5
 
 # Palate while moving. shush above ramps over a second; this one is there
-# almost at once and comes off linearly, for a gap you can already see.
-BOOST_FAST_AMOUNT = 12
+# almost at once and stays until hiss or ee. Flat, not scaled by the slow
+# steps, so the boost is the same size however slow the cursor is under it.
+BOOST_FAST_AMOUNT = 14
 BOOST_FAST_OVER_MS = 80
-BOOST_FAST_HOLD_MS = 300
-BOOST_FAST_RELEASE_MS = 500
-BOOST_FAST_MAX = 18
+BOOST_FAST_MAX = 20
 BOOST_FAST_EASING = "linear"
 BRAKE_REVERT_MS = 0
 # A burst is usually a hop to something nearby, so the cursor eases down after
