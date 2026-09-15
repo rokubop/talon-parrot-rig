@@ -69,7 +69,7 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
 | `er` | mode gateway | Canvas and back. On arrival, `hiss` `mm` `ee` redirect elsewhere for 300ms |
 | `cluck` | Start or exit parrot mode | any context |
-| `palate` | utility 1 / fast boost | App picker by default, `tut palate` rebinds it. While moving it is the immediate boost instead. Same heading lock, and it holds the speed until `hiss` or `ee` |
+| `palate` | utility 1 / fast boost | App picker by default, `tut palate` rebinds it. While moving it is the immediate boost instead, linear both ways, for a gap you can already see. Same heading lock |
 | `tut` | cancel / combo prefix | General cancel action (after 300ms) or prefix for combos. |
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.

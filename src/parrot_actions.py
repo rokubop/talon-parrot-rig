@@ -14,6 +14,8 @@ from ..parrot_rig_settings import (
     BOOST_LONG_MAX,
     BOOST_FAST_AMOUNT,
     BOOST_FAST_OVER_MS,
+    BOOST_FAST_HOLD_MS,
+    BOOST_FAST_RELEASE_MS,
     BOOST_FAST_MAX,
     BOOST_FAST_EASING,
     BURST_AMOUNT,
@@ -174,14 +176,19 @@ class ParrotActions:
                 if event_manager.get_mode() == "boost" else None)
 
     def mouse_boost_fast(self):
-        """Palate while moving. Immediate where shush ramps, and it stays
-        until hiss or ee."""
+        """Palate while moving. Immediate where shush ramps, and off again
+        linearly, for a gap you can already see."""
         self._lock_heading()
         event_manager.set_mode("boost")
         amount = BOOST_FAST_AMOUNT * boost_scale() * self._move_speed_scale()
         max_speed = BOOST_FAST_MAX * boost_scale()
         actions.user.mouse_rig().speed.offset.add(amount).max(max_speed) \
-            .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING)
+            .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING) \
+            .hold(BOOST_FAST_HOLD_MS) \
+            .revert(BOOST_FAST_RELEASE_MS, BOOST_FAST_EASING) \
+            .stack(1) \
+            .then(lambda: event_manager.return_to_previous_mode()
+                  if event_manager.get_mode() == "boost" else None)
 
     def mouse_brake(self):
         """hiss while moving, whatever put the speed there. Over cursor speed
