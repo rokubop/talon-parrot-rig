@@ -52,8 +52,8 @@ GLIDE_RELEASE_RATE = 5
 # same idea as GLIDE_RELEASE_RATE above, quicker because it is a brake.
 BRAKE_RATE = 20
 BRAKE_EASING = "linear"
-# hiss under a palate boost. Steeper than the plain brake: it carries on past
-# cursor speed by a slow step, and sheds at twice the rate getting there.
+# hiss under a palate boost. Same landing as the plain brake, cursor speed, it
+# just gets there at twice the rate.
 BRAKE_RATE_HARD = 40
 
 # Scroll

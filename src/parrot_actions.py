@@ -210,16 +210,15 @@ class ParrotActions:
             self.mouse_brake()
 
     def mouse_brake_hard(self):
-        """hiss under a palate boost. The plain brake lands on cursor speed;
-        this one carries on past it by a slow step, so one noise takes you from
-        boosting to slow enough to click."""
+        """hiss under a palate boost. Lands on cursor speed like the plain
+        brake, but sheds at twice the rate. It never steps the slow multiplier,
+        so shedding a boost cannot leave you in slow mode."""
         self._fast_boosting = False
         rig = actions.user.mouse_rig()
         rig.layer("burst_settle").revert(0)
         rig.layer("hiss_boost").revert(0)
         self._burst_glide(False)
         rig.bake()
-        self._move_speed_level += 1
         rig.speed.to(self._get_move_speed()).over(rate=BRAKE_RATE_HARD, easing=BRAKE_EASING)
         if event_manager.get_mode() in ("glide", "boost"):
             event_manager.set_mode("move")
