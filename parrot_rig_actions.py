@@ -317,12 +317,13 @@ input_map_move = {
     "eh":         ("glide / lock turn", parrot_actions.mouse_toggle_glide),
     "mm":         ("click", actions.user.parrot_rig_click),
     # Two boosts, both locking the heading: shush ramps and sheds itself,
-    # palate is immediate and held. hiss is the one deceleration, so it never
-    # bursts in here.
+    # palate is immediate and held. Neither noise bursts here, they only slow.
+    # While a palate boost is up both shift down one: shush becomes the plain
+    # brake and hiss the steeper one.
     "palate":     ("fast boost", _anchor_chase(parrot_actions.mouse_boost_fast)),
-    "shush":      ("boost", _anchor_chase(parrot_actions.mouse_boost_long)),
+    "shush":      ("boost / brake", _anchor_chase(parrot_actions.mouse_boost_or_brake)),
     "shush_stop": ("", lambda: None),
-    "hiss":            ("slow down", parrot_actions.mouse_brake),
+    "hiss":            ("slow down / harder", parrot_actions.mouse_brake_or_hard),
     "hiss_stop:db_50": ("", lambda: None),
 }
 

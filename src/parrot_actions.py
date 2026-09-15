@@ -24,6 +24,7 @@ from ..parrot_rig_settings import (
     BURST_SETTLE_REVERT_MS,
     GLIDE_RELEASE_RATE,
     BRAKE_RATE,
+    BRAKE_RATE_HARD,
     BRAKE_EASING,
     APP_PICKER_KEY,
     WINDOW_KEYS,
@@ -86,6 +87,7 @@ class ParrotActions:
         self._burst_gliding = False
         self._burst_glide_job = None
         self._last_alt_mode = None
+        self._fast_boosting = False
 
     def _get_move_speed(self):
         return setting_number("move_speed") * (SLOW_MODE_MULTIPLIER ** self._move_speed_level)
@@ -140,6 +142,7 @@ class ParrotActions:
         return actions.user.mouse_rig().state.direction.target is not None
 
     def mouse_toggle_glide(self):
+        self._fast_boosting = False
         rig = actions.user.mouse_rig()
         if event_manager.get_mode() == "glide" and self._is_turning():
             rig.direction.bake()
@@ -184,16 +187,49 @@ class ParrotActions:
         hiss or ee. The amount is flat: the slow steps scale the cursor under
         it, not the boost itself."""
         self._lock_heading()
+        self._fast_boosting = True
         event_manager.set_mode("boost")
         amount = BOOST_FAST_AMOUNT * boost_scale()
         max_speed = BOOST_FAST_MAX * boost_scale()
         actions.user.mouse_rig().speed.offset.add(amount).max(max_speed) \
             .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING)
 
+    def mouse_boost_or_brake(self):
+        """shush. Under a palate boost it brakes instead, so while the boost is
+        up the two noises are a small slow-down and a big one."""
+        if self._fast_boosting:
+            self.mouse_brake()
+        else:
+            self.mouse_boost_long()
+
+    def mouse_brake_or_hard(self):
+        """hiss. The plain brake, or the steeper one under a palate boost."""
+        if self._fast_boosting:
+            self.mouse_brake_hard()
+        else:
+            self.mouse_brake()
+
+    def mouse_brake_hard(self):
+        """hiss under a palate boost. The plain brake lands on cursor speed;
+        this one carries on past it by a slow step, so one noise takes you from
+        boosting to slow enough to click."""
+        self._fast_boosting = False
+        rig = actions.user.mouse_rig()
+        rig.layer("burst_settle").revert(0)
+        rig.layer("hiss_boost").revert(0)
+        self._burst_glide(False)
+        rig.bake()
+        self._move_speed_level += 1
+        rig.speed.to(self._get_move_speed()).over(rate=BRAKE_RATE_HARD, easing=BRAKE_EASING)
+        if event_manager.get_mode() in ("glide", "boost"):
+            event_manager.set_mode("move")
+        self._emit_speed_level()
+
     def mouse_brake(self):
         """hiss while moving, whatever put the speed there. Over cursor speed
         it brakes back to it; already there, it steps the slow multiplier, so
         hiss always slows down rather than bursting some of the time."""
+        self._fast_boosting = False
         rig = actions.user.mouse_rig()
         rig.layer("burst_settle").revert(0)
         rig.layer("hiss_boost").revert(0)
@@ -615,6 +651,7 @@ class ParrotActions:
         (stop or self.stopper)()
 
     def stopper(self, stop_tracking=True, stop_moving=True, stop_scrolling=True, reset_mode=True):
+        self._fast_boosting = False
         self._burst_glide(False)
         if stop_moving:
             actions.user.mouse_rig_stop()
