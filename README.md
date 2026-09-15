@@ -64,12 +64,12 @@ Use this table to understand what role each noise plays, then decide which of yo
 | `ee` | stop | Stop movement, scrolling |
 | `pop` | return | Either click and exit, or return to an anchor position |
 | `mm` | click | Click (stay in mode) |
-| `hiss` | scroll / slow down | Scroll down. While moving it always sheds speed, whatever put it there, at a fixed rate so a fast boost takes longer to stop. At cursor speed it halves instead. Under a `palate` boost it is the steeper brake, and never halves |
+| `hiss` | scroll / slow down | Scroll down. While moving it always sheds speed, whatever put it there, at a fixed rate so a fast boost takes longer to stop. At cursor speed it halves instead. Under a `palate` boost it brakes harder and never halves |
 | `shush` | scroll / boost | Scroll up, boost in move mode. Ramps in over a second, for covering a screen. Locks the heading it fired on. Under a `palate` boost it brakes instead |
 | `eh` | tracking / glide | Activate tracking, toggle glide in move mode |
 | `er` | mode gateway | Canvas and back. On arrival, `hiss` `mm` `ee` redirect elsewhere for 300ms |
 | `cluck` | Start or exit parrot mode | any context |
-| `palate` | utility 1 / fast boost | App picker by default, `tut palate` rebinds it. While moving it is the immediate boost instead. Same heading lock, an exact speed rather than an amount added on top, and it holds until `hiss` or `ee` |
+| `palate` | utility 1 / fast boost | App picker by default, `tut palate` rebinds it. While moving it is the immediate boost instead: one exact speed, locks the heading, holds until `hiss` or `ee` |
 | `tut` | cancel / combo prefix | General cancel action (after 300ms) or prefix for combos. |
 
 Recommend **at least 9 noises**: 4 directions + stop + click + exit + 2 scrolls.

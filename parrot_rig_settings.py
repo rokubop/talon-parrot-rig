@@ -30,9 +30,8 @@ BOOST_LONG_RELEASE_MS = 1000
 BOOST_LONG_MAX = 15
 BURST_AMOUNT = 4.5
 
-# Palate while moving. shush above adds to whatever the cursor is doing; this
-# one overrides, so palate is exactly this speed however slow or fast you were
-# under it. Stays until hiss or ee.
+# Palate while moving. An override, not an offset like shush above: palate is
+# exactly this speed, and holds it until hiss or ee.
 BOOST_FAST_SPEED = 17
 BOOST_FAST_OVER_MS = 80
 BOOST_FAST_EASING = "linear"
@@ -51,8 +50,7 @@ GLIDE_RELEASE_RATE = 5
 # same idea as GLIDE_RELEASE_RATE above, quicker because it is a brake.
 BRAKE_RATE = 20
 BRAKE_EASING = "linear"
-# hiss under a palate boost. Same landing as the plain brake, cursor speed, it
-# just gets there at twice the rate.
+# hiss under a palate boost. Same landing as BRAKE_RATE, twice the rate.
 BRAKE_RATE_HARD = 40
 
 # Scroll

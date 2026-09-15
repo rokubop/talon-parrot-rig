@@ -161,10 +161,10 @@ class ParrotActions:
         return CANVAS_SLOW_MODE_MULTIPLIER ** self._canvas_speed_level
 
     def _lock_heading(self):
-        """Boosts commit to the heading they fired on, so a turn still sweeping
-        is baked rather than carrying the boost around the curve. A reversal
-        lerps through a zero vector at its midpoint, and baking that would
-        freeze a dead heading, so leave those frames alone."""
+        """Boosts commit to the heading they fired on, so a sweeping turn is
+        baked instead of carrying the boost around the curve. A reversal lerps
+        through a zero vector at its midpoint; baking that would freeze a dead
+        heading."""
         if not self._is_turning():
             return
         rig = actions.user.mouse_rig()
@@ -182,23 +182,20 @@ class ParrotActions:
                 if event_manager.get_mode() == "boost" else None)
 
     def mouse_boost_fast(self):
-        """Palate while moving. An override, not an offset: palate is exactly
-        this speed whatever the cursor was doing under it, slow steps included.
-        Stays until hiss or ee."""
+        """Palate while moving. An override, not an offset: exactly this speed
+        whatever was underneath, until hiss or ee."""
         self._lock_heading()
         self._fast_boosting = True
         event_manager.set_mode("boost")
         rig = actions.user.mouse_rig()
-        # An override ramps from base speed, not from the speed you can see, so
-        # fold any live offset in first. Without this, palate over a shush boost
-        # drops to base before it climbs.
+        # An override ramps from base, not from the speed you can see, so fold
+        # any live offset in first or palate over a shush boost dips first.
         rig.speed.bake()
         rig.speed.override.to(BOOST_FAST_SPEED * boost_scale()) \
             .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING)
 
     def mouse_boost_or_brake(self):
-        """shush. Under a palate boost it brakes instead, so while the boost is
-        up the two noises are a small slow-down and a big one."""
+        """shush. Under a palate boost it brakes instead."""
         if self._fast_boosting:
             self.mouse_brake()
         else:
@@ -212,9 +209,9 @@ class ParrotActions:
             self.mouse_brake()
 
     def mouse_brake_hard(self):
-        """hiss under a palate boost. Lands on cursor speed like the plain
-        brake, but sheds at twice the rate. It never steps the slow multiplier,
-        so shedding a boost cannot leave you in slow mode."""
+        """hiss under a palate boost. Same landing as the plain brake, twice the
+        rate, and deliberately no slow step so it cannot strand you in slow
+        mode."""
         self._fast_boosting = False
         rig = actions.user.mouse_rig()
         rig.layer("burst_settle").revert(0)
@@ -379,10 +376,8 @@ class ParrotActions:
              and setting_get("track_freeze") == "freeze")
         )
 
-        # Before the button goes out, not after. The rig stops synchronously,
-        # so stopping first means down and up land on the same pixel. The other
-        # way round the cursor travels between them and the click arrives as a
-        # short drag, which is worse the faster you were going.
+        # Before the button, not after: the rig stops synchronously, so down and
+        # up land on the same pixel. The other way round a fast click is a drag.
         if should_stop:
             self._click_stop(current_mode)
 
