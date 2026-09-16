@@ -12,9 +12,16 @@ from ..parrot_rig_settings import (
     BOOST_LONG_OVER_MS,
     BOOST_LONG_RELEASE_MS,
     BOOST_LONG_MAX,
-    BOOST_FAST_SPEED,
-    BOOST_FAST_OVER_MS,
-    BOOST_FAST_EASING,
+    BOOST_BIG_AMOUNT,
+    BOOST_BIG_OVER_MS,
+    BOOST_BIG_OVER_EASING,
+    BOOST_BIG_HOLD_MS,
+    BOOST_BIG_RELEASE_MS,
+    BOOST_BIG_RELEASE_EASING,
+    BOOST_BIG_MAX,
+    BOOST_BIG_TURN_SCALE,
+    BOOST_BIG_GLIDE_MS,
+    BOOST_BIG_GLIDE_EASING,
     BURST_AMOUNT,
     BRAKE_REVERT_MS,
     BURST_SETTLE_SCALE,
@@ -86,7 +93,10 @@ class ParrotActions:
         self._burst_gliding = False
         self._burst_glide_job = None
         self._last_alt_mode = None
-        self._fast_boosting = False
+        self._big_boosting = False
+        self._big_gliding = False
+        self._big_boost_gen = 0
+        self._big_prev_mode = "move"
 
     def _get_move_speed(self):
         return setting_number("move_speed") * (SLOW_MODE_MULTIPLIER ** self._move_speed_level)
@@ -120,11 +130,12 @@ class ParrotActions:
         speed = self._get_move_speed()
         current_speed = actions.user.mouse_rig_state_speed()
         always_glide = setting_get("move_mode") == "always_glide"
-        if always_glide or self._burst_gliding or mode in ("glide", "boost") or current_speed > speed:
-            actions.user.mouse_rig_move_continuous_smooth(direction, speed, scale=turn_scale())
+        if always_glide or self._burst_gliding or mode in ("glide", "burst", "boost") or current_speed > speed:
+            actions.user.mouse_rig_move_continuous_smooth(
+                direction, speed, scale=turn_scale() * self._burst_turn_scale())
         else:
             actions.user.mouse_rig_move_continuous(direction, speed)
-        if mode not in ("glide", "boost"):
+        if mode not in ("glide", "burst", "boost"):
             # glide keeps whatever input map is live rather than swapping to
             # one of its own, so it has to be entered from move or the default
             # map stays and none of the move noises exist.
@@ -136,12 +147,20 @@ class ParrotActions:
     def mouse_move_dir(self, direction: str):
         self.move(direction)
 
+    def _burst_turn_scale(self) -> float:
+        """Tighter turns while a palate burst or its glide is running, and only
+        then. Everything else keeps its own timing."""
+        if self._big_boosting or self._big_gliding:
+            return BOOST_BIG_TURN_SCALE
+        return 1.0
+
     def _is_turning(self):
         """True while a smooth turn is still sweeping toward its target."""
         return actions.user.mouse_rig().state.direction.target is not None
 
     def mouse_toggle_glide(self):
-        self._fast_boosting = False
+        self._big_boosting = False
+        self._big_gliding = False
         rig = actions.user.mouse_rig()
         if event_manager.get_mode() == "glide" and self._is_turning():
             rig.direction.bake()
@@ -181,45 +200,90 @@ class ParrotActions:
             lambda: event_manager.return_to_previous_mode()
                 if event_manager.get_mode() == "boost" else None)
 
-    def mouse_boost_fast(self):
-        """Palate while moving. An override, not an offset: exactly this speed
-        whatever was underneath, until hiss or ee."""
+    def mouse_boost_big(self):
+        """Palate while moving. Straight to the top, then a long way down: a
+        palate is for covering ground, so the commit is immediate and the decay
+        is what you time against."""
         self._lock_heading()
-        self._fast_boosting = True
-        event_manager.set_mode("boost")
+        self._big_boosting = True
+        self._big_gliding = False
+        self._big_boost_gen += 1
+        gen = self._big_boost_gen
+        # Not the event manager's previous mode: the glide below pushes "boost"
+        # over it, so by the time anything ends that is the burst itself.
+        if event_manager.get_mode() not in ("burst", "boost"):
+            self._big_prev_mode = event_manager.get_mode()
+        event_manager.set_mode("burst")
+        amount = BOOST_BIG_AMOUNT * boost_scale() * self._move_speed_scale()
         rig = actions.user.mouse_rig()
-        # An override ramps from base, not from the speed you can see, so fold
-        # any live offset in first or palate over a shush boost dips first.
+        rig.speed.offset.add(amount).max(BOOST_BIG_MAX * boost_scale()) \
+            .over(BOOST_BIG_OVER_MS, BOOST_BIG_OVER_EASING) \
+            .hold(BOOST_BIG_HOLD_MS) \
+            .revert(BOOST_BIG_RELEASE_MS, BOOST_BIG_RELEASE_EASING) \
+            .then(lambda: self._big_done(gen))
+
+    def mouse_burst_glide(self):
+        """shush inside a palate burst. The back half of a shush boost from
+        whatever speed you are carrying, bled down to cursor speed. Purple to
+        green.
+
+        Speed only: a bare bake would park the turn mid-sweep, and leaving the
+        direction animating is the point, because this is the window you aim in.
+        """
+        self._big_boosting = False
+        self._big_gliding = True
+        # The burst's phases are still queued behind this; bumping the
+        # generation stops them handing the mode back underneath it.
+        self._big_boost_gen += 1
+        gen = self._big_boost_gen
+        rig = actions.user.mouse_rig()
+        rig.layer("burst_settle").revert(0)
+        rig.layer("hiss_boost").revert(0)
         rig.speed.bake()
-        rig.speed.override.to(BOOST_FAST_SPEED * boost_scale()) \
-            .over(BOOST_FAST_OVER_MS, BOOST_FAST_EASING)
+        rig.speed.to(self._get_move_speed()) \
+            .over(BOOST_BIG_GLIDE_MS, BOOST_BIG_GLIDE_EASING) \
+            .then(lambda: self._big_done(gen))
+        event_manager.set_mode("boost")
+
+    def _big_done(self, gen: int):
+        """A burst or its glide ran out. A brake gets here first and has already
+        cleared the flags, and starting a new one bumps the generation, so only
+        the untouched case hands back."""
+        if gen != self._big_boost_gen:
+            return
+        self._big_boosting = False
+        self._big_gliding = False
+        if event_manager.get_mode() in ("burst", "boost"):
+            event_manager.set_mode(self._big_prev_mode)
 
     def mouse_boost_or_brake(self):
-        """shush. Under a palate boost it brakes instead."""
-        if self._fast_boosting:
-            self.mouse_brake()
+        """shush. Inside a palate burst it glides out rather than boosting again
+        or braking flat."""
+        if self._big_boosting:
+            self.mouse_burst_glide()
         else:
             self.mouse_boost_long()
 
     def mouse_brake_or_hard(self):
-        """hiss. The plain brake, or the steeper one under a palate boost."""
-        if self._fast_boosting:
+        """hiss. The plain brake, or the steeper one under a palate burst."""
+        if self._big_boosting:
             self.mouse_brake_hard()
         else:
             self.mouse_brake()
 
     def mouse_brake_hard(self):
-        """hiss under a palate boost. Same landing as the plain brake, twice the
-        rate, and deliberately no slow step so it cannot strand you in slow
+        """hiss under a palate burst. Same landing as the plain brake, twice
+        the rate, and deliberately no slow step so it cannot strand you in slow
         mode."""
-        self._fast_boosting = False
+        self._big_boosting = False
+        self._big_gliding = False
         rig = actions.user.mouse_rig()
         rig.layer("burst_settle").revert(0)
         rig.layer("hiss_boost").revert(0)
         self._burst_glide(False)
         rig.bake()
         rig.speed.to(self._get_move_speed()).over(rate=BRAKE_RATE_HARD, easing=BRAKE_EASING)
-        if event_manager.get_mode() in ("glide", "boost"):
+        if event_manager.get_mode() in ("glide", "burst", "boost"):
             event_manager.set_mode("move")
         self._emit_speed_level()
 
@@ -227,7 +291,8 @@ class ParrotActions:
         """hiss while moving, whatever put the speed there. Over cursor speed
         it brakes back to it; already there, it steps the slow multiplier, so
         hiss always slows down rather than bursting some of the time."""
-        self._fast_boosting = False
+        self._big_boosting = False
+        self._big_gliding = False
         rig = actions.user.mouse_rig()
         rig.layer("burst_settle").revert(0)
         rig.layer("hiss_boost").revert(0)
@@ -239,7 +304,7 @@ class ParrotActions:
         else:
             self._move_speed_level += 1
             actions.user.mouse_rig_speed_mul(SLOW_MODE_MULTIPLIER)
-        if event_manager.get_mode() in ("glide", "boost"):
+        if event_manager.get_mode() in ("glide", "burst", "boost"):
             event_manager.set_mode("move")
         self._emit_speed_level()
 
@@ -270,7 +335,7 @@ class ParrotActions:
 
     def mouse_burst_or_brake(self):
         actions.user.mouse_rig().layer("burst_settle").revert(0)
-        if event_manager.get_mode() in ("boost", "glide"):
+        if event_manager.get_mode() in ("burst", "boost", "glide"):
             # bake absorbs the boost into base speed and drops the layer, so
             # this is the only thing moving the speed afterwards. It comes off
             # at a rate, which is what makes a fast boost take longer to shed
@@ -654,7 +719,8 @@ class ParrotActions:
         (stop or self.stopper)()
 
     def stopper(self, stop_tracking=True, stop_moving=True, stop_scrolling=True, reset_mode=True):
-        self._fast_boosting = False
+        self._big_boosting = False
+        self._big_gliding = False
         self._burst_glide(False)
         if stop_moving:
             actions.user.mouse_rig_stop()

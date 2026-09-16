@@ -76,7 +76,7 @@ def only_current_mode_table():
 # for it.
 COLUMNS = [
     ("default",      "default",      "circle",   ["default"]),
-    ("move",         "move",         "circle",   ["move", "boost", "glide"]),
+    ("move",         "move",         "circle",   ["move", "burst", "boost", "glide"]),
     ("tracking",     "tracking",     "circle",   ["tracking"]),
     ("canvas",       "canvas_stop",  "triangle", ["canvas_stop", "canvas_tracking"]),
     ("canvas move",  "canvas_move",  "triangle", ["canvas_move", "canvas_boost", "canvas_glide"]),

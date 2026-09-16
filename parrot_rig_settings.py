@@ -30,11 +30,27 @@ BOOST_LONG_RELEASE_MS = 1000
 BOOST_LONG_MAX = 15
 BURST_AMOUNT = 4.5
 
-# Palate while moving. An override, not an offset like shush above: palate is
-# exactly this speed, and holds it until hiss or ee.
-BOOST_FAST_SPEED = 17
-BOOST_FAST_OVER_MS = 80
-BOOST_FAST_EASING = "linear"
+# Palate while moving. An offset like shush above, not a flat override. Fast
+# attack so it commits on the noise, a real hold at the top, then off. The hold
+# is what makes the shush glide below worth having: two states, and you pick
+# when to swap.
+BOOST_BIG_AMOUNT = 13
+BOOST_BIG_OVER_MS = 180
+BOOST_BIG_OVER_EASING = "ease_out2"
+BOOST_BIG_HOLD_MS = 700
+BOOST_BIG_RELEASE_MS = 500
+BOOST_BIG_RELEASE_EASING = "ease_in_out2"
+BOOST_BIG_MAX = 24
+# Turn timing during a palate burst, on top of the Turn setting. Smooth turns
+# are stretched for speed, and at burst speed the turn outlasts the burst and
+# you get one wide committed arc. Lower is tighter.
+BOOST_BIG_TURN_SCALE = 0.6
+
+# shush inside a palate burst. Not a brake: drops out of the hold into the back
+# half of a shush boost. ease_out2 sheds about half the excess in the first
+# third, so you feel the swap, and the long tail is where you aim.
+BOOST_BIG_GLIDE_MS = 1400
+BOOST_BIG_GLIDE_EASING = "ease_out2"
 BRAKE_REVERT_MS = 0
 # A burst is usually a hop to something nearby, so the cursor eases down after
 # one to make the click easier. Another hiss inside the window clears it and
@@ -140,6 +156,7 @@ REVERSE_TIMEOUT = "2s"
 # Click behavior
 CLICK_BEHAVIOR = {
     "move": "stop",
+    "burst": "stop",
     "boost": "stop",
     "glide": "stop",
     "canvas_move": "canvas_stop",
@@ -161,6 +178,9 @@ WINDOW_MODES = ("window", "window_stop", "window_move")
 MODE_COLORS = {
     "default": "#FF0000",
     "move": "#FFFF00",
+    # Palate. Own colour, not boost green: purple holds speed, green bleeds it
+    # off to aim, and the shush between them is what you time.
+    "burst": "#E85BFF",
     "boost": "#2AE33C",
     "glide": "#578EF5",
     "tracking": "#A7D3FF",
