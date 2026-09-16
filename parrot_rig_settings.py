@@ -38,7 +38,7 @@ BOOST_BIG_AMOUNT = 13
 BOOST_BIG_OVER_MS = 180
 BOOST_BIG_OVER_EASING = "ease_out2"
 BOOST_BIG_HOLD_MS = 700
-BOOST_BIG_RELEASE_MS = 500
+BOOST_BIG_RELEASE_MS = 1200
 BOOST_BIG_RELEASE_EASING = "ease_in_out2"
 BOOST_BIG_MAX = 24
 # Turn timing during a palate burst, on top of the Turn setting. Smooth turns
