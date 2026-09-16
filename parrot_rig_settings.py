@@ -72,13 +72,16 @@ BRAKE_RATE_HARD = 40
 # Scroll
 SCROLL_SPEED = 0.4
 
-# The app picker hotkey, named because two things reach for it: tut eh opens
-# it, and utility 1 is set to it out of the box. This is what BentoLaunch binds.
+# The picker hotkey. Everything that raises one reaches for this: palate when
+# stopped, tut eh, tut palate, and utility 1 out of the box.
+WINDOW_PICKER_KEY = "super-tab"
+
+# BentoLaunch. Unused while win+tab is the picker.
 APP_PICKER_KEY = "alt-`"
 
 # Window mode. Whatever your window manager uses.
 WINDOW_KEYS = {
-    "picker":   APP_PICKER_KEY,
+    "picker":   WINDOW_PICKER_KEY,
     "tab_next": "ctrl-tab",
     "tab_prev": "ctrl-shift-tab",
     "tab_close": "ctrl-w",
@@ -173,7 +176,7 @@ CURSOR_UI_ENABLED = True
 # square for window.
 CANVAS_MODES = ("canvas_stop", "canvas_move", "canvas_boost", "canvas_glide", "canvas_tracking")
 CANVAS_SCALE_MODES = ("canvas_scale", "canvas_scale_move")
-WINDOW_MODES = ("window", "window_stop", "window_move")
+WINDOW_MODES = ("window", "window_stop", "window_tracking")
 
 MODE_COLORS = {
     "default": "#FF0000",
@@ -184,9 +187,11 @@ MODE_COLORS = {
     "boost": "#2AE33C",
     "glide": "#578EF5",
     "tracking": "#A7D3FF",
-    "window": "#A7D3FF",
-    "window_move": "#FFFF00",
-    "window_stop": "#FF0000",
+    # One colour for window mode whatever it is doing. Held super is a
+    # modifier, not a mode.
+    "window": "#00E5FF",
+    "window_stop": "#00E5FF",
+    "window_tracking": "#00E5FF",
     "canvas_tracking": "#A7D3FF",
     "canvas_stop": "#FF4444",
     "canvas_move": "#FFFF44",
@@ -196,11 +201,13 @@ MODE_COLORS = {
     "canvas_scale_move": "#FFFF44",
 }
 
-# Modifier letters, shown next to the cursor in this order
-MODIFIER_LETTERS = {
-    "shift": "S",
-    "ctrl": "C",
-    "alt": "A",
+# Modifier names, shown next to the cursor in this order
+MODIFIER_LABELS = {
+    "shift": "SHIFT",
+    "ctrl": "CTRL",
+    "alt": "ALT",
+    # Window mode holds this across a run of win+arrow
+    "super": "WIN",
 }
 
 # UI colors

@@ -1,5 +1,5 @@
 from talon import actions
-from ..parrot_rig_settings import MODE_COLORS, MODIFIER_LETTERS
+from ..parrot_rig_settings import MODE_COLORS, MODIFIER_LABELS
 from ..parrot_rig_settings import CANVAS_MODES, CANVAS_SCALE_MODES, WINDOW_MODES
 from ..parrot_rig_settings import CURSOR_UI_ENABLED
 
@@ -63,31 +63,30 @@ def cursor_ui():
 
     modifier_label = None
     if modifiers:
-        letters = [
-            letter for mod, letter in MODIFIER_LETTERS.items() if mod in modifiers
+        names = [
+            name for mod, name in MODIFIER_LABELS.items() if mod in modifiers
         ]
-        # One text per letter, since the stroke on each glyph swallows the
-        # font's own spacing and there is no letter_spacing property.
+        # One text per name, since the stroke swallows the font's own spacing
+        # and there is no letter_spacing property.
         modifier_label = div(
             position="absolute",
             left=33,
             top=30,
-            width=48,
             height=20,
             flex_direction="row",
             align_items="center",
-            gap=4,
+            gap=6,
         )[
             *[
                 text(
-                    letter,
+                    name,
                     color="white",
                     font_size=14,
                     font_weight="bold",
                     stroke_color="000000",
                     stroke_width=3,
                 )
-                for letter in letters
+                for name in names
             ]
         ]
 

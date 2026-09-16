@@ -81,7 +81,7 @@ COLUMNS = [
     ("canvas",       "canvas_stop",  "triangle", ["canvas_stop", "canvas_tracking"]),
     ("canvas move",  "canvas_move",  "triangle", ["canvas_move", "canvas_boost", "canvas_glide"]),
     ("canvas scale", "canvas_scale", "diamond",  ["canvas_scale", "canvas_scale_move"]),
-    ("window",       "window",       "square",   ["window_stop", "window", "window_move"]),
+    ("window",       "window",       "square",   ["window_stop", "window", "window_tracking"]),
 ]
 
 

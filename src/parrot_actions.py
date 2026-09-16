@@ -32,9 +32,10 @@ from ..parrot_rig_settings import (
     BRAKE_RATE,
     BRAKE_RATE_HARD,
     BRAKE_EASING,
-    APP_PICKER_KEY,
+    WINDOW_PICKER_KEY,
     WINDOW_KEYS,
     WINDOW_SUPER_KEYS,
+    WINDOW_MODES,
     WINDOW_SNAP_ASSIST_MS,
     WINDOW_ALT_TAB_HOLD_MS,
     WINDOW_NUMBER_MS,
@@ -68,7 +69,7 @@ ALT_MODE_MODES = {
                        "canvas_boost", "canvas_tracking"),
     "canvas_scale":   ("canvas_scale", "canvas_scale_move"),
     "window_pick":    ("window",),
-    "window_control": ("window_stop", "window_move"),
+    "window_control": ("window_stop", "window_tracking"),
 }
 
 class ParrotActions:
@@ -361,18 +362,34 @@ class ParrotActions:
         self._burst_settle()
 
     def tracking_activate(self):
-        """The way out to plain tracking from anywhere, so a super window mode
-        was holding is let go here rather than at every caller."""
+        """The way to the tracker from anywhere, so a super window mode was
+        holding is let go here rather than at every caller. In window mode it
+        stays there: what you are aiming at is a window."""
+        if event_manager.get_mode() in WINDOW_MODES:
+            self.window_tracking_activate()
+            return
         self._window_super_release()
         actions.user.mouse_rig_stop()
         tracking.activate()
         event_manager.set_mode("tracking")
 
-    def app_picker(self):
-        """Tracking first: it is what lets go of a held super, and win+alt+`
-        is not the hotkey."""
+    def key_tracking(self, key: str):
+        """A window hotkey you then aim at. Tracking first: it lets go of a
+        held super, and super plus the hotkey is a different hotkey."""
         self.tracking_activate()
-        actions.key(APP_PICKER_KEY)
+        actions.key(key)
+
+    def app_picker(self):
+        self.key_tracking(WINDOW_PICKER_KEY)
+
+    def window_tracking_activate(self):
+        """The tracker without leaving window mode. eh, palate, anything that
+        reaches for tracking while the window map is live."""
+        self._window_super_release()
+        self._window_number_at = None
+        actions.user.mouse_rig_stop()
+        tracking.activate()
+        event_manager.set_mode("window_tracking")
 
     def canvas_tracking_activate(self):
         actions.user.mouse_rig_scroll_stop()
@@ -458,7 +475,7 @@ class ParrotActions:
             ui_manager.hide_border()
 
     def _click_stop(self, mode):
-        if mode in ("tracking", "canvas_tracking"):
+        if mode in ("tracking", "canvas_tracking", "window_tracking"):
             self.stop_temporarily()
         elif CLICK_BEHAVIOR.get(mode) in ("canvas_stop", "canvas_scale"):
             actions.user.mouse_rig_scroll_stop()
@@ -507,9 +524,12 @@ class ParrotActions:
         actions.key(WINDOW_KEYS["picker"])
 
     def window_exit(self):
+        """Tracking outlives window mode. Leaving drops the window map and the
+        held super, not your aim."""
         self._window_number_at = None
         self._window_super_release()
-        self.stopper()
+        self.stopper(stop_tracking=False, reset_mode=False)
+        event_manager.set_mode("tracking" if tracking.is_tracking else "default")
 
     def window_key(self, name: str):
         self._window_number_at = None
@@ -517,12 +537,14 @@ class ParrotActions:
         actions.key(WINDOW_KEYS[name])
 
     def window_move(self, name: str):
-        """Super stays down across a run of these, so the next one still lands."""
+        """Super stays down across a run of these, so the next one still lands.
+        It shows as a modifier on the cursor, not a mode: window mode is one
+        colour whatever it is doing."""
         self._window_number_at = None
         if not self._window_super_held:
             actions.key("super:down")
             self._window_super_held = True
-            event_manager.set_mode("window_move")
+            event_manager.add_modifier("super")
         actions.key(WINDOW_SUPER_KEYS[name])
 
     def _window_super_release(self) -> bool:
@@ -530,8 +552,7 @@ class ParrotActions:
             return False
         actions.key("super:up")
         self._window_super_held = False
-        if event_manager.get_mode() == "window_move":
-            event_manager.set_mode("window")
+        event_manager.remove_modifier("super")
         return True
 
     def window_escape(self):
@@ -659,6 +680,9 @@ class ParrotActions:
         keys.toggle_modifier(modifier)
 
     def disable_modifiers(self):
+        # Window mode holds its own super, so this has to let go of that one
+        # too or the key outlives the label.
+        self._window_super_release()
         keys.clear_modifiers()
         event_manager.clear_modifiers()
 
@@ -699,7 +723,10 @@ class ParrotActions:
         if self._is_left_click_held:
             self.click_release()
             return
-        if (event_manager.get_modifiers()
+        # keys.modifiers, not the event manager's: window mode's held super is
+        # in there too, and it should not eat a cancel step. Leaving window
+        # mode lets go of it anyway.
+        if (keys.modifiers
                 or self._move_speed_level
                 or self._canvas_speed_level):
             self.full_reset()

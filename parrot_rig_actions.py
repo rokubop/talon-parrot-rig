@@ -1,6 +1,6 @@
 from talon import Module, actions, app, ctrl
 from .src.parrot_actions import parrot_actions
-from .parrot_rig_settings import APP_PICKER_KEY, CLICK_HOLD_MS, WINDOW_NUMBER_MS
+from .parrot_rig_settings import CLICK_HOLD_MS, WINDOW_NUMBER_MS, WINDOW_PICKER_KEY
 from .src.settings_menu import (
     setting_maps, setting_set, setting_label, setting_title, SETTING_TITLES,
     setting_set_custom, setting_number_text, is_numeric,
@@ -302,6 +302,8 @@ input_map_common = {
 
 input_map_default = {
     **input_map_common,
+    # win+tab, then aim at it. A hotkey and the tracker, no window mode.
+    "palate":            ("task view", lambda: parrot_actions.key_tracking(WINDOW_PICKER_KEY)),
     "hiss":              ("scroll down", lambda: parrot_actions.scroll("down")),
     "hiss_stop:db_170":  ("", parrot_actions.scroll_stop),
     "shush":             ("scroll up", _anchor_chase(lambda: parrot_actions.scroll("up"))),
@@ -372,11 +374,12 @@ input_map_canvas_move = {
     "hiss_stop:db_50": ("", parrot_actions.canvas_burst_or_brake_stop),
 }
 
-# Tracking stays live here, because the app picker is an overlay you aim at.
-# eh and palate are left to the common map on purpose: eh is the way out to
-# plain tracking from anywhere, and palate is utility 1 everywhere.
+# Tracking stays live here, because the picker is an overlay you aim at. eh
+# keeps the tracker inside window mode rather than leaving for plain tracking:
+# what you are aiming at is a window. tut is the way out.
 input_map_window = {
     **input_map_common,
+    "eh":     ("window track", parrot_actions.window_tracking_activate),
     "ah":     ("window left", lambda: parrot_actions.window_move("left")),
     "oh":     ("window right", lambda: parrot_actions.window_move("right")),
     "t":      ("window up", lambda: parrot_actions.window_move("up")),
@@ -431,7 +434,7 @@ input_map_canvas_tracking = {
 # First entry is what utility 1 does until you pick something else.
 utility_presets = {
     "utility_1": {
-        "app_picker":       ("App Picker",       parrot_actions.app_picker),
+        "app_picker":       ("Task View",        parrot_actions.app_picker),
         "hold_click":       ("Hold Click",       lambda: actions.user.parrot_rig_click(0, True)),
         "click":            ("Click",            lambda: actions.user.parrot_rig_click(0)),
         "right_click":      ("Right Click",      lambda: actions.user.parrot_rig_click(1)),
@@ -448,7 +451,7 @@ utility_presets = {
         "repeat_command":  ("Repeat Command",  lambda: actions.core.repeat_command()),
         "reverse_command": ("Reverse Command", parrot_actions.reverse_command),
         "next_anchor":     ("Next Anchor",     _anchor_go),
-        "app_picker":      ("App Picker",      lambda: actions.key(APP_PICKER_KEY)),
+        "app_picker":      ("Task View",       lambda: actions.key(WINDOW_PICKER_KEY)),
         "parrot_rig":      ("Parrot Rig",      parrot_actions.parrot_mode_enable),
         "click":           ("Click",           lambda: ctrl.mouse_click(button=0, hold=CLICK_HOLD_MS)),
         "right_click":     ("Right Click",     lambda: ctrl.mouse_click(button=1, hold=CLICK_HOLD_MS)),
@@ -466,7 +469,7 @@ input_map = {
     "canvas_scale": input_map_canvas_scale,
     "window": input_map_window,
     "window_stop": input_map_window,
-    "window_move": input_map_window,
+    "window_tracking": input_map_window,
 }
 
 # Outside parrot mode. parrot.talon sends its four noises here instead of
@@ -481,7 +484,7 @@ input_map_global = {
         "tut:now": ("cancel / reverse command", _global_cancel),
         "tut pop":    ("switch app", parrot_actions.window_alt_tab),
         "tut cluck":  ("window mode", _window_mode),
-        "tut palate": ("app picker", _app_picker),
+        "tut palate": ("task view", _app_picker),
     },
 }
 
